@@ -43,45 +43,51 @@ export default function Historico() {
   const [showViewsDialog, setShowViewsDialog] = useState(false);
   const [viewsClientName, setViewsClientName] = useState("");
 
+  const loadContracts = async () => {
+    const { data } = await supabase
+      .from('contracts')
+      .select('id, valor_total, status, created_at, servicos, numero_contrato, clients(nome)')
+      .order('created_at', { ascending: false });
+
+    if (data) {
+      const ids = data.map((c: any) => c.id);
+      const { data: views } = await (supabase.from('contract_views') as any)
+        .select('contract_id, viewed_at')
+        .in('contract_id', ids)
+        .order('viewed_at', { ascending: false });
+
+      const viewsMap: Record<string, { count: number; last: string | null }> = {};
+      (views || []).forEach((v: any) => {
+        if (!viewsMap[v.contract_id]) {
+          viewsMap[v.contract_id] = { count: 0, last: v.viewed_at };
+        }
+        viewsMap[v.contract_id].count++;
+      });
+
+      setContracts(data.map((c: any) => ({
+        id: c.id,
+        valor_total: c.valor_total,
+        status: c.status,
+        created_at: c.created_at,
+        client_nome: c.clients?.nome || '—',
+        servicos: c.servicos || [],
+        numero_contrato: c.numero_contrato,
+        views_count: viewsMap[c.id]?.count || 0,
+        last_viewed: viewsMap[c.id]?.last || null,
+      })));
+    }
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const load = async () => {
-      const { data } = await supabase
-        .from('contracts')
-        .select('id, valor_total, status, created_at, servicos, numero_contrato, clients(nome)')
-        .order('created_at', { ascending: false });
-
-      if (data) {
-        // Fetch views counts
-        const ids = data.map((c: any) => c.id);
-        const { data: views } = await (supabase.from('contract_views') as any)
-          .select('contract_id, viewed_at')
-          .in('contract_id', ids)
-          .order('viewed_at', { ascending: false });
-
-        const viewsMap: Record<string, { count: number; last: string | null }> = {};
-        (views || []).forEach((v: any) => {
-          if (!viewsMap[v.contract_id]) {
-            viewsMap[v.contract_id] = { count: 0, last: v.viewed_at };
-          }
-          viewsMap[v.contract_id].count++;
-        });
-
-        setContracts(data.map((c: any) => ({
-          id: c.id,
-          valor_total: c.valor_total,
-          status: c.status,
-          created_at: c.created_at,
-          client_nome: c.clients?.nome || '—',
-          servicos: c.servicos || [],
-          numero_contrato: c.numero_contrato,
-          views_count: viewsMap[c.id]?.count || 0,
-          last_viewed: viewsMap[c.id]?.last || null,
-        })));
-      }
-      setLoading(false);
-    };
-    load();
+    loadContracts();
   }, []);
+
+  const handleConfirmContract = async (contractId: string) => {
+    await supabase.from('contracts').update({ status: 'confirmado' }).eq('id', contractId);
+    toast.success("Contrato confirmado!");
+    loadContracts();
+  };
 
   const handleShowViews = async (contractId: string, clientName: string) => {
     setViewsClientName(clientName);
