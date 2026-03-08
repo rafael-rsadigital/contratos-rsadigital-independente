@@ -52,8 +52,7 @@ export default function Historico() {
       if (data) {
         // Fetch views counts
         const ids = data.map((c: any) => c.id);
-        const { data: views } = await supabase
-          .from('contract_views')
+        const { data: views } = await (supabase.from('contract_views') as any)
           .select('contract_id, viewed_at')
           .in('contract_id', ids)
           .order('viewed_at', { ascending: false });
