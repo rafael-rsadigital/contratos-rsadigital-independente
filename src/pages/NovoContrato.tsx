@@ -5,9 +5,9 @@ import { Step1ClientData } from "@/components/steps/Step1ClientData";
 import { Step2ContractType } from "@/components/steps/Step2ContractType";
 import { Step3Commercial } from "@/components/steps/Step3Commercial";
 import { Step4Contract } from "@/components/steps/Step4Contract";
-import { ClientData, ContractFormData, ContractType, PaymentMethod } from "@/types/contract";
+import { ClientData, ContractFormData } from "@/types/contract";
 
-const STEPS = ["Cliente", "Contrato", "Pagamento", "Geração"];
+const STEPS = ["Cliente", "Serviços", "Pagamento", "Geração"];
 
 const emptyClient: ClientData = {
   nome: "", cpf_cnpj: "", logradouro: "", numero: "",
@@ -20,12 +20,16 @@ export default function NovoContrato() {
   const [formData, setFormData] = useState<ContractFormData>({
     client: emptyClient,
     tipo: "website",
+    servico_website: "",
+    servico_google: "",
     servicos: [],
     valor_total: 0,
     forma_pagamento: "pix",
     numero_parcelas: 1,
     dia_vencimento: 9,
     desconto_regressivo: false,
+    anexos: [],
+    aditivos: [],
   });
 
   return (
@@ -51,9 +55,19 @@ export default function NovoContrato() {
 
         {step === 1 && (
           <Step2ContractType
-            tipo={formData.tipo}
-            servicos={formData.servicos}
-            onNext={(tipo, servicos) => { setFormData(d => ({ ...d, tipo, servicos })); setStep(2); }}
+            servicoWebsite={formData.servico_website}
+            servicoGoogle={formData.servico_google}
+            onNext={(servicoWebsite, servicoGoogle) => {
+              setFormData(d => ({
+                ...d,
+                servicoWebsite,
+                servicoGoogle,
+                servico_website: servicoWebsite,
+                servico_google: servicoGoogle,
+                servicos: [servicoWebsite, servicoGoogle],
+              }));
+              setStep(2);
+            }}
             onBack={() => setStep(0)}
           />
         )}

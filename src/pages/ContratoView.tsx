@@ -36,12 +36,16 @@ export default function ContratoView() {
             email: data.clients?.email || '',
           },
           tipo: data.tipo as ContractType,
+          servico_website: (data.servicos || []).find((s: string) => ['Site Onepage', 'Site Institucional', 'Site Portfólio'].includes(s)) || '',
+          servico_google: (data.servicos || []).find((s: string) => ['Criação de Perfil no Google', 'Otimização do Perfil', 'Gestão do Perfil'].includes(s)) || '',
           servicos: data.servicos || [],
           valor_total: Number(data.valor_total),
           forma_pagamento: data.forma_pagamento as PaymentMethod,
           numero_parcelas: data.numero_parcelas,
           dia_vencimento: data.dia_vencimento,
           desconto_regressivo: data.desconto_regressivo,
+          anexos: [],
+          aditivos: [],
         });
         setConfirmed(data.status === 'confirmado');
         if (data.data_confirmacao) {
