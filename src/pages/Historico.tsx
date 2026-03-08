@@ -84,8 +84,7 @@ export default function Historico() {
 
   const handleShowViews = async (contractId: string, clientName: string) => {
     setViewsClientName(clientName);
-    const { data } = await supabase
-      .from('contract_views')
+    const { data } = await (supabase.from('contract_views') as any)
       .select('viewed_at, ip, navegador')
       .eq('contract_id', contractId)
       .order('viewed_at', { ascending: false });
