@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -6,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
+
 import { Switch } from "@/components/ui/switch";
 import { PaymentMethod, EntradaPaymentMethod } from "@/types/contract";
 import { DollarSign, Info } from "lucide-react";
@@ -75,6 +76,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
   const valorParcelado = showParcelas ? Math.max(0, valorTotal - valorEntrada) : 0;
   const valorParcela = showParcelas && numeroParcelas > 0 ? (valorParcelado / numeroParcelas).toFixed(2) : '0.00';
 
+  const [descontoRegressivo, setDescontoRegressivo] = useState(false);
   const hasDesconto = formaPagamento === "pix_boleto" && numeroParcelas >= 10;
 
   const handleSubmit = (values: FormValues) => {
@@ -84,7 +86,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
       forma_pagamento: values.forma_pagamento as PaymentMethod,
       numero_parcelas: parcelas,
       data_primeiro_vencimento: values.data_primeiro_vencimento || '',
-      desconto_regressivo: hasDesconto,
+      desconto_regressivo: hasDesconto && descontoRegressivo,
       valor_entrada: values.tem_entrada ? (values.valor_entrada || 0) : 0,
       forma_pagamento_entrada: (values.forma_pagamento_entrada || 'pix') as EntradaPaymentMethod,
       numero_paginas: values.numero_paginas || 0,
@@ -240,13 +242,18 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
             )}
 
             {hasDesconto && (
-              <div className="p-4 rounded-lg bg-accent/10 border border-accent/30 flex gap-3 items-start">
-                <Info className="w-5 h-5 text-accent mt-0.5 shrink-0" />
-                <div className="text-sm">
-                  <Badge variant="outline" className="mb-2 border-accent text-accent">Desconto Regressivo Ativado</Badge>
-                  <p className="text-muted-foreground">
-                    O cliente poderá quitar antecipadamente com desconto regressivo: 15% inicial, reduzindo 1% ao mês, mínimo de 5%.
-                  </p>
+              <div className="p-4 rounded-lg bg-accent/10 border border-accent/30 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-3 items-start">
+                    <Info className="w-5 h-5 text-accent mt-0.5 shrink-0" />
+                    <div className="text-sm">
+                      <p className="font-semibold">Desconto Regressivo</p>
+                      <p className="text-muted-foreground">
+                        O cliente poderá quitar antecipadamente com desconto regressivo: 15% inicial, reduzindo 1% ao mês, mínimo de 5%.
+                      </p>
+                    </div>
+                  </div>
+                  <Switch checked={descontoRegressivo} onCheckedChange={setDescontoRegressivo} />
                 </div>
               </div>
             )}

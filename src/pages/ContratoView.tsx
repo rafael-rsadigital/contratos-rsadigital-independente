@@ -274,6 +274,15 @@ export default function ContratoView() {
             numeroContrato={numeroContrato}
           />
         </div>
+
+        {/* Bottom confirm button */}
+        {!confirmed && contractStatus !== 'cancelado' && (
+          <div className="mt-6 text-center no-print">
+            <Button onClick={handleStartConfirmation} size="lg" className="gap-2">
+              <Check className="w-4 h-4" /> Confirmar Contratação
+            </Button>
+          </div>
+        )}
       </main>
 
       {/* Confirmation Dialog */}
