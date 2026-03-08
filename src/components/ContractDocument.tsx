@@ -366,18 +366,28 @@ function GoogleContract({ data, confirmed, confirmDate, valorParcela }: Props & 
       <p className="mt-2">Dessa forma, não é possível garantir resultados específicos de posicionamento, volume de clientes ou faturamento.</p>
 
       {/* 7. VALOR DOS SERVIÇOS */}
-      <h2 className="text-sm font-bold mt-6 mb-2">7. VALOR DOS SERVIÇOS</h2>
-      <p>Pela prestação dos serviços descritos neste contrato, o CONTRATANTE pagará ao CONTRATADO o valor de:</p>
+      <h2 className="text-sm font-bold mt-6 mb-2">7. VALOR E CONDIÇÕES DE PAGAMENTO</h2>
+      <p>Pela execução dos serviços descritos neste contrato, o CONTRATANTE pagará ao CONTRATADO o valor total de:</p>
       <p className="ml-4 font-bold text-base">R$ {Number(data.valor_total).toFixed(2)}</p>
       <p className="mt-2">Forma de pagamento: <strong>{paymentLabel[data.forma_pagamento]}</strong></p>
       {data.numero_parcelas > 1 ? (
         <>
           <p className="mt-2">Parcelamento: <strong>{data.numero_parcelas} parcelas de R$ {valorParcela}</strong></p>
           <p className="mt-2">Vencimento: dia <strong>{data.dia_vencimento}</strong> de cada mês.</p>
+          <p className="mt-2">A primeira parcela será paga no ato da contratação.</p>
         </>
       ) : (
-        <p className="mt-2">Vencimento: dia <strong>{data.dia_vencimento}</strong> de cada mês.</p>
+        <p className="mt-2">Pagamento à vista no ato da contratação.</p>
       )}
+      <p className="mt-2">
+        O parcelamento refere-se exclusivamente à forma de pagamento do serviço contratado, não caracterizando mensalidade, assinatura ou prestação de serviço recorrente.
+      </p>
+      <p className="mt-2">
+        O valor contratado corresponde à execução dos serviços durante o prazo estabelecido neste contrato.
+      </p>
+      <p className="mt-2">
+        Após a conclusão do período de prestação dos serviços, a continuidade do trabalho poderá ser realizada mediante novo acordo entre as partes, podendo ser formalizado por meio de novo contrato ou aditivo contratual.
+      </p>
 
       {/* 8. ATRASO E INADIMPLÊNCIA */}
       <h2 className="text-sm font-bold mt-6 mb-2">8. ATRASO E INADIMPLÊNCIA</h2>
