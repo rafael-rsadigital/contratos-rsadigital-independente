@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ContractFormData, CONTRATADO } from "@/types/contract";
-import { Check, Download, MessageCircle, ArrowLeft } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { ContractFormData, AnexoData, AditivoData, CONTRATADO } from "@/types/contract";
+import { Check, Download, MessageCircle, ArrowLeft, Plus, Paperclip, FilePlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ContractDocument } from "@/components/ContractDocument";
@@ -15,17 +16,56 @@ interface Props {
   onConfirmed: (contractId: string) => void;
 }
 
-export function Step4Contract({ data, onBack, onConfirmed }: Props) {
+export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props) {
+  const [data, setData] = useState(initialData);
   const [confirmed, setConfirmed] = useState(false);
   const [showEmailDialog, setShowEmailDialog] = useState(false);
-  const [email, setEmail] = useState(data.client.email);
+  const [email, setEmail] = useState(initialData.client.email);
   const [saving, setSaving] = useState(false);
   const [contractId, setContractId] = useState<string | null>(null);
+
+  // Anexo/Aditivo dialogs
+  const [showAnexoDialog, setShowAnexoDialog] = useState(false);
+  const [showAditivoDialog, setShowAditivoDialog] = useState(false);
+  const [anexoTitulo, setAnexoTitulo] = useState("");
+  const [anexoDescricao, setAnexoDescricao] = useState("");
+  const [aditivoTitulo, setAditivoTitulo] = useState("");
+  const [aditivoDescricao, setAditivoDescricao] = useState("");
 
   const confirmDate = new Date().toLocaleDateString('pt-BR', {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
   });
+
+  const handleAddAnexo = () => {
+    if (!anexoTitulo.trim() || !anexoDescricao.trim()) return;
+    const novo: AnexoData = {
+      id: crypto.randomUUID(),
+      titulo: anexoTitulo.trim(),
+      descricao: anexoDescricao.trim(),
+      data: new Date().toLocaleDateString('pt-BR'),
+    };
+    setData(d => ({ ...d, anexos: [...d.anexos, novo] }));
+    setAnexoTitulo("");
+    setAnexoDescricao("");
+    setShowAnexoDialog(false);
+    toast.success("Anexo adicionado.");
+  };
+
+  const handleAddAditivo = () => {
+    if (!aditivoTitulo.trim() || !aditivoDescricao.trim()) return;
+    const novo: AditivoData = {
+      id: crypto.randomUUID(),
+      titulo: aditivoTitulo.trim(),
+      descricao: aditivoDescricao.trim(),
+      data: new Date().toLocaleDateString('pt-BR'),
+    };
+    setData(d => ({ ...d, aditivos: [...d.aditivos, novo] }));
+    setAditivoTitulo("");
+    setAditivoDescricao("");
+    setShowAditivoDialog(false);
+    toast.success("Aditivo adicionado.");
+  };
 
   const handleConfirmClick = () => {
     setShowEmailDialog(true);
@@ -34,7 +74,6 @@ export function Step4Contract({ data, onBack, onConfirmed }: Props) {
   const handleConfirmContract = async () => {
     setSaving(true);
     try {
-      // Insert client
       const { data: clientRow, error: clientErr } = await supabase
         .from('clients')
         .insert({
@@ -53,13 +92,12 @@ export function Step4Contract({ data, onBack, onConfirmed }: Props) {
 
       if (clientErr) throw clientErr;
 
-      // Insert contract
       const { data: contractRow, error: contractErr } = await supabase
         .from('contracts')
         .insert({
           client_id: clientRow.id,
-          tipo: data.tipo,
-          servicos: data.servicos,
+          tipo: 'website',
+          servicos: [data.servico_website, data.servico_google],
           valor_total: data.valor_total,
           forma_pagamento: data.forma_pagamento,
           numero_parcelas: data.numero_parcelas,
@@ -77,7 +115,7 @@ export function Step4Contract({ data, onBack, onConfirmed }: Props) {
       setContractId(contractRow.id);
       setConfirmed(true);
       setShowEmailDialog(false);
-      toast.success("Contrato confirmado com sucesso!");
+      toast.success("Contratos confirmados com sucesso!");
       onConfirmed(contractRow.id);
     } catch (err) {
       console.error(err);
@@ -90,7 +128,6 @@ export function Step4Contract({ data, onBack, onConfirmed }: Props) {
   const handleDownloadPDF = async () => {
     const element = document.getElementById('contract-document');
     if (!element) return;
-
     const html2pdf = (await import('html2pdf.js')).default;
     html2pdf()
       .set({
@@ -118,6 +155,16 @@ export function Step4Contract({ data, onBack, onConfirmed }: Props) {
           <ArrowLeft className="w-4 h-4" /> Voltar
         </Button>
         <div className="flex gap-2 flex-wrap">
+          {!confirmed && (
+            <>
+              <Button variant="outline" onClick={() => setShowAnexoDialog(true)} className="gap-2">
+                <Paperclip className="w-4 h-4" /> Anexo
+              </Button>
+              <Button variant="outline" onClick={() => setShowAditivoDialog(true)} className="gap-2">
+                <FilePlus className="w-4 h-4" /> Aditivo
+              </Button>
+            </>
+          )}
           {confirmed && (
             <>
               <Button onClick={handleDownloadPDF} variant="outline" className="gap-2">
@@ -140,26 +187,77 @@ export function Step4Contract({ data, onBack, onConfirmed }: Props) {
         <ContractDocument data={data} confirmed={confirmed} confirmDate={confirmDate} />
       </div>
 
+      {/* Email Dialog */}
       <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirmar Contratação</DialogTitle>
-            <DialogDescription>Informe o email do cliente para confirmação do contrato.</DialogDescription>
+            <DialogDescription>Informe o email do cliente para confirmação dos contratos.</DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
             <Label htmlFor="confirm-email">Email do cliente</Label>
-            <Input
-              id="confirm-email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="email@exemplo.com"
-            />
+            <Input id="confirm-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@exemplo.com" />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowEmailDialog(false)}>Cancelar</Button>
             <Button onClick={handleConfirmContract} disabled={saving || !email}>
-              {saving ? "Salvando..." : "Confirmar Contrato"}
+              {saving ? "Salvando..." : "Confirmar Contratos"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Anexo Dialog */}
+      <Dialog open={showAnexoDialog} onOpenChange={setShowAnexoDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Adicionar Anexo</DialogTitle>
+            <DialogDescription>
+              Anexos servem para registrar alterações, complementações ou anulações de cláusulas do contrato, mediante acordo entre as partes.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div>
+              <Label htmlFor="anexo-titulo">Título do anexo</Label>
+              <Input id="anexo-titulo" value={anexoTitulo} onChange={(e) => setAnexoTitulo(e.target.value)} placeholder="Ex: Alteração da cláusula 5" />
+            </div>
+            <div>
+              <Label htmlFor="anexo-desc">Descrição</Label>
+              <Textarea id="anexo-desc" value={anexoDescricao} onChange={(e) => setAnexoDescricao(e.target.value)} placeholder="Descreva a alteração, complementação ou anulação..." rows={5} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAnexoDialog(false)}>Cancelar</Button>
+            <Button onClick={handleAddAnexo} disabled={!anexoTitulo.trim() || !anexoDescricao.trim()}>
+              <Plus className="w-4 h-4 mr-1" /> Adicionar Anexo
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Aditivo Dialog */}
+      <Dialog open={showAditivoDialog} onOpenChange={setShowAditivoDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Adicionar Aditivo</DialogTitle>
+            <DialogDescription>
+              Aditivos registram renovações de prazo ou inclusão de novos serviços após o término ou durante a vigência do contrato.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div>
+              <Label htmlFor="aditivo-titulo">Título do aditivo</Label>
+              <Input id="aditivo-titulo" value={aditivoTitulo} onChange={(e) => setAditivoTitulo(e.target.value)} placeholder="Ex: Renovação de prazo por 30 dias" />
+            </div>
+            <div>
+              <Label htmlFor="aditivo-desc">Descrição</Label>
+              <Textarea id="aditivo-desc" value={aditivoDescricao} onChange={(e) => setAditivoDescricao(e.target.value)} placeholder="Descreva a renovação ou novo serviço..." rows={5} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAditivoDialog(false)}>Cancelar</Button>
+            <Button onClick={handleAddAditivo} disabled={!aditivoTitulo.trim() || !aditivoDescricao.trim()}>
+              <Plus className="w-4 h-4 mr-1" /> Adicionar Aditivo
             </Button>
           </DialogFooter>
         </DialogContent>
