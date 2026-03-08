@@ -26,7 +26,7 @@ export default function ContratoView() {
 
   // Confirmation dialog
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [confirmStep, setConfirmStep] = useState(1);
+  const [confirmStep, setConfirmStep] = useState(1); // 1=identify, 2=terms, 3=payment
   const [confirmNome, setConfirmNome] = useState("");
   const [confirmEmail, setConfirmEmail] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
