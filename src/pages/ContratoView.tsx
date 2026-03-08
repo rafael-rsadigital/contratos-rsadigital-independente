@@ -121,7 +121,7 @@ export default function ContratoView() {
     setShowConfirmDialog(true);
   };
 
-  const handleConfirmContract = async () => {
+  const handleConfirmContract = async (valorEntradaFinal?: number, parcelasFinal?: number) => {
     if (!id) return;
     setSaving(true);
     try {
@@ -135,14 +135,23 @@ export default function ContratoView() {
       const navegador = navigator.userAgent;
       const now = new Date().toISOString();
 
-      await supabase.from('contracts').update({
+      const updateData: any = {
         status: 'confirmado',
         data_confirmacao: now,
         nome_confirmacao: confirmNome,
         email_confirmacao: confirmEmail,
         ip_confirmacao: ip,
         navegador_confirmacao: navegador,
-      }).eq('id', id);
+      };
+
+      if (valorEntradaFinal !== undefined) {
+        updateData.valor_entrada = valorEntradaFinal;
+      }
+      if (parcelasFinal !== undefined) {
+        updateData.numero_parcelas = parcelasFinal;
+      }
+
+      await supabase.from('contracts').update(updateData).eq('id', id);
 
       setConfirmed(true);
       setNomeConfirmacao(confirmNome);
@@ -157,8 +166,9 @@ export default function ContratoView() {
       // Open WhatsApp to admin
       const link = window.location.href;
       const servicos = [contractData?.servico_website, contractData?.servico_google].filter(Boolean).join(' + ');
+      const entradaValor = valorEntradaFinal ?? contractData?.valor_entrada ?? 0;
       const message = encodeURIComponent(
-        `Olá Rafael, confirmei o contrato da RSA Digital.\n\nCliente: ${confirmNome}\nServiço: ${servicos}\nValor: R$ ${Number(contractData?.valor_total || 0).toFixed(2)}\n\nLink do contrato:\n${link}`
+        `Olá Rafael, confirmei o contrato da RSA Digital.\n\nCliente: ${confirmNome}\nServiço: ${servicos}\nValor: R$ ${Number(contractData?.valor_total || 0).toFixed(2)}\nEntrada paga: R$ ${Number(entradaValor).toFixed(2)}\n\nLink do contrato:\n${link}`
       );
       window.open(`https://wa.me/${CONTRATADO.whatsapp}?text=${message}`, '_blank');
     } catch (err) {
