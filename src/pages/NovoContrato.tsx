@@ -6,31 +6,39 @@ import { Step2ContractType } from "@/components/steps/Step2ContractType";
 import { Step3Commercial } from "@/components/steps/Step3Commercial";
 import { Step4Contract } from "@/components/steps/Step4Contract";
 import { ClientData, ContractFormData } from "@/types/contract";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
 
 const STEPS = ["Cliente", "Serviços", "Pagamento", "Geração"];
 
 const emptyClient: ClientData = {
-  nome: "", cpf_cnpj: "", logradouro: "", numero: "",
+  nome: "", cpf_cnpj: "", celular: "", logradouro: "", numero: "",
   bairro: "", cep: "", municipio: "", estado: "", email: "",
 };
 
 export default function NovoContrato() {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<ContractFormData>({
     client: emptyClient,
-    tipo: "website",
+    servicos: [],
     servico_website: "",
     servico_google: "",
-    servicos: [],
     valor_total: 0,
-    forma_pagamento: "pix",
+    forma_pagamento: "pix_boleto",
     numero_parcelas: 1,
-    dia_vencimento: 9,
+    data_primeiro_vencimento: "",
     desconto_regressivo: false,
+    valor_entrada: 0,
+    forma_pagamento_entrada: "pix",
+    numero_paginas: 5,
     anexos: [],
     aditivos: [],
   });
+
+  const isInstitucional = formData.servico_website.includes('Institucional');
 
   return (
     <div className="min-h-screen bg-background">
@@ -39,7 +47,12 @@ export default function NovoContrato() {
           <button onClick={() => navigate("/")} className="font-bold text-lg text-primary hover:opacity-80 transition">
             RSA Digital
           </button>
-          <span className="text-sm text-muted-foreground">Novo Contrato</span>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-muted-foreground">Novo Contrato</span>
+            <Button variant="ghost" size="sm" onClick={signOut} className="gap-1 text-muted-foreground">
+              <LogOut className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -58,13 +71,14 @@ export default function NovoContrato() {
             servicoWebsite={formData.servico_website}
             servicoGoogle={formData.servico_google}
             onNext={(servicoWebsite, servicoGoogle) => {
+              const servicos = [servicoWebsite, servicoGoogle].filter(Boolean);
               setFormData(d => ({
                 ...d,
                 servicoWebsite,
                 servicoGoogle,
                 servico_website: servicoWebsite,
                 servico_google: servicoGoogle,
-                servicos: [servicoWebsite, servicoGoogle],
+                servicos,
               }));
               setStep(2);
             }}
@@ -78,8 +92,13 @@ export default function NovoContrato() {
               valor_total: formData.valor_total,
               forma_pagamento: formData.forma_pagamento,
               numero_parcelas: formData.numero_parcelas,
-              dia_vencimento: formData.dia_vencimento,
+              data_primeiro_vencimento: formData.data_primeiro_vencimento,
+              valor_entrada: formData.valor_entrada,
+              forma_pagamento_entrada: formData.forma_pagamento_entrada,
+              numero_paginas: formData.numero_paginas,
             }}
+            hasWebsite={!!formData.servico_website}
+            isInstitucional={isInstitucional}
             onNext={(vals) => { setFormData(d => ({ ...d, ...vals })); setStep(3); }}
             onBack={() => setStep(1)}
           />

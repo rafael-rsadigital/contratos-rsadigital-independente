@@ -1,6 +1,7 @@
 export interface ClientData {
   nome: string;
   cpf_cnpj: string;
+  celular: string;
   logradouro: string;
   numero: string;
   bairro: string;
@@ -10,32 +11,35 @@ export interface ClientData {
   email: string;
 }
 
-export type ContractType = 'website' | 'google';
-export type PaymentMethod = 'pix' | 'boleto' | 'cartao';
+export type PaymentMethod = 'pix_boleto' | 'cartao' | 'dinheiro';
+export type EntradaPaymentMethod = 'pix' | 'cartao' | 'dinheiro';
 
 export const WEBSITE_SERVICES = [
-  'Site Onepage',
-  'Site Institucional',
-  'Site Portfólio',
+  'Site Onepage Otimizado',
+  'Site Institucional Completo Otimizado',
+  'Site Portfólio Onepage (não otimizado)',
+  'Site Institucional Completo (não otimizado)',
 ] as const;
 
 export const GOOGLE_SERVICES = [
-  'Criação de Perfil no Google',
-  'Otimização do Perfil',
-  'Gestão do Perfil',
+  'Presença Digital no Google',
 ] as const;
+
+export type ContractStatus = 'rascunho' | 'enviado' | 'confirmado' | 'cancelado';
 
 export interface ContractFormData {
   client: ClientData;
-  tipo: ContractType;
+  servicos: string[]; // selected services
   servico_website: string;
   servico_google: string;
-  servicos: string[];
   valor_total: number;
   forma_pagamento: PaymentMethod;
   numero_parcelas: number;
-  dia_vencimento: number;
+  data_primeiro_vencimento: string; // yyyy-mm-dd
   desconto_regressivo: boolean;
+  valor_entrada: number;
+  forma_pagamento_entrada: EntradaPaymentMethod;
+  numero_paginas: number;
   anexos: AnexoData[];
   aditivos: AditivoData[];
 }
@@ -57,16 +61,23 @@ export interface AditivoData {
 export interface ContractRecord {
   id: string;
   client_id: string;
-  tipo: ContractType;
   servicos: string[];
   valor_total: number;
   forma_pagamento: PaymentMethod;
   numero_parcelas: number;
-  dia_vencimento: number;
+  data_primeiro_vencimento: string | null;
   desconto_regressivo: boolean;
-  status: 'rascunho' | 'confirmado';
+  status: ContractStatus;
   data_confirmacao: string | null;
   email_confirmacao: string | null;
+  nome_confirmacao: string | null;
+  ip_confirmacao: string | null;
+  navegador_confirmacao: string | null;
+  codigo_verificacao: string | null;
+  valor_entrada: number;
+  forma_pagamento_entrada: string | null;
+  numero_paginas: number | null;
+  servico_principal: string | null;
   created_at: string;
   updated_at: string;
   clients?: ClientData & { id: string };

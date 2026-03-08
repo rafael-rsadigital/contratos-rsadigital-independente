@@ -18,7 +18,7 @@ export function Step2ContractType({ servicoWebsite: initialWeb, servicoGoogle: i
   const [servicoWebsite, setServicoWebsite] = useState(initialWeb);
   const [servicoGoogle, setServicoGoogle] = useState(initialGoogle);
 
-  const canProceed = servicoWebsite !== '' && servicoGoogle !== '';
+  const canProceed = servicoWebsite !== '' || servicoGoogle !== '';
 
   return (
     <Card className="border-0 shadow-lg">
@@ -28,7 +28,7 @@ export function Step2ContractType({ servicoWebsite: initialWeb, servicoGoogle: i
           Serviços Contratados
         </CardTitle>
         <p className="text-sm text-muted-foreground mt-1">
-          Selecione 1 serviço de website e 1 serviço de presença digital no Google.
+          Selecione os serviços desejados. É possível combinar um serviço de website com presença digital no Google.
         </p>
       </CardHeader>
       <CardContent className="space-y-8">
@@ -53,6 +53,15 @@ export function Step2ContractType({ servicoWebsite: initialWeb, servicoGoogle: i
                 <Label htmlFor={`web-${service}`} className="cursor-pointer font-medium">{service}</Label>
               </label>
             ))}
+            <label
+              className={cn(
+                "flex items-center gap-3 cursor-pointer p-3 rounded-md border transition-colors",
+                servicoWebsite === '' ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"
+              )}
+            >
+              <RadioGroupItem value="" id="web-none" />
+              <Label htmlFor="web-none" className="cursor-pointer font-medium text-muted-foreground">Nenhum serviço de website</Label>
+            </label>
           </RadioGroup>
         </div>
 
@@ -77,6 +86,15 @@ export function Step2ContractType({ servicoWebsite: initialWeb, servicoGoogle: i
                 <Label htmlFor={`google-${service}`} className="cursor-pointer font-medium">{service}</Label>
               </label>
             ))}
+            <label
+              className={cn(
+                "flex items-center gap-3 cursor-pointer p-3 rounded-md border transition-colors",
+                servicoGoogle === '' ? "border-primary bg-primary/5" : "border-border hover:bg-muted/50"
+              )}
+            >
+              <RadioGroupItem value="" id="google-none" />
+              <Label htmlFor="google-none" className="cursor-pointer font-medium text-muted-foreground">Nenhum serviço Google</Label>
+            </label>
           </RadioGroup>
         </div>
 
