@@ -3,20 +3,23 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
-import { WEBSITE_SERVICES, GOOGLE_SERVICES } from "@/types/contract";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { WEBSITE_SERVICES, GOOGLE_SERVICES, GOOGLE_PRAZO_OPTIONS } from "@/types/contract";
 import { FileText, Monitor, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Props {
   servicoWebsite: string;
   servicoGoogle: string;
-  onNext: (servicoWebsite: string, servicoGoogle: string) => void;
+  prazoGoogle: string;
+  onNext: (servicoWebsite: string, servicoGoogle: string, prazoGoogle: string) => void;
   onBack: () => void;
 }
 
-export function Step2ContractType({ servicoWebsite: initialWeb, servicoGoogle: initialGoogle, onNext, onBack }: Props) {
+export function Step2ContractType({ servicoWebsite: initialWeb, servicoGoogle: initialGoogle, prazoGoogle: initialPrazo, onNext, onBack }: Props) {
   const [servicoWebsite, setServicoWebsite] = useState(initialWeb);
   const [servicoGoogle, setServicoGoogle] = useState(initialGoogle);
+  const [prazoGoogle, setPrazoGoogle] = useState(initialPrazo || '30 dias');
 
   const canProceed = servicoWebsite !== '' || servicoGoogle !== '';
 
@@ -96,11 +99,28 @@ export function Step2ContractType({ servicoWebsite: initialWeb, servicoGoogle: i
               <Label htmlFor="google-none" className="cursor-pointer font-medium text-muted-foreground">Nenhum serviço Google</Label>
             </label>
           </RadioGroup>
+
+          {/* Prazo selection when Google is selected */}
+          {servicoGoogle && (
+            <div className="mt-4 p-4 rounded-lg border bg-muted/30 space-y-2">
+              <Label className="font-semibold">Prazo do serviço Google</Label>
+              <Select value={prazoGoogle} onValueChange={setPrazoGoogle}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o prazo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {GOOGLE_PRAZO_OPTIONS.map(opt => (
+                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
 
         <div className="flex justify-between pt-4">
           <Button variant="outline" onClick={onBack}>Voltar</Button>
-          <Button onClick={() => onNext(servicoWebsite, servicoGoogle)} disabled={!canProceed} size="lg">
+          <Button onClick={() => onNext(servicoWebsite, servicoGoogle, servicoGoogle ? prazoGoogle : '')} disabled={!canProceed} size="lg">
             Próximo
           </Button>
         </div>

@@ -25,17 +25,26 @@ export const GOOGLE_SERVICES = [
   'Presença Digital no Google',
 ] as const;
 
+export const GOOGLE_PRAZO_OPTIONS = [
+  '30 dias',
+  '60 dias',
+  '90 dias',
+  '6 meses',
+  '12 meses',
+] as const;
+
 export type ContractStatus = 'rascunho' | 'enviado' | 'confirmado' | 'cancelado';
 
 export interface ContractFormData {
   client: ClientData;
-  servicos: string[]; // selected services
+  servicos: string[];
   servico_website: string;
   servico_google: string;
+  prazo_google: string;
   valor_total: number;
   forma_pagamento: PaymentMethod;
   numero_parcelas: number;
-  data_primeiro_vencimento: string; // yyyy-mm-dd
+  data_primeiro_vencimento: string;
   desconto_regressivo: boolean;
   valor_entrada: number;
   forma_pagamento_entrada: EntradaPaymentMethod;
@@ -74,10 +83,12 @@ export interface ContractRecord {
   ip_confirmacao: string | null;
   navegador_confirmacao: string | null;
   codigo_verificacao: string | null;
+  numero_contrato: string | null;
   valor_entrada: number;
   forma_pagamento_entrada: string | null;
   numero_paginas: number | null;
   servico_principal: string | null;
+  prazo_google: string | null;
   created_at: string;
   updated_at: string;
   clients?: ClientData & { id: string };

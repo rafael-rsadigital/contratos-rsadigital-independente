@@ -4,9 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ContractFormData, AnexoData, AditivoData, CONTRATADO } from "@/types/contract";
-import { Check, Download, MessageCircle, ArrowLeft, Plus, Paperclip, FilePlus, Link2, Copy } from "lucide-react";
+import { Check, Download, MessageCircle, ArrowLeft, Plus, Paperclip, FilePlus, Copy, Mail, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ContractDocument } from "@/components/ContractDocument";
@@ -17,18 +16,13 @@ interface Props {
   onConfirmed: (contractId: string) => void;
 }
 
-function generateVerificationCode(contractId: string): string {
-  const year = new Date().getFullYear();
-  const hash = contractId.substring(0, 6).toUpperCase();
-  return `RSA-${year}-${hash}`;
-}
-
 export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props) {
   const [data, setData] = useState(initialData);
-  const [confirmed, setConfirmed] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [contractId, setContractId] = useState<string | null>(null);
   const [codigoVerificacao, setCodigoVerificacao] = useState("");
+  const [numeroContrato, setNumeroContrato] = useState("");
 
   // Anexo/Aditivo dialogs
   const [showAnexoDialog, setShowAnexoDialog] = useState(false);
@@ -38,10 +32,8 @@ export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props)
   const [aditivoTitulo, setAditivoTitulo] = useState("");
   const [aditivoDescricao, setAditivoDescricao] = useState("");
 
-  const confirmDate = new Date().toLocaleDateString('pt-BR', {
-    day: '2-digit', month: '2-digit', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  });
+  // Share dialog
+  const [showShareDialog, setShowShareDialog] = useState(false);
 
   const handleAddAnexo = () => {
     if (!anexoTitulo.trim() || !anexoDescricao.trim()) return;
@@ -96,10 +88,8 @@ export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props)
 
       if (clientErr) throw clientErr;
 
-      // Determine principal service (first one has the financial value)
       const servicos = [data.servico_website, data.servico_google].filter(Boolean);
 
-      // Save contract
       const { data: contractRow, error: contractErr } = await supabase
         .from('contracts')
         .insert({
@@ -116,6 +106,7 @@ export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props)
           forma_pagamento_entrada: data.forma_pagamento_entrada,
           numero_paginas: data.numero_paginas || null,
           servico_principal: servicos[0] || null,
+          prazo_google: data.prazo_google || '30 dias',
         })
         .select()
         .single();
@@ -123,8 +114,12 @@ export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props)
       if (contractErr) throw contractErr;
 
       // Generate verification code
-      const code = generateVerificationCode(contractRow.id);
-      await supabase.from('contracts').update({ codigo_verificacao: code }).eq('id', contractRow.id);
+      const code = `RSA-${new Date().getFullYear()}-${(contractRow as any).numero_contrato?.split('-').pop() || contractRow.id.substring(0, 6).toUpperCase()}`;
+      const finalCode = (contractRow as any).numero_contrato
+        ? `${(contractRow as any).numero_contrato}-${contractRow.id.substring(0, 4).toUpperCase()}`
+        : `RSA-${new Date().getFullYear()}-${contractRow.id.substring(0, 6).toUpperCase()}`;
+      
+      await supabase.from('contracts').update({ codigo_verificacao: finalCode }).eq('id', contractRow.id);
 
       // Save anexos
       if (data.anexos.length > 0) {
@@ -141,16 +136,49 @@ export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props)
       }
 
       setContractId(contractRow.id);
-      setCodigoVerificacao(code);
-      setConfirmed(true);
-      toast.success("Contrato salvo como rascunho!");
+      setCodigoVerificacao(finalCode);
+      setNumeroContrato((contractRow as any).numero_contrato || '');
+      setSaved(true);
+      toast.success("Contrato salvo com sucesso!");
       onConfirmed(contractRow.id);
     } catch (err) {
-      console.error(err);
+      console.error('Erro ao salvar contrato:', err);
       toast.error("Erro ao salvar contrato. Tente novamente.");
     } finally {
       setSaving(false);
     }
+  };
+
+  const getContractLink = () => {
+    if (!contractId) return '';
+    return `${window.location.origin}/contrato/${contractId}`;
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(getContractLink());
+    toast.success("Link copiado!");
+  };
+
+  const handleWhatsApp = () => {
+    const link = getContractLink();
+    const message = encodeURIComponent(
+      `Olá ${data.client.nome}.\n\nSegue o contrato para leitura e confirmação:\n\n${link}\n\nApós a leitura basta clicar em "Confirmar contratação".`
+    );
+    window.open(`https://wa.me/55${data.client.celular.replace(/\D/g, '')}?text=${message}`, '_blank');
+  };
+
+  const handleEmail = () => {
+    if (!data.client.email) {
+      toast.error("Cliente não possui email cadastrado.");
+      return;
+    }
+    const link = getContractLink();
+    const servicos = [data.servico_website, data.servico_google].filter(Boolean).join(' + ');
+    const subject = encodeURIComponent(`Contrato RSA Digital - ${servicos}`);
+    const body = encodeURIComponent(
+      `Olá ${data.client.nome},\n\nSegue o contrato para leitura e confirmação:\n\n${link}\n\nApós a leitura basta clicar em "Confirmar contratação".\n\nAtenciosamente,\nRSA Digital`
+    );
+    window.open(`mailto:${data.client.email}?subject=${subject}&body=${body}`, '_blank');
   };
 
   const handleDownloadPDF = async () => {
@@ -169,31 +197,14 @@ export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props)
       .save();
   };
 
-  const handleCopyLink = () => {
-    if (!contractId) return;
-    const link = `${window.location.origin}/contrato/${contractId}`;
-    navigator.clipboard.writeText(link);
-    toast.success("Link copiado!");
-  };
-
-  const handleWhatsApp = () => {
-    if (!contractId) return;
-    const link = `${window.location.origin}/contrato/${contractId}`;
-    const servicos = [data.servico_website, data.servico_google].filter(Boolean).join(' + ');
-    const message = encodeURIComponent(
-      `Olá Rafael, confirmei o contrato da RSA Digital.\n\nCliente: ${data.client.nome}\nServiço: ${servicos}\nValor: R$ ${Number(data.valor_total).toFixed(2)}\n\nLink do contrato:\n${link}`
-    );
-    window.open(`https://wa.me/${CONTRATADO.whatsapp}?text=${message}`, '_blank');
-  };
-
   return (
     <div className="space-y-6">
       <div className="no-print flex items-center justify-between flex-wrap gap-3">
-        <Button variant="outline" onClick={onBack} className="gap-2">
+        <Button variant="outline" onClick={onBack} className="gap-2" disabled={saved}>
           <ArrowLeft className="w-4 h-4" /> Voltar
         </Button>
         <div className="flex gap-2 flex-wrap">
-          {!confirmed && (
+          {!saved && (
             <>
               <Button variant="outline" onClick={() => setShowAnexoDialog(true)} className="gap-2">
                 <Paperclip className="w-4 h-4" /> Anexo
@@ -201,36 +212,65 @@ export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props)
               <Button variant="outline" onClick={() => setShowAditivoDialog(true)} className="gap-2">
                 <FilePlus className="w-4 h-4" /> Aditivo
               </Button>
+              <Button onClick={handleSaveContract} size="lg" className="gap-2" disabled={saving}>
+                <Check className="w-4 h-4" /> {saving ? "Salvando..." : "Salvar Contrato"}
+              </Button>
             </>
           )}
-          {confirmed && (
+          {saved && (
             <>
-              <Button onClick={handleCopyLink} variant="outline" className="gap-2">
-                <Copy className="w-4 h-4" /> Copiar Link
-              </Button>
               <Button onClick={handleDownloadPDF} variant="outline" className="gap-2">
-                <Download className="w-4 h-4" /> Baixar PDF
+                <Download className="w-4 h-4" /> PDF
               </Button>
-              <Button onClick={handleWhatsApp} className="gap-2 bg-accent hover:bg-accent/90">
-                <MessageCircle className="w-4 h-4" /> WhatsApp
+              <Button onClick={() => setShowShareDialog(true)} size="lg" className="gap-2">
+                <Send className="w-4 h-4" /> Enviar ao Cliente
               </Button>
             </>
-          )}
-          {!confirmed && (
-            <Button onClick={handleSaveContract} size="lg" className="gap-2" disabled={saving}>
-              <Check className="w-4 h-4" /> {saving ? "Salvando..." : "Salvar Contrato"}
-            </Button>
           )}
         </div>
       </div>
+
+      {/* Contract number badge */}
+      {saved && numeroContrato && (
+        <div className="text-center">
+          <span className="inline-block bg-primary/10 text-primary font-mono text-sm px-4 py-2 rounded-full">
+            Contrato nº {numeroContrato}
+          </span>
+        </div>
+      )}
 
       <div id="contract-document" className="bg-card rounded-lg shadow-lg p-6 md:p-10">
         <ContractDocument
           data={data}
           confirmed={false}
           codigoVerificacao={codigoVerificacao}
+          numeroContrato={numeroContrato}
         />
       </div>
+
+      {/* Share Dialog */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Enviar contrato ao cliente</DialogTitle>
+            <DialogDescription>Escolha como enviar o link do contrato.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-4">
+            <Button onClick={handleWhatsApp} className="w-full gap-3 justify-start h-12 bg-[hsl(142,70%,40%)] hover:bg-[hsl(142,70%,35%)]">
+              <MessageCircle className="w-5 h-5" /> Enviar via WhatsApp
+            </Button>
+            <Button onClick={handleEmail} variant="outline" className="w-full gap-3 justify-start h-12">
+              <Mail className="w-5 h-5" /> Enviar via Email
+            </Button>
+            <Button onClick={handleCopyLink} variant="outline" className="w-full gap-3 justify-start h-12">
+              <Copy className="w-5 h-5" /> Copiar Link
+            </Button>
+          </div>
+          <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-md break-all">
+            {getContractLink()}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Anexo Dialog */}
       <Dialog open={showAnexoDialog} onOpenChange={setShowAnexoDialog}>

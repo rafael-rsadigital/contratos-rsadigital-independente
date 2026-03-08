@@ -26,6 +26,7 @@ export default function NovoContrato() {
     servicos: [],
     servico_website: "",
     servico_google: "",
+    prazo_google: "30 dias",
     valor_total: 0,
     forma_pagamento: "pix_boleto",
     numero_parcelas: 1,
@@ -70,14 +71,14 @@ export default function NovoContrato() {
           <Step2ContractType
             servicoWebsite={formData.servico_website}
             servicoGoogle={formData.servico_google}
-            onNext={(servicoWebsite, servicoGoogle) => {
+            prazoGoogle={formData.prazo_google}
+            onNext={(servicoWebsite, servicoGoogle, prazoGoogle) => {
               const servicos = [servicoWebsite, servicoGoogle].filter(Boolean);
               setFormData(d => ({
                 ...d,
-                servicoWebsite,
-                servicoGoogle,
                 servico_website: servicoWebsite,
                 servico_google: servicoGoogle,
+                prazo_google: prazoGoogle,
                 servicos,
               }));
               setStep(2);
@@ -108,7 +109,7 @@ export default function NovoContrato() {
           <Step4Contract
             data={formData}
             onBack={() => setStep(2)}
-            onConfirmed={(id) => navigate(`/contrato/${id}`)}
+            onConfirmed={(id) => {/* stay on page, share buttons shown */}}
           />
         )}
       </main>

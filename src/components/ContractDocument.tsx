@@ -9,6 +9,7 @@ interface Props {
   nomeConfirmacao?: string;
   emailConfirmacao?: string;
   codigoVerificacao?: string;
+  numeroContrato?: string;
 }
 
 const paymentLabel: Record<string, string> = {
@@ -39,12 +40,11 @@ function isOptimized(servico: string): boolean {
   return servico.includes('Otimizado') && !servico.includes('não otimizado');
 }
 
-export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, codigoVerificacao }: Props) {
+export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, codigoVerificacao, numeroContrato }: Props) {
   const hasWebsite = !!data.servico_website;
   const hasGoogle = !!data.servico_google;
   const hasBoth = hasWebsite && hasGoogle;
 
-  // When 2 services: first is principal (has value), second is complementary
   const valorLiquido = data.valor_total - data.valor_entrada;
   const valorParcela = data.numero_parcelas > 1
     ? (valorLiquido / data.numero_parcelas).toFixed(2)
@@ -54,7 +54,13 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
 
   return (
     <div className="space-y-16">
-      {/* CONTRATO PRINCIPAL: WEBSITE */}
+      {/* Contract number header */}
+      {numeroContrato && (
+        <div className="text-center text-xs text-muted-foreground">
+          <p>Contrato nº <strong>{numeroContrato}</strong></p>
+        </div>
+      )}
+
       {hasWebsite && (
         <WebsiteContract
           data={data}
@@ -64,12 +70,10 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
           emailConfirmacao={emailConfirmacao}
           valorParcela={valorParcela}
           vencimentos={vencimentos}
-          isPrincipal={!hasBoth || true}
           isComplementar={false}
         />
       )}
 
-      {/* CONTRATO GOOGLE */}
       {hasGoogle && (
         <>
           {hasWebsite && <div className="border-t-4 border-primary/20 my-12" />}
@@ -86,7 +90,6 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
         </>
       )}
 
-      {/* ANEXOS - only if they exist */}
       {data.anexos.length > 0 && (
         <>
           <div className="border-t-4 border-primary/20 my-12" />
@@ -94,7 +97,6 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
         </>
       )}
 
-      {/* ADITIVOS - only if they exist */}
       {data.aditivos.length > 0 && (
         <>
           <div className="border-t-4 border-primary/20 my-12" />
@@ -102,7 +104,6 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
         </>
       )}
 
-      {/* VERIFICATION CODE */}
       {codigoVerificacao && (
         <div className="text-center text-xs text-muted-foreground border-t pt-4 mt-8">
           <p>Código de verificação: <strong>{codigoVerificacao}</strong></p>
@@ -112,7 +113,7 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
   );
 }
 
-/* ─── CONTRATANTE HEADER (reusable) ─── */
+/* ─── CONTRATANTE HEADER ─── */
 function ContratanteHeader({ data }: { data: ContractFormData }) {
   return (
     <>
@@ -133,12 +134,14 @@ function ContratanteHeader({ data }: { data: ContractFormData }) {
         Município: {data.client.municipio}<br />
         Estado: {data.client.estado}
       </p>
+      {data.client.celular && <p className="ml-4">Celular: {data.client.celular}</p>}
+      {data.client.email && <p className="ml-4">Email: {data.client.email}</p>}
       <p>doravante denominado CONTRATANTE.</p>
     </>
   );
 }
 
-/* ─── CONFIRMAÇÃO FOOTER (reusable) ─── */
+/* ─── CONFIRMAÇÃO FOOTER ─── */
 function ConfirmacaoFooter({ confirmed, confirmDate, nomeConfirmacao, emailConfirmacao }: {
   confirmed: boolean; confirmDate?: string; nomeConfirmacao?: string; emailConfirmacao?: string;
 }) {
@@ -162,7 +165,7 @@ function ConfirmacaoFooter({ confirmed, confirmDate, nomeConfirmacao, emailConfi
   );
 }
 
-/* ─── PAYMENT SECTION (reusable) ─── */
+/* ─── PAYMENT SECTION ─── */
 function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
   data: ContractFormData; valorParcela: string; vencimentos: string[]; clauseNum: number;
 }) {
@@ -211,11 +214,9 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
   );
 }
 
-/* ═══════════════════════════════════════
-   CONTRATO WEBSITE
-   ═══════════════════════════════════════ */
+/* ═══ CONTRATO WEBSITE ═══ */
 function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, valorParcela, vencimentos, isComplementar }: Props & {
-  valorParcela: string; vencimentos: string[]; isPrincipal?: boolean; isComplementar: boolean;
+  valorParcela: string; vencimentos: string[]; isComplementar: boolean;
 }) {
   const optimized = isOptimized(data.servico_website);
   const isInstitucional = data.servico_website.includes('Institucional');
@@ -358,9 +359,7 @@ function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailC
   );
 }
 
-/* ═══════════════════════════════════════
-   CONTRATO GOOGLE
-   ═══════════════════════════════════════ */
+/* ═══ CONTRATO GOOGLE ═══ */
 function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, valorParcela, vencimentos, isComplementar }: Props & {
   valorParcela: string; vencimentos: string[]; isComplementar: boolean;
 }) {
@@ -394,7 +393,7 @@ function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailCo
       </ul>
 
       <h2 className="text-sm font-bold mt-6 mb-2">2. PRAZO DA PRESTAÇÃO DE SERVIÇO</h2>
-      <p>O presente contrato possui prazo inicial de <strong>30 (trinta) dias</strong>, contados a partir da data de início da prestação dos serviços.</p>
+      <p>O presente contrato possui prazo inicial de <strong>{data.prazo_google || '30 dias'}</strong>, contados a partir da data de início da prestação dos serviços.</p>
       <p className="mt-2">Após o período inicial, o contrato poderá ser renovado mediante acordo entre as partes.</p>
 
       <h2 className="text-sm font-bold mt-6 mb-2">3. INÍCIO DOS SERVIÇOS</h2>
@@ -456,9 +455,7 @@ function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailCo
   );
 }
 
-/* ═══════════════════════════════════════
-   ANEXOS
-   ═══════════════════════════════════════ */
+/* ═══ ANEXOS ═══ */
 function AnexosSection({ anexos }: { anexos: AnexoData[] }) {
   return (
     <div className="contract-document max-w-3xl mx-auto text-[15px] leading-relaxed">
@@ -479,9 +476,7 @@ function AnexosSection({ anexos }: { anexos: AnexoData[] }) {
   );
 }
 
-/* ═══════════════════════════════════════
-   ADITIVOS
-   ═══════════════════════════════════════ */
+/* ═══ ADITIVOS ═══ */
 function AditivosSection({ aditivos }: { aditivos: AditivoData[] }) {
   return (
     <div className="contract-document max-w-3xl mx-auto text-[15px] leading-relaxed">

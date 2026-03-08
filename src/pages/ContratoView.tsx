@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { ContractDocument } from "@/components/ContractDocument";
 import { ContractFormData, PaymentMethod, EntradaPaymentMethod, CONTRATADO, AnexoData, AditivoData } from "@/types/contract";
-import { Download, MessageCircle, Check } from "lucide-react";
+import { Download, Check } from "lucide-react";
 import { toast } from "sonner";
 
 export default function ContratoView() {
@@ -20,6 +20,7 @@ export default function ContratoView() {
   const [nomeConfirmacao, setNomeConfirmacao] = useState("");
   const [emailConfirmacao, setEmailConfirmacao] = useState("");
   const [codigoVerificacao, setCodigoVerificacao] = useState("");
+  const [numeroContrato, setNumeroContrato] = useState("");
   const [contractStatus, setContractStatus] = useState("");
 
   // Confirmation dialog
@@ -29,6 +30,25 @@ export default function ContratoView() {
   const [confirmEmail, setConfirmEmail] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Track view on load
+  useEffect(() => {
+    const trackView = async () => {
+      if (!id) return;
+      let ip = 'desconhecido';
+      try {
+        const resp = await fetch('https://api.ipify.org?format=json');
+        const ipData = await resp.json();
+        ip = ipData.ip;
+      } catch {}
+      await supabase.from('contract_views').insert({
+        contract_id: id,
+        ip,
+        navegador: navigator.userAgent,
+      });
+    };
+    trackView();
+  }, [id]);
 
   useEffect(() => {
     const load = async () => {
@@ -40,7 +60,6 @@ export default function ContratoView() {
         .single();
 
       if (data) {
-        // Load anexos and aditivos
         const [{ data: anexos }, { data: aditivos }] = await Promise.all([
           supabase.from('contract_anexos').select('*').eq('contract_id', id).order('created_at'),
           supabase.from('contract_aditivos').select('*').eq('contract_id', id).order('created_at'),
@@ -65,6 +84,7 @@ export default function ContratoView() {
           servicos,
           servico_website: servicos.find((s: string) => websiteServices.includes(s)) || '',
           servico_google: servicos.find((s: string) => s.includes('Google')) || '',
+          prazo_google: (data as any).prazo_google || '30 dias',
           valor_total: Number(data.valor_total),
           forma_pagamento: data.forma_pagamento as PaymentMethod,
           numero_parcelas: data.numero_parcelas,
@@ -80,6 +100,7 @@ export default function ContratoView() {
         setContractStatus(data.status);
         setConfirmed(data.status === 'confirmado');
         setCodigoVerificacao((data as any).codigo_verificacao || '');
+        setNumeroContrato((data as any).numero_contrato || '');
         setNomeConfirmacao((data as any).nome_confirmacao || '');
         setEmailConfirmacao(data.email_confirmacao || '');
         if (data.data_confirmacao) {
@@ -103,7 +124,6 @@ export default function ContratoView() {
     if (!id) return;
     setSaving(true);
     try {
-      // Get IP
       let ip = 'desconhecido';
       try {
         const resp = await fetch('https://api.ipify.org?format=json');
@@ -133,7 +153,7 @@ export default function ContratoView() {
       setShowConfirmDialog(false);
       toast.success("Contrato confirmado com sucesso!");
 
-      // Open WhatsApp
+      // Open WhatsApp to admin
       const link = window.location.href;
       const servicos = [contractData?.servico_website, contractData?.servico_google].filter(Boolean).join(' + ');
       const message = encodeURIComponent(
@@ -207,11 +227,12 @@ export default function ContratoView() {
             nomeConfirmacao={nomeConfirmacao}
             emailConfirmacao={emailConfirmacao}
             codigoVerificacao={codigoVerificacao}
+            numeroContrato={numeroContrato}
           />
         </div>
       </main>
 
-      {/* Confirmation Dialog - DocuSign style */}
+      {/* Confirmation Dialog */}
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
