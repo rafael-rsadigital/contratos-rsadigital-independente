@@ -10,6 +10,7 @@ import { ContractDocument } from "@/components/ContractDocument";
 import { ContractFormData, PaymentMethod, EntradaPaymentMethod, CONTRATADO, AnexoData, AditivoData } from "@/types/contract";
 import { Download, Check } from "lucide-react";
 import { toast } from "sonner";
+import { PaymentScreen } from "@/components/PaymentScreen";
 
 export default function ContratoView() {
   const { id } = useParams<{ id: string }>();
@@ -25,7 +26,7 @@ export default function ContratoView() {
 
   // Confirmation dialog
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [confirmStep, setConfirmStep] = useState(1);
+  const [confirmStep, setConfirmStep] = useState(1); // 1=identify, 2=terms, 3=payment
   const [confirmNome, setConfirmNome] = useState("");
   const [confirmEmail, setConfirmEmail] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
@@ -120,7 +121,7 @@ export default function ContratoView() {
     setShowConfirmDialog(true);
   };
 
-  const handleConfirmContract = async () => {
+  const handleConfirmContract = async (valorEntradaFinal?: number, parcelasFinal?: number) => {
     if (!id) return;
     setSaving(true);
     try {
@@ -134,14 +135,23 @@ export default function ContratoView() {
       const navegador = navigator.userAgent;
       const now = new Date().toISOString();
 
-      await supabase.from('contracts').update({
+      const updateData: any = {
         status: 'confirmado',
         data_confirmacao: now,
         nome_confirmacao: confirmNome,
         email_confirmacao: confirmEmail,
         ip_confirmacao: ip,
         navegador_confirmacao: navegador,
-      }).eq('id', id);
+      };
+
+      if (valorEntradaFinal !== undefined) {
+        updateData.valor_entrada = valorEntradaFinal;
+      }
+      if (parcelasFinal !== undefined) {
+        updateData.numero_parcelas = parcelasFinal;
+      }
+
+      await supabase.from('contracts').update(updateData).eq('id', id);
 
       setConfirmed(true);
       setNomeConfirmacao(confirmNome);
@@ -156,8 +166,9 @@ export default function ContratoView() {
       // Open WhatsApp to admin
       const link = window.location.href;
       const servicos = [contractData?.servico_website, contractData?.servico_google].filter(Boolean).join(' + ');
+      const entradaValor = valorEntradaFinal ?? contractData?.valor_entrada ?? 0;
       const message = encodeURIComponent(
-        `Olá Rafael, confirmei o contrato da RSA Digital.\n\nCliente: ${confirmNome}\nServiço: ${servicos}\nValor: R$ ${Number(contractData?.valor_total || 0).toFixed(2)}\n\nLink do contrato:\n${link}`
+        `Olá Rafael, confirmei o contrato da RSA Digital.\n\nCliente: ${confirmNome}\nServiço: ${servicos}\nValor: R$ ${Number(contractData?.valor_total || 0).toFixed(2)}\nEntrada paga: R$ ${Number(entradaValor).toFixed(2)}\n\nLink do contrato:\n${link}`
       );
       window.open(`https://wa.me/${CONTRATADO.whatsapp}?text=${message}`, '_blank');
     } catch (err) {
@@ -234,17 +245,19 @@ export default function ContratoView() {
 
       {/* Confirmation Dialog */}
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              {confirmStep === 1 ? "Identificação" : "Declaração de Aceite"}
-            </DialogTitle>
-            <DialogDescription>
-              {confirmStep === 1
-                ? "Informe seus dados para confirmar o contrato."
-                : "Leia e confirme a declaração abaixo."}
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className={confirmStep === 3 ? "max-w-lg max-h-[90vh] overflow-y-auto" : "max-w-md"}>
+          {confirmStep !== 3 && (
+            <DialogHeader>
+              <DialogTitle>
+                {confirmStep === 1 ? "Identificação" : "Declaração de Aceite"}
+              </DialogTitle>
+              <DialogDescription>
+                {confirmStep === 1
+                  ? "Informe seus dados para confirmar o contrato."
+                  : "Leia e confirme a declaração abaixo."}
+              </DialogDescription>
+            </DialogHeader>
+          )}
 
           {confirmStep === 1 && (
             <div className="space-y-4 py-2">
@@ -280,26 +293,41 @@ export default function ContratoView() {
             </div>
           )}
 
-          <DialogFooter>
-            {confirmStep === 1 ? (
-              <>
-                <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>Cancelar</Button>
-                <Button
-                  onClick={() => setConfirmStep(2)}
-                  disabled={!confirmNome.trim() || !confirmEmail.trim()}
-                >
-                  Próximo
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button variant="outline" onClick={() => setConfirmStep(1)}>Voltar</Button>
-                <Button onClick={handleConfirmContract} disabled={!acceptTerms || saving}>
-                  {saving ? "Confirmando..." : "Confirmar Contratação"}
-                </Button>
-              </>
-            )}
-          </DialogFooter>
+          {confirmStep === 3 && contractData && (
+            <PaymentScreen
+              valorTotal={contractData.valor_total}
+              valorEntradaMinimo={contractData.valor_entrada}
+              numeroParcelas={contractData.numero_parcelas}
+              descontoRegressivo={contractData.desconto_regressivo}
+              formaPagamento={contractData.forma_pagamento}
+              onConfirm={(valorEntrada, parcelas) => handleConfirmContract(valorEntrada, parcelas)}
+              onBack={() => setConfirmStep(2)}
+              saving={saving}
+            />
+          )}
+
+          {confirmStep !== 3 && (
+            <DialogFooter>
+              {confirmStep === 1 ? (
+                <>
+                  <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>Cancelar</Button>
+                  <Button
+                    onClick={() => setConfirmStep(2)}
+                    disabled={!confirmNome.trim() || !confirmEmail.trim()}
+                  >
+                    Próximo
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="outline" onClick={() => setConfirmStep(1)}>Voltar</Button>
+                  <Button onClick={() => setConfirmStep(3)} disabled={!acceptTerms}>
+                    Próximo — Pagamento
+                  </Button>
+                </>
+              )}
+            </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
     </div>
