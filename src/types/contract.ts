@@ -28,12 +28,30 @@ export const GOOGLE_SERVICES = [
 export interface ContractFormData {
   client: ClientData;
   tipo: ContractType;
+  servico_website: string;
+  servico_google: string;
   servicos: string[];
   valor_total: number;
   forma_pagamento: PaymentMethod;
   numero_parcelas: number;
   dia_vencimento: number;
   desconto_regressivo: boolean;
+  anexos: AnexoData[];
+  aditivos: AditivoData[];
+}
+
+export interface AnexoData {
+  id: string;
+  titulo: string;
+  descricao: string;
+  data: string;
+}
+
+export interface AditivoData {
+  id: string;
+  titulo: string;
+  descricao: string;
+  data: string;
 }
 
 export interface ContractRecord {
