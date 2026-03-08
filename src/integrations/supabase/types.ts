@@ -14,7 +14,110 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      clients: {
+        Row: {
+          bairro: string
+          cep: string
+          cpf_cnpj: string
+          created_at: string
+          email: string
+          estado: string
+          id: string
+          logradouro: string
+          municipio: string
+          nome: string
+          numero: string
+          updated_at: string
+        }
+        Insert: {
+          bairro: string
+          cep: string
+          cpf_cnpj: string
+          created_at?: string
+          email: string
+          estado: string
+          id?: string
+          logradouro: string
+          municipio: string
+          nome: string
+          numero: string
+          updated_at?: string
+        }
+        Update: {
+          bairro?: string
+          cep?: string
+          cpf_cnpj?: string
+          created_at?: string
+          email?: string
+          estado?: string
+          id?: string
+          logradouro?: string
+          municipio?: string
+          nome?: string
+          numero?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      contracts: {
+        Row: {
+          client_id: string
+          created_at: string
+          data_confirmacao: string | null
+          desconto_regressivo: boolean
+          dia_vencimento: number
+          email_confirmacao: string | null
+          forma_pagamento: string
+          id: string
+          numero_parcelas: number
+          servicos: string[]
+          status: string
+          tipo: string
+          updated_at: string
+          valor_total: number
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          data_confirmacao?: string | null
+          desconto_regressivo?: boolean
+          dia_vencimento?: number
+          email_confirmacao?: string | null
+          forma_pagamento: string
+          id?: string
+          numero_parcelas?: number
+          servicos?: string[]
+          status?: string
+          tipo: string
+          updated_at?: string
+          valor_total: number
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          data_confirmacao?: string | null
+          desconto_regressivo?: boolean
+          dia_vencimento?: number
+          email_confirmacao?: string | null
+          forma_pagamento?: string
+          id?: string
+          numero_parcelas?: number
+          servicos?: string[]
+          status?: string
+          tipo?: string
+          updated_at?: string
+          valor_total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contracts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
