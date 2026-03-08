@@ -41,7 +41,7 @@ export default function ContratoView() {
         const ipData = await resp.json();
         ip = ipData.ip;
       } catch {}
-      await supabase.from('contract_views').insert({
+      await (supabase.from('contract_views') as any).insert({
         contract_id: id,
         ip,
         navegador: navigator.userAgent,
