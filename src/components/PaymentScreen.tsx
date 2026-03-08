@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CONTRATADO } from "@/types/contract";
-import { Copy, Check, QrCode, ArrowLeft } from "lucide-react";
+import { Copy, Check, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 interface PaymentScreenProps {
@@ -16,12 +16,6 @@ interface PaymentScreenProps {
   onConfirm: (valorEntrada: number, parcelas: number) => void;
   onBack: () => void;
   saving: boolean;
-}
-
-function calcularDesconto(parcelasRestantes: number): number {
-  // 15% inicial, reduz 1% por mês, mínimo 5%
-  const desconto = Math.max(15 - (parcelasRestantes - 1), 5);
-  return desconto;
 }
 
 export function PaymentScreen({
@@ -37,38 +31,25 @@ export function PaymentScreen({
   const [valorEntrada, setValorEntrada] = useState(valorEntradaMinimo);
   const [parcelasSelecionadas, setParcelasSelecionadas] = useState(numeroParcelas);
   const [copied, setCopied] = useState(false);
-  const [showQR, setShowQR] = useState(false);
-
-  const isPixBoleto = formaPagamento === "pix_boleto";
 
   const resumo = useMemo(() => {
     const restante = valorTotal - valorEntrada;
     const valorParcela = parcelasSelecionadas > 0 ? restante / parcelasSelecionadas : restante;
-    
-    let descontoPercent = 0;
-    let valorComDesconto = valorTotal;
-    if (descontoRegressivo && isPixBoleto && parcelasSelecionadas <= numeroParcelas) {
-      descontoPercent = calcularDesconto(parcelasSelecionadas);
-      valorComDesconto = valorTotal * (1 - descontoPercent / 100);
-    }
-
-    const restanteComDesconto = valorComDesconto - valorEntrada;
-    const parcelaComDesconto = parcelasSelecionadas > 0 ? restanteComDesconto / parcelasSelecionadas : restanteComDesconto;
-
-    return {
-      restante,
-      valorParcela,
-      descontoPercent,
-      valorComDesconto,
-      restanteComDesconto,
-      parcelaComDesconto,
-    };
-  }, [valorTotal, valorEntrada, parcelasSelecionadas, descontoRegressivo, isPixBoleto, numeroParcelas]);
+    return { restante, valorParcela };
+  }, [valorTotal, valorEntrada, parcelasSelecionadas]);
 
   const handleValorEntradaChange = (value: string) => {
     const num = parseFloat(value) || 0;
-    if (num >= valorEntradaMinimo) {
-      setValorEntrada(num);
+    setValorEntrada(num);
+  };
+
+  const handleValorEntradaBlur = () => {
+    if (valorEntrada < valorEntradaMinimo) {
+      setValorEntrada(valorEntradaMinimo);
+      toast.error(`O valor mínimo da entrada é R$ ${valorEntradaMinimo.toFixed(2)}`);
+    }
+    if (valorEntrada > valorTotal) {
+      setValorEntrada(valorTotal);
     }
   };
 
@@ -101,21 +82,6 @@ export function PaymentScreen({
           <span className="text-muted-foreground">Valor total do contrato</span>
           <span className="font-semibold">R$ {valorTotal.toFixed(2)}</span>
         </div>
-
-        {descontoRegressivo && isPixBoleto && resumo.descontoPercent > 0 && (
-          <>
-            <div className="flex justify-between text-sm">
-              <span className="text-green-600 font-medium">Desconto regressivo ({resumo.descontoPercent}%)</span>
-              <span className="text-green-600 font-medium">
-                - R$ {(valorTotal - resumo.valorComDesconto).toFixed(2)}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm border-t pt-2">
-              <span className="text-muted-foreground">Valor com desconto</span>
-              <span className="font-semibold">R$ {resumo.valorComDesconto.toFixed(2)}</span>
-            </div>
-          </>
-        )}
       </div>
 
       {/* Valor da entrada */}
@@ -129,6 +95,7 @@ export function PaymentScreen({
           step="0.01"
           value={valorEntrada}
           onChange={(e) => handleValorEntradaChange(e.target.value)}
+          onBlur={handleValorEntradaBlur}
         />
         <p className="text-xs text-muted-foreground">
           Você pode aumentar o valor da entrada para adiantar parcelas.
@@ -149,10 +116,7 @@ export function PaymentScreen({
             <SelectContent>
               {opçõesParcelas.map((n) => (
                 <SelectItem key={n} value={String(n)}>
-                  {n}x de R$ {((descontoRegressivo && isPixBoleto
-                    ? (valorTotal * (1 - calcularDesconto(n) / 100)) - valorEntrada
-                    : valorTotal - valorEntrada) / n).toFixed(2)}
-                  {descontoRegressivo && isPixBoleto && ` (${calcularDesconto(n)}% desc.)`}
+                  {n}x de R$ {((valorTotal - valorEntrada) / n).toFixed(2)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -171,20 +135,23 @@ export function PaymentScreen({
           <div className="flex justify-between text-sm">
             <span>Restante ({parcelasSelecionadas}x)</span>
             <span className="font-medium">
-              R$ {(descontoRegressivo && isPixBoleto
-                ? resumo.restanteComDesconto
-                : resumo.restante
-              ).toFixed(2)}
+              R$ {resumo.restante.toFixed(2)} ({parcelasSelecionadas}x de R$ {resumo.valorParcela.toFixed(2)})
             </span>
           </div>
         )}
-        {descontoRegressivo && isPixBoleto && resumo.descontoPercent > 0 && (
-          <div className="flex justify-between text-sm text-green-600">
-            <span>Economia total</span>
-            <span className="font-medium">R$ {(valorTotal - resumo.valorComDesconto).toFixed(2)}</span>
-          </div>
-        )}
       </div>
+
+      {/* Info desconto regressivo */}
+      {descontoRegressivo && (
+        <div className="rounded-lg border bg-muted/30 p-4 text-xs text-muted-foreground space-y-1">
+          <p className="font-medium text-foreground text-sm">Desconto regressivo</p>
+          <p>
+            Este contrato poderá ser liquidado antecipadamente a qualquer momento, com desconto regressivo 
+            de <strong>15%</strong> sobre o saldo das parcelas vincendas, reduzindo <strong>1% ao mês</strong>, 
+            até o mínimo de <strong>5%</strong>.
+          </p>
+        </div>
+      )}
 
       {/* Pix payment area */}
       <div className="rounded-lg border bg-card p-5 space-y-4">
@@ -206,26 +173,10 @@ export function PaymentScreen({
           <p className="text-2xl font-bold text-primary">R$ {valorEntrada.toFixed(2)}</p>
         </div>
 
-        <div className="flex gap-2">
-          <Button onClick={handleCopyPix} variant="outline" className="flex-1 gap-2">
-            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-            {copied ? "Copiado!" : "Copiar Chave Pix"}
-          </Button>
-          <Button onClick={() => setShowQR(!showQR)} variant="outline" size="icon">
-            <QrCode className="w-4 h-4" />
-          </Button>
-        </div>
-
-        {showQR && (
-          <div className="flex flex-col items-center gap-2 p-4 bg-background rounded-lg">
-            <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(CONTRATADO.cnpj)}`}
-              alt="QR Code Pix"
-              className="w-48 h-48"
-            />
-            <p className="text-xs text-muted-foreground">Escaneie com o app do seu banco</p>
-          </div>
-        )}
+        <Button onClick={handleCopyPix} variant="outline" className="w-full gap-2">
+          {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+          {copied ? "Copiado!" : "Copiar Chave Pix"}
+        </Button>
       </div>
 
       {/* Actions */}
@@ -236,7 +187,7 @@ export function PaymentScreen({
         <Button
           onClick={() => onConfirm(valorEntrada, parcelasSelecionadas)}
           className="flex-1"
-          disabled={saving}
+          disabled={saving || valorEntrada < valorEntradaMinimo}
         >
           {saving ? "Confirmando..." : "Já realizei o pagamento — Confirmar"}
         </Button>

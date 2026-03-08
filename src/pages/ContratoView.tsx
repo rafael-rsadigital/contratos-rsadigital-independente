@@ -26,7 +26,7 @@ export default function ContratoView() {
 
   // Confirmation dialog
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [confirmStep, setConfirmStep] = useState(1); // 1=identify, 2=terms, 3=payment
+  const [confirmStep, setConfirmStep] = useState(1);
   const [confirmNome, setConfirmNome] = useState("");
   const [confirmEmail, setConfirmEmail] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
@@ -99,7 +99,7 @@ export default function ContratoView() {
         });
 
         setContractStatus(data.status);
-        setConfirmed(data.status === 'confirmado');
+        setConfirmed(data.status === 'confirmado' || data.status === 'a_confirmar');
         setCodigoVerificacao((data as any).codigo_verificacao || '');
         setNumeroContrato((data as any).numero_contrato || '');
         setNomeConfirmacao((data as any).nome_confirmacao || '');
@@ -122,7 +122,7 @@ export default function ContratoView() {
   };
 
   const handleConfirmContract = async (valorEntradaFinal?: number, parcelasFinal?: number) => {
-    if (!id) return;
+    if (!id || !contractData) return;
     setSaving(true);
     try {
       let ip = 'desconhecido';
@@ -136,7 +136,7 @@ export default function ContratoView() {
       const now = new Date().toISOString();
 
       const updateData: any = {
-        status: 'confirmado',
+        status: 'a_confirmar',
         data_confirmacao: now,
         nome_confirmacao: confirmNome,
         email_confirmacao: confirmEmail,
@@ -153,7 +153,36 @@ export default function ContratoView() {
 
       await supabase.from('contracts').update(updateData).eq('id', id);
 
+      // Create anexo if client changed entry value or installments
+      const entradaOriginal = contractData.valor_entrada;
+      const parcelasOriginal = contractData.numero_parcelas;
+      const entradaFinal = valorEntradaFinal ?? entradaOriginal;
+      const parcFinal = parcelasFinal ?? parcelasOriginal;
+
+      if (entradaFinal !== entradaOriginal || parcFinal !== parcelasOriginal) {
+        const hoje = new Date().toLocaleDateString('pt-BR');
+        let descricao = `Alteração na forma de pagamento solicitada pelo cliente ${confirmNome} em ${hoje}.\n\n`;
+        
+        if (entradaFinal !== entradaOriginal) {
+          descricao += `Valor da entrada alterado de R$ ${entradaOriginal.toFixed(2)} para R$ ${entradaFinal.toFixed(2)}.\n`;
+        }
+        if (parcFinal !== parcelasOriginal) {
+          const valorParcela = (contractData.valor_total - entradaFinal) / parcFinal;
+          descricao += `Número de parcelas alterado de ${parcelasOriginal}x para ${parcFinal}x de R$ ${valorParcela.toFixed(2)}.\n`;
+        }
+
+        descricao += `\nValor total do contrato permanece: R$ ${contractData.valor_total.toFixed(2)}.`;
+
+        await (supabase.from('contract_anexos') as any).insert({
+          contract_id: id,
+          titulo: 'Alteração na Forma de Pagamento',
+          descricao,
+          data: hoje,
+        });
+      }
+
       setConfirmed(true);
+      setContractStatus('a_confirmar');
       setNomeConfirmacao(confirmNome);
       setEmailConfirmacao(confirmEmail);
       setConfirmDate(new Date(now).toLocaleDateString('pt-BR', {
@@ -161,14 +190,13 @@ export default function ContratoView() {
         hour: '2-digit', minute: '2-digit',
       }));
       setShowConfirmDialog(false);
-      toast.success("Contrato confirmado com sucesso!");
+      toast.success("Pagamento informado! Aguarde a confirmação.");
 
       // Open WhatsApp to admin
       const link = window.location.href;
       const servicos = [contractData?.servico_website, contractData?.servico_google].filter(Boolean).join(' + ');
-      const entradaValor = valorEntradaFinal ?? contractData?.valor_entrada ?? 0;
       const message = encodeURIComponent(
-        `Olá Rafael, confirmei o contrato da RSA Digital.\n\nCliente: ${confirmNome}\nServiço: ${servicos}\nValor: R$ ${Number(contractData?.valor_total || 0).toFixed(2)}\nEntrada paga: R$ ${Number(entradaValor).toFixed(2)}\n\nLink do contrato:\n${link}`
+        `Olá Rafael, informei o pagamento da entrada do contrato.\n\nCliente: ${confirmNome}\nServiço: ${servicos}\nValor: R$ ${Number(contractData?.valor_total || 0).toFixed(2)}\nEntrada paga: R$ ${Number(entradaFinal).toFixed(2)}\n\nLink do contrato:\n${link}`
       );
       window.open(`https://wa.me/${CONTRATADO.whatsapp}?text=${message}`, '_blank');
     } catch (err) {
@@ -230,6 +258,11 @@ export default function ContratoView() {
       </header>
 
       <main className="container py-8 max-w-3xl">
+        {contractStatus === 'a_confirmar' && (
+          <div className="mb-6 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4 text-center">
+            <p className="text-sm font-medium text-yellow-700">⏳ Pagamento informado — aguardando confirmação do administrador.</p>
+          </div>
+        )}
         <div id="contract-document" className="bg-card rounded-lg shadow-lg p-6 md:p-10">
           <ContractDocument
             data={contractData}

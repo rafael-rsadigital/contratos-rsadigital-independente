@@ -30,6 +30,7 @@ interface ContractSummary {
 const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
   rascunho: { label: "📝 Rascunho", variant: "outline" },
   enviado: { label: "📤 Enviado", variant: "secondary" },
+  a_confirmar: { label: "⏳ A Confirmar", variant: "secondary" },
   confirmado: { label: "✅ Confirmado", variant: "default" },
   cancelado: { label: "❌ Cancelado", variant: "destructive" },
 };
