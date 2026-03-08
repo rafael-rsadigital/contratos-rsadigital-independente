@@ -69,6 +69,11 @@ export function PaymentScreen({
 
   return (
     <div className="space-y-6">
+      {/* Logo */}
+      <div className="flex justify-center">
+        <img src={logoRsa} alt="RSA Digital" className="h-14 object-contain" />
+      </div>
+
       {/* Header */}
       <div className="text-center space-y-2">
         <h2 className="text-xl font-bold text-foreground">Pagamento da Entrada</h2>

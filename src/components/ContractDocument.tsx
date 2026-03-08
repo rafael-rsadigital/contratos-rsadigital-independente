@@ -55,6 +55,11 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
 
   return (
     <div className="space-y-16">
+      {/* Logo */}
+      <div className="flex justify-center mb-4">
+        <img src={logoRsa} alt="RSA Digital" className="h-16 object-contain" />
+      </div>
+
       {/* Contract number header */}
       {numeroContrato && (
         <div className="text-center text-xs text-muted-foreground">
