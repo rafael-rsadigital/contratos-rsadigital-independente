@@ -86,7 +86,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
       forma_pagamento: values.forma_pagamento as PaymentMethod,
       numero_parcelas: parcelas,
       data_primeiro_vencimento: values.data_primeiro_vencimento || '',
-      desconto_regressivo: hasDesconto,
+      desconto_regressivo: hasDesconto && descontoRegressivo,
       valor_entrada: values.tem_entrada ? (values.valor_entrada || 0) : 0,
       forma_pagamento_entrada: (values.forma_pagamento_entrada || 'pix') as EntradaPaymentMethod,
       numero_paginas: values.numero_paginas || 0,
