@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { FilePlus, History, FileText } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 interface ContractSummary {
   id: string;
@@ -16,7 +16,7 @@ interface ContractSummary {
   client_nome: string;
 }
 
-export default function Index() {
+export default function Historico() {
   const [contracts, setContracts] = useState<ContractSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,8 +25,7 @@ export default function Index() {
       const { data } = await supabase
         .from('contracts')
         .select('id, tipo, valor_total, status, created_at, clients(nome)')
-        .order('created_at', { ascending: false })
-        .limit(10);
+        .order('created_at', { ascending: false });
 
       if (data) {
         setContracts(data.map((c: any) => ({
@@ -46,42 +45,23 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
-        <div className="container py-4 flex items-center justify-between">
-          <h1 className="font-bold text-xl text-primary">RSA Digital</h1>
-          <span className="text-xs text-muted-foreground">Gerador de Contratos</span>
+        <div className="container py-4 flex items-center gap-4">
+          <Link to="/">
+            <Button variant="ghost" size="icon"><ArrowLeft className="w-5 h-5" /></Button>
+          </Link>
+          <h1 className="font-bold text-lg text-primary">Histórico de Contratos</h1>
         </div>
       </header>
-
-      <main className="container py-8 max-w-4xl space-y-8">
-        {/* Hero */}
-        <div className="text-center space-y-4 py-6">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Gerador de Contratos</h2>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            Crie contratos profissionais em menos de 2 minutos. Preencha os dados, gere o documento e envie para confirmação.
-          </p>
-          <Link to="/novo-contrato">
-            <Button size="lg" className="gap-2 mt-2">
-              <FilePlus className="w-5 h-5" /> Novo Contrato
-            </Button>
-          </Link>
-        </div>
-
-        {/* Recent contracts */}
+      <main className="container py-8 max-w-4xl">
         <Card className="border-0 shadow-lg">
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <History className="w-5 h-5 text-primary" />
-              Contratos Recentes
-            </CardTitle>
+          <CardHeader>
+            <CardTitle>Todos os Contratos</CardTitle>
           </CardHeader>
           <CardContent>
             {loading ? (
               <p className="text-sm text-muted-foreground py-6 text-center">Carregando...</p>
             ) : contracts.length === 0 ? (
-              <div className="text-center py-10 space-y-2">
-                <FileText className="w-10 h-10 text-muted-foreground/40 mx-auto" />
-                <p className="text-sm text-muted-foreground">Nenhum contrato gerado ainda.</p>
-              </div>
+              <p className="text-center py-10 text-muted-foreground">Nenhum contrato encontrado.</p>
             ) : (
               <Table>
                 <TableHeader>
@@ -97,13 +77,9 @@ export default function Index() {
                 <TableBody>
                   {contracts.map(c => (
                     <TableRow key={c.id}>
-                      <TableCell className="text-sm">
-                        {new Date(c.created_at).toLocaleDateString('pt-BR')}
-                      </TableCell>
+                      <TableCell className="text-sm">{new Date(c.created_at).toLocaleDateString('pt-BR')}</TableCell>
                       <TableCell className="font-medium text-sm">{c.client_nome}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary" className="text-xs capitalize">{c.tipo}</Badge>
-                      </TableCell>
+                      <TableCell><Badge variant="secondary" className="text-xs capitalize">{c.tipo}</Badge></TableCell>
                       <TableCell className="text-sm">R$ {Number(c.valor_total).toFixed(2)}</TableCell>
                       <TableCell>
                         <Badge variant={c.status === 'confirmado' ? 'default' : 'outline'} className="text-xs">
@@ -119,13 +95,6 @@ export default function Index() {
                   ))}
                 </TableBody>
               </Table>
-            )}
-            {contracts.length > 0 && (
-              <div className="mt-4 text-center">
-                <Link to="/historico">
-                  <Button variant="link" className="text-sm">Ver todos os contratos →</Button>
-                </Link>
-              </div>
             )}
           </CardContent>
         </Card>
