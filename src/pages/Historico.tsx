@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { ArrowLeft, LogOut, Eye } from "lucide-react";
+import { ArrowLeft, LogOut, Eye, CheckCircle } from "lucide-react";
 
 interface ContractView {
   viewed_at: string;
