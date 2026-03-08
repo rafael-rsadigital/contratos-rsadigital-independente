@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { ArrowLeft, LogOut, Eye, CheckCircle } from "lucide-react";
+import { toast } from "sonner";
 
 interface ContractView {
   viewed_at: string;
