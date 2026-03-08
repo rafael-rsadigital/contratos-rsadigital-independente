@@ -132,6 +132,38 @@ export type Database = {
           },
         ]
       }
+      contract_views: {
+        Row: {
+          contract_id: string
+          id: string
+          ip: string | null
+          navegador: string | null
+          viewed_at: string
+        }
+        Insert: {
+          contract_id: string
+          id?: string
+          ip?: string | null
+          navegador?: string | null
+          viewed_at?: string
+        }
+        Update: {
+          contract_id?: string
+          id?: string
+          ip?: string | null
+          navegador?: string | null
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_views_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contracts: {
         Row: {
           client_id: string
@@ -148,8 +180,10 @@ export type Database = {
           ip_confirmacao: string | null
           navegador_confirmacao: string | null
           nome_confirmacao: string | null
+          numero_contrato: string | null
           numero_paginas: number | null
           numero_parcelas: number
+          prazo_google: string | null
           servico_principal: string | null
           servicos: string[]
           status: string
@@ -173,8 +207,10 @@ export type Database = {
           ip_confirmacao?: string | null
           navegador_confirmacao?: string | null
           nome_confirmacao?: string | null
+          numero_contrato?: string | null
           numero_paginas?: number | null
           numero_parcelas?: number
+          prazo_google?: string | null
           servico_principal?: string | null
           servicos?: string[]
           status?: string
@@ -198,8 +234,10 @@ export type Database = {
           ip_confirmacao?: string | null
           navegador_confirmacao?: string | null
           nome_confirmacao?: string | null
+          numero_contrato?: string | null
           numero_paginas?: number | null
           numero_parcelas?: number
+          prazo_google?: string | null
           servico_principal?: string | null
           servicos?: string[]
           status?: string
