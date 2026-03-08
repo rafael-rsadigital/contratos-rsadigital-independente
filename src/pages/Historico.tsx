@@ -161,7 +161,12 @@ export default function Historico() {
                             <span className="text-xs text-muted-foreground">—</span>
                           )}
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="flex gap-1">
+                          {c.status === 'a_confirmar' && (
+                            <Button variant="default" size="sm" className="gap-1" onClick={() => handleConfirmContract(c.id)}>
+                              <CheckCircle className="w-3 h-3" /> Confirmar
+                            </Button>
+                          )}
                           <Link to={`/contrato/${c.id}`}>
                             <Button variant="ghost" size="sm">Ver</Button>
                           </Link>
