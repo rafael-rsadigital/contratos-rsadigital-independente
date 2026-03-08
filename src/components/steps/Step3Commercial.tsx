@@ -242,13 +242,18 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
             )}
 
             {hasDesconto && (
-              <div className="p-4 rounded-lg bg-accent/10 border border-accent/30 flex gap-3 items-start">
-                <Info className="w-5 h-5 text-accent mt-0.5 shrink-0" />
-                <div className="text-sm">
-                  <Badge variant="outline" className="mb-2 border-accent text-accent">Desconto Regressivo Ativado</Badge>
-                  <p className="text-muted-foreground">
-                    O cliente poderá quitar antecipadamente com desconto regressivo: 15% inicial, reduzindo 1% ao mês, mínimo de 5%.
-                  </p>
+              <div className="p-4 rounded-lg bg-accent/10 border border-accent/30 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-3 items-start">
+                    <Info className="w-5 h-5 text-accent mt-0.5 shrink-0" />
+                    <div className="text-sm">
+                      <p className="font-semibold">Desconto Regressivo</p>
+                      <p className="text-muted-foreground">
+                        O cliente poderá quitar antecipadamente com desconto regressivo: 15% inicial, reduzindo 1% ao mês, mínimo de 5%.
+                      </p>
+                    </div>
+                  </div>
+                  <Switch checked={descontoRegressivo} onCheckedChange={setDescontoRegressivo} />
                 </div>
               </div>
             )}
