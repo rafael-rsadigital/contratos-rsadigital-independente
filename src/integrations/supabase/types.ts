@@ -17,6 +17,7 @@ export type Database = {
       clients: {
         Row: {
           bairro: string
+          celular: string
           cep: string
           cpf_cnpj: string
           created_at: string
@@ -31,10 +32,11 @@ export type Database = {
         }
         Insert: {
           bairro: string
+          celular?: string
           cep: string
           cpf_cnpj: string
           created_at?: string
-          email: string
+          email?: string
           estado: string
           id?: string
           logradouro: string
@@ -45,6 +47,7 @@ export type Database = {
         }
         Update: {
           bairro?: string
+          celular?: string
           cep?: string
           cpf_cnpj?: string
           created_at?: string
@@ -59,53 +62,150 @@ export type Database = {
         }
         Relationships: []
       }
+      contract_aditivos: {
+        Row: {
+          contract_id: string
+          created_at: string
+          data: string
+          descricao: string
+          id: string
+          titulo: string
+        }
+        Insert: {
+          contract_id: string
+          created_at?: string
+          data: string
+          descricao: string
+          id?: string
+          titulo: string
+        }
+        Update: {
+          contract_id?: string
+          created_at?: string
+          data?: string
+          descricao?: string
+          id?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_aditivos_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contract_anexos: {
+        Row: {
+          contract_id: string
+          created_at: string
+          data: string
+          descricao: string
+          id: string
+          titulo: string
+        }
+        Insert: {
+          contract_id: string
+          created_at?: string
+          data: string
+          descricao: string
+          id?: string
+          titulo: string
+        }
+        Update: {
+          contract_id?: string
+          created_at?: string
+          data?: string
+          descricao?: string
+          id?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_anexos_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contracts: {
         Row: {
           client_id: string
+          codigo_verificacao: string | null
           created_at: string
           data_confirmacao: string | null
+          data_primeiro_vencimento: string | null
           desconto_regressivo: boolean
           dia_vencimento: number
           email_confirmacao: string | null
           forma_pagamento: string
+          forma_pagamento_entrada: string | null
           id: string
+          ip_confirmacao: string | null
+          navegador_confirmacao: string | null
+          nome_confirmacao: string | null
+          numero_paginas: number | null
           numero_parcelas: number
+          servico_principal: string | null
           servicos: string[]
           status: string
           tipo: string
           updated_at: string
+          valor_entrada: number
           valor_total: number
         }
         Insert: {
           client_id: string
+          codigo_verificacao?: string | null
           created_at?: string
           data_confirmacao?: string | null
+          data_primeiro_vencimento?: string | null
           desconto_regressivo?: boolean
           dia_vencimento?: number
           email_confirmacao?: string | null
           forma_pagamento: string
+          forma_pagamento_entrada?: string | null
           id?: string
+          ip_confirmacao?: string | null
+          navegador_confirmacao?: string | null
+          nome_confirmacao?: string | null
+          numero_paginas?: number | null
           numero_parcelas?: number
+          servico_principal?: string | null
           servicos?: string[]
           status?: string
           tipo: string
           updated_at?: string
+          valor_entrada?: number
           valor_total: number
         }
         Update: {
           client_id?: string
+          codigo_verificacao?: string | null
           created_at?: string
           data_confirmacao?: string | null
+          data_primeiro_vencimento?: string | null
           desconto_regressivo?: boolean
           dia_vencimento?: number
           email_confirmacao?: string | null
           forma_pagamento?: string
+          forma_pagamento_entrada?: string | null
           id?: string
+          ip_confirmacao?: string | null
+          navegador_confirmacao?: string | null
+          nome_confirmacao?: string | null
+          numero_paginas?: number | null
           numero_parcelas?: number
+          servico_principal?: string | null
           servicos?: string[]
           status?: string
           tipo?: string
           updated_at?: string
+          valor_entrada?: number
           valor_total?: number
         }
         Relationships: [
