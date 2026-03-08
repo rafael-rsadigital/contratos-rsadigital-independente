@@ -10,6 +10,7 @@ import { ContractDocument } from "@/components/ContractDocument";
 import { ContractFormData, PaymentMethod, EntradaPaymentMethod, CONTRATADO, AnexoData, AditivoData } from "@/types/contract";
 import { Download, Check } from "lucide-react";
 import { toast } from "sonner";
+import { PaymentScreen } from "@/components/PaymentScreen";
 
 export default function ContratoView() {
   const { id } = useParams<{ id: string }>();
