@@ -75,6 +75,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
   const valorParcelado = showParcelas ? Math.max(0, valorTotal - valorEntrada) : 0;
   const valorParcela = showParcelas && numeroParcelas > 0 ? (valorParcelado / numeroParcelas).toFixed(2) : '0.00';
 
+  const [descontoRegressivo, setDescontoRegressivo] = useState(false);
   const hasDesconto = formaPagamento === "pix_boleto" && numeroParcelas >= 10;
 
   const handleSubmit = (values: FormValues) => {
