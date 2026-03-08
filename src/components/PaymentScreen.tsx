@@ -166,6 +166,7 @@ export function PaymentScreen({
           <p className="text-xs text-muted-foreground">Beneficiário</p>
           <p className="font-medium text-sm">{CONTRATADO.nome}</p>
           <p className="text-xs text-muted-foreground">{CONTRATADO.nomeFantasia}</p>
+          <p className="text-xs text-muted-foreground">Banco: ASAAS IP S.A.</p>
         </div>
 
         <div className="text-center">
