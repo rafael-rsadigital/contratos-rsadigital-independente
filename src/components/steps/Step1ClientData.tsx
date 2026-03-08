@@ -11,13 +11,14 @@ import { User } from "lucide-react";
 const clientSchema = z.object({
   nome: z.string().trim().min(3, "Nome deve ter pelo menos 3 caracteres").max(200),
   cpf_cnpj: z.string().trim().min(11, "CPF/CNPJ inválido").max(20),
+  celular: z.string().trim().min(10, "Celular inválido").max(20),
   logradouro: z.string().trim().min(3, "Logradouro obrigatório").max(200),
   numero: z.string().trim().min(1, "Número obrigatório").max(20),
   bairro: z.string().trim().min(2, "Bairro obrigatório").max(100),
   cep: z.string().trim().min(8, "CEP inválido").max(10),
   municipio: z.string().trim().min(2, "Município obrigatório").max(100),
   estado: z.string().trim().min(2, "Estado obrigatório").max(2),
-  email: z.string().trim().email("Email inválido").max(255),
+  email: z.string().trim().max(255).optional().or(z.literal('')),
 });
 
 interface Props {
@@ -57,9 +58,16 @@ export function Step1ClientData({ data, onNext }: Props) {
                   <FormMessage />
                 </FormItem>
               )} />
+              <FormField control={form.control} name="celular" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Celular</FormLabel>
+                  <FormControl><Input placeholder="(12) 98805-2097" {...field} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
               <FormField control={form.control} name="email" render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Email <span className="text-muted-foreground text-xs">(opcional)</span></FormLabel>
                   <FormControl><Input type="email" placeholder="email@exemplo.com" {...field} /></FormControl>
                   <FormMessage />
                 </FormItem>

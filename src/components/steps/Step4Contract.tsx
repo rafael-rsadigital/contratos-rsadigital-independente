@@ -4,8 +4,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ContractFormData, AnexoData, AditivoData, CONTRATADO } from "@/types/contract";
-import { Check, Download, MessageCircle, ArrowLeft, Plus, Paperclip, FilePlus } from "lucide-react";
+import { Check, Download, MessageCircle, ArrowLeft, Plus, Paperclip, FilePlus, Link2, Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ContractDocument } from "@/components/ContractDocument";
@@ -16,13 +17,18 @@ interface Props {
   onConfirmed: (contractId: string) => void;
 }
 
+function generateVerificationCode(contractId: string): string {
+  const year = new Date().getFullYear();
+  const hash = contractId.substring(0, 6).toUpperCase();
+  return `RSA-${year}-${hash}`;
+}
+
 export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props) {
   const [data, setData] = useState(initialData);
   const [confirmed, setConfirmed] = useState(false);
-  const [showEmailDialog, setShowEmailDialog] = useState(false);
-  const [email, setEmail] = useState(initialData.client.email);
   const [saving, setSaving] = useState(false);
   const [contractId, setContractId] = useState<string | null>(null);
+  const [codigoVerificacao, setCodigoVerificacao] = useState("");
 
   // Anexo/Aditivo dialogs
   const [showAnexoDialog, setShowAnexoDialog] = useState(false);
@@ -67,55 +73,77 @@ export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props)
     toast.success("Aditivo adicionado.");
   };
 
-  const handleConfirmClick = () => {
-    setShowEmailDialog(true);
-  };
-
-  const handleConfirmContract = async () => {
+  const handleSaveContract = async () => {
     setSaving(true);
     try {
+      // Save client
       const { data: clientRow, error: clientErr } = await supabase
         .from('clients')
         .insert({
           nome: data.client.nome,
           cpf_cnpj: data.client.cpf_cnpj,
+          celular: data.client.celular,
           logradouro: data.client.logradouro,
           numero: data.client.numero,
           bairro: data.client.bairro,
           cep: data.client.cep,
           municipio: data.client.municipio,
           estado: data.client.estado,
-          email: data.client.email,
+          email: data.client.email || '',
         })
         .select()
         .single();
 
       if (clientErr) throw clientErr;
 
+      // Determine principal service (first one has the financial value)
+      const servicos = [data.servico_website, data.servico_google].filter(Boolean);
+
+      // Save contract
       const { data: contractRow, error: contractErr } = await supabase
         .from('contracts')
         .insert({
           client_id: clientRow.id,
-          tipo: 'website',
-          servicos: [data.servico_website, data.servico_google],
+          tipo: servicos[0] || 'website',
+          servicos,
           valor_total: data.valor_total,
           forma_pagamento: data.forma_pagamento,
           numero_parcelas: data.numero_parcelas,
-          dia_vencimento: data.dia_vencimento,
+          data_primeiro_vencimento: data.data_primeiro_vencimento || null,
           desconto_regressivo: data.desconto_regressivo,
-          status: 'confirmado',
-          data_confirmacao: new Date().toISOString(),
-          email_confirmacao: email,
+          status: 'rascunho',
+          valor_entrada: data.valor_entrada,
+          forma_pagamento_entrada: data.forma_pagamento_entrada,
+          numero_paginas: data.numero_paginas || null,
+          servico_principal: servicos[0] || null,
         })
         .select()
         .single();
 
       if (contractErr) throw contractErr;
 
+      // Generate verification code
+      const code = generateVerificationCode(contractRow.id);
+      await supabase.from('contracts').update({ codigo_verificacao: code }).eq('id', contractRow.id);
+
+      // Save anexos
+      if (data.anexos.length > 0) {
+        await supabase.from('contract_anexos').insert(
+          data.anexos.map(a => ({ contract_id: contractRow.id, titulo: a.titulo, descricao: a.descricao, data: a.data }))
+        );
+      }
+
+      // Save aditivos
+      if (data.aditivos.length > 0) {
+        await supabase.from('contract_aditivos').insert(
+          data.aditivos.map(a => ({ contract_id: contractRow.id, titulo: a.titulo, descricao: a.descricao, data: a.data }))
+        );
+      }
+
       setContractId(contractRow.id);
+      setCodigoVerificacao(code);
       setConfirmed(true);
-      setShowEmailDialog(false);
-      toast.success("Contratos confirmados com sucesso!");
+      toast.success("Contrato salvo como rascunho!");
       onConfirmed(contractRow.id);
     } catch (err) {
       console.error(err);
@@ -141,9 +169,19 @@ export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props)
       .save();
   };
 
+  const handleCopyLink = () => {
+    if (!contractId) return;
+    const link = `${window.location.origin}/contrato/${contractId}`;
+    navigator.clipboard.writeText(link);
+    toast.success("Link copiado!");
+  };
+
   const handleWhatsApp = () => {
+    if (!contractId) return;
+    const link = `${window.location.origin}/contrato/${contractId}`;
+    const servicos = [data.servico_website, data.servico_google].filter(Boolean).join(' + ');
     const message = encodeURIComponent(
-      `Olá Rafael, confirmo a contratação conforme contrato gerado.\n\nNome: ${data.client.nome}`
+      `Olá Rafael, confirmei o contrato da RSA Digital.\n\nCliente: ${data.client.nome}\nServiço: ${servicos}\nValor: R$ ${Number(data.valor_total).toFixed(2)}\n\nLink do contrato:\n${link}`
     );
     window.open(`https://wa.me/${CONTRATADO.whatsapp}?text=${message}`, '_blank');
   };
@@ -167,45 +205,32 @@ export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props)
           )}
           {confirmed && (
             <>
+              <Button onClick={handleCopyLink} variant="outline" className="gap-2">
+                <Copy className="w-4 h-4" /> Copiar Link
+              </Button>
               <Button onClick={handleDownloadPDF} variant="outline" className="gap-2">
                 <Download className="w-4 h-4" /> Baixar PDF
               </Button>
               <Button onClick={handleWhatsApp} className="gap-2 bg-accent hover:bg-accent/90">
-                <MessageCircle className="w-4 h-4" /> Enviar WhatsApp
+                <MessageCircle className="w-4 h-4" /> WhatsApp
               </Button>
             </>
           )}
           {!confirmed && (
-            <Button onClick={handleConfirmClick} size="lg" className="gap-2">
-              <Check className="w-4 h-4" /> Confirmar Contratação
+            <Button onClick={handleSaveContract} size="lg" className="gap-2" disabled={saving}>
+              <Check className="w-4 h-4" /> {saving ? "Salvando..." : "Salvar Contrato"}
             </Button>
           )}
         </div>
       </div>
 
       <div id="contract-document" className="bg-card rounded-lg shadow-lg p-6 md:p-10">
-        <ContractDocument data={data} confirmed={confirmed} confirmDate={confirmDate} />
+        <ContractDocument
+          data={data}
+          confirmed={false}
+          codigoVerificacao={codigoVerificacao}
+        />
       </div>
-
-      {/* Email Dialog */}
-      <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirmar Contratação</DialogTitle>
-            <DialogDescription>Informe o email do cliente para confirmação dos contratos.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3 py-2">
-            <Label htmlFor="confirm-email">Email do cliente</Label>
-            <Input id="confirm-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@exemplo.com" />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowEmailDialog(false)}>Cancelar</Button>
-            <Button onClick={handleConfirmContract} disabled={saving || !email}>
-              {saving ? "Salvando..." : "Confirmar Contratos"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Anexo Dialog */}
       <Dialog open={showAnexoDialog} onOpenChange={setShowAnexoDialog}>
@@ -213,7 +238,7 @@ export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props)
           <DialogHeader>
             <DialogTitle>Adicionar Anexo</DialogTitle>
             <DialogDescription>
-              Anexos servem para registrar alterações, complementações ou anulações de cláusulas do contrato, mediante acordo entre as partes.
+              Anexos servem para registrar alterações, complementações ou anulações de cláusulas do contrato.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
@@ -223,13 +248,13 @@ export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props)
             </div>
             <div>
               <Label htmlFor="anexo-desc">Descrição</Label>
-              <Textarea id="anexo-desc" value={anexoDescricao} onChange={(e) => setAnexoDescricao(e.target.value)} placeholder="Descreva a alteração, complementação ou anulação..." rows={5} />
+              <Textarea id="anexo-desc" value={anexoDescricao} onChange={(e) => setAnexoDescricao(e.target.value)} placeholder="Descreva a alteração..." rows={5} />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAnexoDialog(false)}>Cancelar</Button>
             <Button onClick={handleAddAnexo} disabled={!anexoTitulo.trim() || !anexoDescricao.trim()}>
-              <Plus className="w-4 h-4 mr-1" /> Adicionar Anexo
+              <Plus className="w-4 h-4 mr-1" /> Adicionar
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -241,7 +266,7 @@ export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props)
           <DialogHeader>
             <DialogTitle>Adicionar Aditivo</DialogTitle>
             <DialogDescription>
-              Aditivos registram renovações de prazo ou inclusão de novos serviços após o término ou durante a vigência do contrato.
+              Aditivos registram renovações de prazo ou inclusão de novos serviços.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 py-2">
@@ -257,7 +282,7 @@ export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props)
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAditivoDialog(false)}>Cancelar</Button>
             <Button onClick={handleAddAditivo} disabled={!aditivoTitulo.trim() || !aditivoDescricao.trim()}>
-              <Plus className="w-4 h-4 mr-1" /> Adicionar Aditivo
+              <Plus className="w-4 h-4 mr-1" /> Adicionar
             </Button>
           </DialogFooter>
         </DialogContent>
