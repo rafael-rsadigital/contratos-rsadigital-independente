@@ -245,17 +245,19 @@ export default function ContratoView() {
 
       {/* Confirmation Dialog */}
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>
-              {confirmStep === 1 ? "Identificação" : "Declaração de Aceite"}
-            </DialogTitle>
-            <DialogDescription>
-              {confirmStep === 1
-                ? "Informe seus dados para confirmar o contrato."
-                : "Leia e confirme a declaração abaixo."}
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className={confirmStep === 3 ? "max-w-lg max-h-[90vh] overflow-y-auto" : "max-w-md"}>
+          {confirmStep !== 3 && (
+            <DialogHeader>
+              <DialogTitle>
+                {confirmStep === 1 ? "Identificação" : "Declaração de Aceite"}
+              </DialogTitle>
+              <DialogDescription>
+                {confirmStep === 1
+                  ? "Informe seus dados para confirmar o contrato."
+                  : "Leia e confirme a declaração abaixo."}
+              </DialogDescription>
+            </DialogHeader>
+          )}
 
           {confirmStep === 1 && (
             <div className="space-y-4 py-2">
@@ -291,26 +293,41 @@ export default function ContratoView() {
             </div>
           )}
 
-          <DialogFooter>
-            {confirmStep === 1 ? (
-              <>
-                <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>Cancelar</Button>
-                <Button
-                  onClick={() => setConfirmStep(2)}
-                  disabled={!confirmNome.trim() || !confirmEmail.trim()}
-                >
-                  Próximo
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button variant="outline" onClick={() => setConfirmStep(1)}>Voltar</Button>
-                <Button onClick={handleConfirmContract} disabled={!acceptTerms || saving}>
-                  {saving ? "Confirmando..." : "Confirmar Contratação"}
-                </Button>
-              </>
-            )}
-          </DialogFooter>
+          {confirmStep === 3 && contractData && (
+            <PaymentScreen
+              valorTotal={contractData.valor_total}
+              valorEntradaMinimo={contractData.valor_entrada}
+              numeroParcelas={contractData.numero_parcelas}
+              descontoRegressivo={contractData.desconto_regressivo}
+              formaPagamento={contractData.forma_pagamento}
+              onConfirm={(valorEntrada, parcelas) => handleConfirmContract(valorEntrada, parcelas)}
+              onBack={() => setConfirmStep(2)}
+              saving={saving}
+            />
+          )}
+
+          {confirmStep !== 3 && (
+            <DialogFooter>
+              {confirmStep === 1 ? (
+                <>
+                  <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>Cancelar</Button>
+                  <Button
+                    onClick={() => setConfirmStep(2)}
+                    disabled={!confirmNome.trim() || !confirmEmail.trim()}
+                  >
+                    Próximo
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="outline" onClick={() => setConfirmStep(1)}>Voltar</Button>
+                  <Button onClick={() => setConfirmStep(3)} disabled={!acceptTerms}>
+                    Próximo — Pagamento
+                  </Button>
+                </>
+              )}
+            </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
     </div>
