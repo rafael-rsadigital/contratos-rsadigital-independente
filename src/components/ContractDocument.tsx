@@ -17,6 +17,7 @@ const paymentLabel: Record<string, string> = {
   pix_boleto: "PIX / Boleto",
   cartao: "Cartão",
   dinheiro: "Dinheiro",
+  permuta: "Permuta",
 };
 
 const entradaPaymentLabel: Record<string, string> = {
