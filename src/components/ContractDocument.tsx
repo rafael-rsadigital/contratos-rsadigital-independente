@@ -77,6 +77,8 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
           confirmDate={confirmDate}
           nomeConfirmacao={nomeConfirmacao}
           emailConfirmacao={emailConfirmacao}
+          ipConfirmacao={ipConfirmacao}
+          navegadorConfirmacao={navegadorConfirmacao}
           valorParcela={valorParcela}
           vencimentos={vencimentos}
           isComplementar={false}
@@ -92,6 +94,8 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
             confirmDate={confirmDate}
             nomeConfirmacao={nomeConfirmacao}
             emailConfirmacao={emailConfirmacao}
+            ipConfirmacao={ipConfirmacao}
+            navegadorConfirmacao={navegadorConfirmacao}
             valorParcela={valorParcela}
             vencimentos={vencimentos}
             isComplementar={hasBoth}
