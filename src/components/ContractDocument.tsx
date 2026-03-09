@@ -48,7 +48,7 @@ function isOptimized(servico: string): boolean {
   return servico.includes('Otimizado') && !servico.includes('não otimizado');
 }
 
-export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, codigoVerificacao, numeroContrato, ipConfirmacao, navegadorConfirmacao, isAdmin }: Props) {
+export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, codigoVerificacao, numeroContrato, ipConfirmacao, navegadorConfirmacao, timezoneConfirmacao, idiomaConfirmacao, resolucaoConfirmacao, isAdmin }: Props) {
   const hasWebsite = !!data.servico_website;
   const hasGoogle = !!data.servico_google;
   const hasBoth = hasWebsite && hasGoogle;
