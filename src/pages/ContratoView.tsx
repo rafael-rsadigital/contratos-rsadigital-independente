@@ -370,7 +370,15 @@ export default function ContratoView() {
           </div>
         )}
 
-        {/* Bottom confirm button */}
+        {/* Admin: Add Aditivo */}
+        {user && (
+          <div className="mt-6 no-print">
+            <Button onClick={() => setShowAditivoDialog(true)} variant="outline" size="sm" className="gap-2">
+              <Plus className="w-4 h-4" /> Adicionar Aditivo
+            </Button>
+          </div>
+        )}
+
         {!confirmed && contractStatus !== 'cancelado' && (
           <div className="mt-6 text-center no-print">
             <Button onClick={handleStartConfirmation} size="lg" className="gap-2">
