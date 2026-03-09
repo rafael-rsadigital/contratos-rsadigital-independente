@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { ArrowLeft, LogOut, Search, Users, FileText, TrendingUp, DollarSign } from "lucide-react";
+import { ArrowLeft, LogOut, Search, Users, FileText, TrendingUp, DollarSign, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 interface Client {
@@ -21,6 +21,8 @@ interface Client {
   celular: string;
   municipio: string;
   estado: string;
+  status: string;
+  tags: string[];
   created_at: string;
   contract_count: number;
   total_value: number;
@@ -37,12 +39,19 @@ interface Contract {
   tipo: string;
 }
 
-const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
+const contractStatusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
   rascunho: { label: "📝 Rascunho", variant: "outline" },
   enviado: { label: "📤 Enviado", variant: "secondary" },
   a_confirmar: { label: "⏳ A Confirmar", variant: "secondary" },
   confirmado: { label: "✅ Confirmado", variant: "default" },
   cancelado: { label: "❌ Cancelado", variant: "destructive" },
+};
+
+const clientStatusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
+  lead: { label: "🟡 Lead", variant: "outline" },
+  ativo: { label: "🟢 Ativo", variant: "default" },
+  recorrente: { label: "🔵 Recorrente", variant: "secondary" },
+  inativo: { label: "⚫ Inativo", variant: "destructive" },
 };
 
 export default function CRM() {
@@ -54,6 +63,7 @@ export default function CRM() {
   const [searchClients, setSearchClients] = useState("");
   const [searchContracts, setSearchContracts] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("todos");
+  const [clientStatusFilter, setClientStatusFilter] = useState<string>("todos");
   const [activeTab, setActiveTab] = useState("clientes");
 
   const [stats, setStats] = useState({
@@ -65,24 +75,23 @@ export default function CRM() {
 
   const loadData = async () => {
     try {
-      // Load clients
       const { data: clientsData } = await supabase
         .from('clients')
         .select('*')
         .order('created_at', { ascending: false });
 
-      // Load contracts
       const { data: contractsData } = await supabase
         .from('contracts')
-        .select('id, numero_contrato, valor_total, status, created_at, servicos, tipo, clients(nome)')
+        .select('id, numero_contrato, valor_total, status, created_at, servicos, tipo, client_id, clients(nome)')
         .order('created_at', { ascending: false });
 
       if (clientsData) {
-        // Calculate stats for each client
         const clientsWithStats = clientsData.map(client => {
-          const clientContracts = contractsData?.filter(c => (c.clients as any)?.nome === client.nome) || [];
+          const clientContracts = contractsData?.filter(c => c.client_id === client.id) || [];
           return {
             ...client,
+            status: (client as any).status || 'lead',
+            tags: (client as any).tags || [],
             contract_count: clientContracts.length,
             total_value: clientContracts.reduce((sum, c) => sum + Number(c.valor_total), 0),
           };
@@ -103,7 +112,6 @@ export default function CRM() {
         }));
         setContracts(formattedContracts);
 
-        // Calculate stats
         setStats({
           totalClients: clientsData?.length || 0,
           totalContracts: contractsData.length,
@@ -123,11 +131,14 @@ export default function CRM() {
     loadData();
   }, []);
 
-  const filteredClients = clients.filter(c =>
-    c.nome.toLowerCase().includes(searchClients.toLowerCase()) ||
-    c.cpf_cnpj.includes(searchClients) ||
-    c.email.toLowerCase().includes(searchClients.toLowerCase())
-  );
+  const filteredClients = clients.filter(c => {
+    const matchesSearch = c.nome.toLowerCase().includes(searchClients.toLowerCase()) ||
+      c.cpf_cnpj.includes(searchClients) ||
+      c.email.toLowerCase().includes(searchClients.toLowerCase()) ||
+      c.celular.includes(searchClients);
+    const matchesStatus = clientStatusFilter === 'todos' || c.status === clientStatusFilter;
+    return matchesSearch && matchesStatus;
+  });
 
   const filteredContracts = contracts.filter(c => {
     const matchesSearch = 
@@ -136,6 +147,14 @@ export default function CRM() {
     const matchesStatus = statusFilter === 'todos' || c.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
+
+  // Pipeline counts
+  const pipeline = {
+    lead: clients.filter(c => c.status === 'lead').length,
+    ativo: clients.filter(c => c.status === 'ativo').length,
+    recorrente: clients.filter(c => c.status === 'recorrente').length,
+    inativo: clients.filter(c => c.status === 'inativo').length,
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -155,47 +174,64 @@ export default function CRM() {
 
       <main className="container py-8 max-w-7xl">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Clientes</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalClients}</div>
-            </CardContent>
+            <CardContent><div className="text-2xl font-bold">{stats.totalClients}</div></CardContent>
           </Card>
-
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Contratos</CardTitle>
               <FileText className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalContracts}</div>
-            </CardContent>
+            <CardContent><div className="text-2xl font-bold">{stats.totalContracts}</div></CardContent>
           </Card>
-
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Confirmados</CardTitle>
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.confirmedContracts}</div>
-            </CardContent>
+            <CardContent><div className="text-2xl font-bold">{stats.confirmedContracts}</div></CardContent>
           </Card>
-
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Valor Total</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">R$ {formatBRL(stats.totalValue)}</div>
-            </CardContent>
+            <CardContent><div className="text-2xl font-bold">R$ {formatBRL(stats.totalValue)}</div></CardContent>
           </Card>
         </div>
+
+        {/* Pipeline mini */}
+        <Card className="mb-6">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Pipeline de Clientes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-4 gap-3 text-center">
+              {[
+                { key: 'lead', label: '🟡 Lead', count: pipeline.lead },
+                { key: 'ativo', label: '🟢 Ativo', count: pipeline.ativo },
+                { key: 'recorrente', label: '🔵 Recorrente', count: pipeline.recorrente },
+                { key: 'inativo', label: '⚫ Inativo', count: pipeline.inativo },
+              ].map(p => (
+                <button
+                  key={p.key}
+                  onClick={() => { setClientStatusFilter(p.key); setActiveTab('clientes'); }}
+                  className={`p-3 rounded-lg border transition-all hover:border-primary/40 ${
+                    clientStatusFilter === p.key ? 'border-primary bg-primary/5' : 'border-border'
+                  }`}
+                >
+                  <div className="text-2xl font-bold">{p.count}</div>
+                  <div className="text-xs text-muted-foreground">{p.label}</div>
+                </button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Tabs */}
         <Card className="border-0 shadow-lg">
@@ -214,12 +250,24 @@ export default function CRM() {
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      placeholder="Buscar por nome, CPF/CNPJ ou e-mail..."
+                      placeholder="Buscar por nome, CPF/CNPJ, e-mail ou celular..."
                       value={searchClients}
                       onChange={(e) => setSearchClients(e.target.value)}
                       className="pl-9"
                     />
                   </div>
+                  <Select value={clientStatusFilter} onValueChange={setClientStatusFilter}>
+                    <SelectTrigger className="w-[160px]">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="todos">Todos</SelectItem>
+                      <SelectItem value="lead">Lead</SelectItem>
+                      <SelectItem value="ativo">Ativo</SelectItem>
+                      <SelectItem value="recorrente">Recorrente</SelectItem>
+                      <SelectItem value="inativo">Inativo</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 {loading ? (
@@ -232,37 +280,46 @@ export default function CRM() {
                       <TableRow>
                         <TableHead>Nome</TableHead>
                         <TableHead>CPF/CNPJ</TableHead>
-                        <TableHead>E-mail</TableHead>
                         <TableHead>Celular</TableHead>
                         <TableHead>Localização</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Tags</TableHead>
                         <TableHead>Contratos</TableHead>
                         <TableHead>Valor Total</TableHead>
-                        <TableHead>Cadastro</TableHead>
+                        <TableHead></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredClients.map(c => (
-                        <TableRow key={c.id} className="cursor-pointer hover:bg-muted/50" onClick={() => {
-                          const clientContracts = contracts.filter(ct => ct.client_nome === c.nome);
-                          if (clientContracts.length === 1) {
-                            window.location.href = `/contrato/${clientContracts[0].id}`;
-                          } else if (clientContracts.length > 1) {
-                            setSearchContracts(c.nome);
-                            setActiveTab("contratos");
-                          }
-                        }}>
-                          <TableCell className="font-medium">{c.nome}</TableCell>
-                          <TableCell className="text-xs font-mono">{c.cpf_cnpj}</TableCell>
-                          <TableCell className="text-sm">{c.email || '—'}</TableCell>
-                          <TableCell className="text-sm">{c.celular || '—'}</TableCell>
-                          <TableCell className="text-sm">{c.municipio}/{c.estado}</TableCell>
-                          <TableCell className="text-center">{c.contract_count}</TableCell>
-                          <TableCell className="text-sm font-medium">R$ {formatBRL(c.total_value)}</TableCell>
-                          <TableCell className="text-xs text-muted-foreground">
-                            {new Date(c.created_at).toLocaleDateString('pt-BR')}
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {filteredClients.map(c => {
+                        const st = clientStatusLabels[c.status] || clientStatusLabels.lead;
+                        return (
+                          <TableRow key={c.id}>
+                            <TableCell className="font-medium">{c.nome}</TableCell>
+                            <TableCell className="text-xs font-mono">{c.cpf_cnpj}</TableCell>
+                            <TableCell className="text-sm">{c.celular || '—'}</TableCell>
+                            <TableCell className="text-sm">{c.municipio}/{c.estado}</TableCell>
+                            <TableCell>
+                              <Badge variant={st.variant} className="text-xs">{st.label}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-wrap gap-1">
+                                {(c.tags || []).slice(0, 3).map(t => (
+                                  <Badge key={t} variant="outline" className="text-xs">{t}</Badge>
+                                ))}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-center">{c.contract_count}</TableCell>
+                            <TableCell className="text-sm font-medium">R$ {formatBRL(c.total_value)}</TableCell>
+                            <TableCell>
+                              <Link to={`/cliente/${c.id}`}>
+                                <Button variant="ghost" size="sm" className="gap-1">
+                                  <Eye className="w-3 h-3" /> Ver
+                                </Button>
+                              </Link>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
                     </TableBody>
                   </Table>
                 )}
@@ -315,7 +372,7 @@ export default function CRM() {
                     </TableHeader>
                     <TableBody>
                       {filteredContracts.map(c => {
-                        const st = statusLabels[c.status] || statusLabels.rascunho;
+                        const st = contractStatusLabels[c.status] || contractStatusLabels.rascunho;
                         return (
                           <TableRow key={c.id}>
                             <TableCell className="text-xs font-mono">{c.numero_contrato || '—'}</TableCell>
