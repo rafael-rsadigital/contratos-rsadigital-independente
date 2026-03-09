@@ -140,7 +140,7 @@ export function PaymentScreen({
           <div className="flex justify-between text-sm">
             <span>Restante ({parcelasSelecionadas}x)</span>
             <span className="font-medium">
-              R$ {resumo.restante.toFixed(2)} ({parcelasSelecionadas}x de R$ {resumo.valorParcela.toFixed(2)})
+              R$ {formatBRL(resumo.restante)} ({parcelasSelecionadas}x de R$ {formatBRL(resumo.valorParcela)})
             </span>
           </div>
         )}
