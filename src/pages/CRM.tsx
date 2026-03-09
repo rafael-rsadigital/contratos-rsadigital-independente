@@ -198,7 +198,7 @@ export default function CRM() {
 
         {/* Tabs */}
         <Card className="border-0 shadow-lg">
-          <Tabs defaultValuvalue={activeTab} onValueChange={setActiveTab}"w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <CardHeader>
               <TabsList className="grid w-full max-w-md grid-cols-2">
                 <TabsTrigger value="clientes">Clientes</TabsTrigger>
