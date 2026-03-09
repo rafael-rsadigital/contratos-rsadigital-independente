@@ -446,7 +446,7 @@ function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailC
 }
 
 /* ═══ CONTRATO GOOGLE ═══ */
-function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, ipConfirmacao, navegadorConfirmacao, valorParcela, vencimentos, isComplementar }: Props & {
+function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, ipConfirmacao, navegadorConfirmacao, valorParcela, vencimentos, isComplementar, isAdmin }: Props & {
   valorParcela: string; vencimentos: string[]; isComplementar: boolean;
 }) {
   return (
