@@ -293,7 +293,7 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
           <p className="mt-2">Vencimentos das parcelas:</p>
           <ul className="list-disc ml-8 my-2">
             {vencimentos.map((v, i) => (
-              <li key={i}>{i + 1}ª parcela — {v} — R$ {Number(valorParcelaReal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</li>
+              <li key={i}>{i + 1}ª parcela — {v} — R$ {formatBRL(Number(valorParcelaReal))}</li>
             ))}
           </ul>
         </>
