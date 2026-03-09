@@ -322,7 +322,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
                   </p>
                 ) : (
                   <p className="text-sm font-medium">
-                    Restante: <strong>R$ {Number(valorAposDesconto).toFixed(2)}</strong> via {paymentLabels[formaPagamento]}
+                    Restante: <strong>R$ {formatBRL(Number(valorAposDesconto))}</strong> via {paymentLabels[formaPagamento]}
                   </p>
                 )}
               </div>
