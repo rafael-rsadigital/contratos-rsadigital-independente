@@ -7,6 +7,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import NovoContrato from "./pages/NovoContrato";
 import Historico from "./pages/Historico";
+import CRM from "./pages/CRM";
 import ContratoView from "./pages/ContratoView";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
