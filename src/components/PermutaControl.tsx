@@ -117,7 +117,7 @@ export function PermutaControl({ contractId, permutaValor, clienteNome }: Props)
           <div className="p-3 rounded-lg bg-background border">
             <p className="text-xs text-muted-foreground">Saldo</p>
             <p className={`text-lg font-bold ${saldoRestante > 0 ? 'text-green-600' : 'text-muted-foreground'}`}>
-              R$ {saldoRestante.toFixed(2)}
+              R$ {formatBRL(saldoRestante)}
             </p>
           </div>
         </div>
