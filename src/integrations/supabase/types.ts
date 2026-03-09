@@ -22,12 +22,17 @@ export type Database = {
           cpf_cnpj: string
           created_at: string
           email: string
+          empresa: string | null
           estado: string
           id: string
           logradouro: string
           municipio: string
           nome: string
           numero: string
+          observacoes: string | null
+          origem: string | null
+          status: string
+          tags: string[]
           updated_at: string
         }
         Insert: {
@@ -37,12 +42,17 @@ export type Database = {
           cpf_cnpj: string
           created_at?: string
           email?: string
+          empresa?: string | null
           estado: string
           id?: string
           logradouro: string
           municipio: string
           nome: string
           numero: string
+          observacoes?: string | null
+          origem?: string | null
+          status?: string
+          tags?: string[]
           updated_at?: string
         }
         Update: {
@@ -52,12 +62,17 @@ export type Database = {
           cpf_cnpj?: string
           created_at?: string
           email?: string
+          empresa?: string | null
           estado?: string
           id?: string
           logradouro?: string
           municipio?: string
           nome?: string
           numero?: string
+          observacoes?: string | null
+          origem?: string | null
+          status?: string
+          tags?: string[]
           updated_at?: string
         }
         Relationships: []
