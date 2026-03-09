@@ -11,6 +11,8 @@ import { ContractFormData, PaymentMethod, EntradaPaymentMethod, CONTRATADO, Anex
 import { Download, Check } from "lucide-react";
 import { toast } from "sonner";
 import { PaymentScreen } from "@/components/PaymentScreen";
+import { PermutaControl } from "@/components/PermutaControl";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function ContratoView() {
   const { id } = useParams<{ id: string }>();
