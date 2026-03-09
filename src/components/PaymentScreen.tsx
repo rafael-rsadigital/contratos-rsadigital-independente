@@ -94,12 +94,11 @@ export function PaymentScreen({
         <Label htmlFor="valor-entrada">Valor da entrada (mínimo R$ {valorEntradaMinimo.toFixed(2)})</Label>
         <Input
           id="valor-entrada"
-          type="number"
-          min={valorEntradaMinimo}
-          max={valorTotal}
-          step="0.01"
-          value={valorEntrada}
-          onChange={(e) => handleValorEntradaChange(e.target.value)}
+          type="text"
+          inputMode="decimal"
+          pattern="[0-9]*[.,]?[0-9]*"
+          value={valorEntradaStr}
+          onChange={(e) => setValorEntradaStr(e.target.value)}
           onBlur={handleValorEntradaBlur}
         />
         <p className="text-xs text-muted-foreground">
