@@ -12,11 +12,12 @@ import { ContractDocument } from "@/components/ContractDocument";
 
 interface Props {
   data: ContractFormData;
+  existingClientId?: string;
   onBack: () => void;
   onConfirmed: (contractId: string) => void;
 }
 
-export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props) {
+export function Step4Contract({ data: initialData, existingClientId, onBack, onConfirmed }: Props) {
   const [data, setData] = useState(initialData);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -70,32 +71,54 @@ export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props)
   const handleSaveContract = async () => {
     setSaving(true);
     try {
-      // Save client
-      const { data: clientRow, error: clientErr } = await supabase
-        .from('clients')
-        .insert({
-          nome: data.client.nome,
-          cpf_cnpj: data.client.cpf_cnpj,
-          celular: data.client.celular,
-          logradouro: data.client.logradouro,
-          numero: data.client.numero,
-          bairro: data.client.bairro,
-          cep: data.client.cep,
-          municipio: data.client.municipio,
-          estado: data.client.estado,
-          email: data.client.email || '',
-        })
-        .select()
-        .single();
+      let clientId = existingClientId;
 
-      if (clientErr) throw clientErr;
+      if (!clientId) {
+        // Create new client
+        const { data: clientRow, error: clientErr } = await supabase
+          .from('clients')
+          .insert({
+            nome: data.client.nome,
+            cpf_cnpj: data.client.cpf_cnpj,
+            celular: data.client.celular,
+            logradouro: data.client.logradouro,
+            numero: data.client.numero,
+            bairro: data.client.bairro,
+            cep: data.client.cep,
+            municipio: data.client.municipio,
+            estado: data.client.estado,
+            email: data.client.email || '',
+          })
+          .select()
+          .single();
+
+        if (clientErr) throw clientErr;
+        clientId = clientRow.id;
+      } else {
+        // Update existing client data
+        await supabase
+          .from('clients')
+          .update({
+            nome: data.client.nome,
+            cpf_cnpj: data.client.cpf_cnpj,
+            celular: data.client.celular,
+            logradouro: data.client.logradouro,
+            numero: data.client.numero,
+            bairro: data.client.bairro,
+            cep: data.client.cep,
+            municipio: data.client.municipio,
+            estado: data.client.estado,
+            email: data.client.email || '',
+          })
+          .eq('id', clientId);
+      }
 
       const servicos = [data.servico_website, data.servico_google].filter(Boolean);
 
       const { data: contractRow, error: contractErr } = await supabase
         .from('contracts')
         .insert({
-          client_id: clientRow.id,
+          client_id: clientId,
           tipo: servicos[0] || 'website',
           servicos,
           valor_total: data.valor_total,

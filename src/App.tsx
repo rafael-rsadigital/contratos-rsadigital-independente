@@ -11,6 +11,7 @@ import CRM from "./pages/CRM";
 import ContratoView from "./pages/ContratoView";
 import VerificarContrato from "./pages/VerificarContrato";
 import AditivoView from "./pages/AditivoView";
+import ClienteView from "./pages/ClienteView";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/novo-contrato" element={<ProtectedRoute><NovoContrato /></ProtectedRoute>} />
           <Route path="/historico" element={<ProtectedRoute><Historico /></ProtectedRoute>} />
           <Route path="/crm" element={<ProtectedRoute><CRM /></ProtectedRoute>} />
+          <Route path="/cliente/:id" element={<ProtectedRoute><ClienteView /></ProtectedRoute>} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>
