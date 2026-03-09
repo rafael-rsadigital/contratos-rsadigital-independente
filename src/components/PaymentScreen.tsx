@@ -134,7 +134,7 @@ export function PaymentScreen({
         <h3 className="font-semibold text-sm text-foreground">Resumo do pagamento</h3>
         <div className="flex justify-between text-sm">
           <span>Entrada (agora)</span>
-          <span className="font-bold text-primary">R$ {valorEntrada.toFixed(2)}</span>
+          <span className="font-bold text-primary">R$ {formatBRL(valorEntrada)}</span>
         </div>
         {numeroParcelas > 1 && (
           <div className="flex justify-between text-sm">
