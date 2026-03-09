@@ -72,11 +72,18 @@ export default function Index() {
           <p className="text-muted-foreground max-w-md mx-auto">
             Crie contratos profissionais em menos de 2 minutos. Preencha os dados, gere o documento e envie para confirmação.
           </p>
-          <Link to="/novo-contrato">
-            <Button size="lg" className="gap-2 mt-2">
-              <FilePlus className="w-5 h-5" /> Novo Contrato
-            </Button>
-          </Link>
+          <div className="flex items-center justify-center gap-3 mt-2">
+            <Link to="/novo-contrato">
+              <Button size="lg" className="gap-2">
+                <FilePlus className="w-5 h-5" /> Novo Contrato
+              </Button>
+            </Link>
+            <Link to="/crm">
+              <Button size="lg" variant="outline" className="gap-2">
+                <LayoutDashboard className="w-5 h-5" /> CRM
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <Card className="border-0 shadow-lg">
