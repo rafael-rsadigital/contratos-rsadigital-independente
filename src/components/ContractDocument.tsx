@@ -476,23 +476,23 @@ function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailCo
 
 /* ═══ ANEXO DE PERMUTA ═══ */
 function PermutaAnexo({ data }: { data: ContractFormData }) {
+  let clauseNum = 1;
+
   return (
     <div className="contract-document max-w-3xl mx-auto text-[15px] leading-relaxed">
       <h1 className="text-center text-lg mb-4 tracking-widest font-bold">ANEXO DE PERMUTA</h1>
       <p className="text-center text-sm text-muted-foreground mb-6">
-        Este anexo faz parte integrante do contrato e estabelece as condições da permuta.
+        Este anexo é parte integrante do contrato de prestação de serviços acima.
       </p>
 
-      <h2 className="text-sm font-bold mt-6 mb-2">1. OBJETO DA PERMUTA</h2>
-      <p>As partes acordam que o pagamento do contrato principal será realizado, total ou parcialmente, por meio de permuta de produtos e/ou serviços.</p>
-
-      <h2 className="text-sm font-bold mt-6 mb-2">2. VALOR EM CRÉDITO</h2>
-      <p>Valor total em crédito de permuta: <strong>R$ {Number(data.permuta_valor).toFixed(2)}</strong></p>
+      <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. VALOR DA PERMUTA</h2>
+      <p>O CONTRATANTE concorda em disponibilizar ao CONTRATADO créditos em produtos e/ou serviços no valor de:</p>
+      <p className="ml-4 font-bold text-base">R$ {Number(data.permuta_valor).toFixed(2)}</p>
 
       {data.permuta_descricao && (
         <>
-          <h2 className="text-sm font-bold mt-6 mb-2">3. PRODUTOS/SERVIÇOS</h2>
-          <p>Os produtos e/ou serviços a serem fornecidos pelo CONTRATANTE como forma de pagamento são:</p>
+          <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. DESCRIÇÃO DOS PRODUTOS/SERVIÇOS</h2>
+          <p>Os créditos de permuta poderão ser utilizados para aquisição de:</p>
           <div className="ml-4 mt-2 p-3 bg-muted/30 rounded border">
             <p className="whitespace-pre-wrap">{data.permuta_descricao}</p>
           </div>
@@ -501,32 +501,65 @@ function PermutaAnexo({ data }: { data: ContractFormData }) {
 
       {data.permuta_condicoes && (
         <>
-          <h2 className="text-sm font-bold mt-6 mb-2">{data.permuta_descricao ? '4' : '3'}. CONDIÇÕES DE UTILIZAÇÃO</h2>
+          <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. CONDIÇÕES ESPECÍFICAS</h2>
           <div className="ml-4 mt-2 p-3 bg-muted/30 rounded border">
             <p className="whitespace-pre-wrap">{data.permuta_condicoes}</p>
           </div>
         </>
       )}
 
-      <h2 className="text-sm font-bold mt-6 mb-2">{data.permuta_descricao && data.permuta_condicoes ? '5' : data.permuta_descricao || data.permuta_condicoes ? '4' : '3'}. REGRAS GERAIS</h2>
+      <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. REGRAS GERAIS DE UTILIZAÇÃO</h2>
+      <p>O crédito de permuta deverá ser disponibilizado ao CONTRATADO nas mesmas condições comerciais praticadas pelo CONTRATANTE aos seus demais clientes.</p>
+      <p className="mt-2">Não será permitida a cobrança de valores diferenciados ou tratamento distinto que reduza o valor efetivo do crédito.</p>
+      <p className="mt-2">Os preços considerados para utilização da permuta deverão respeitar os valores normalmente praticados pelo CONTRATANTE no momento da utilização, incluindo promoções, descontos ou condições comerciais vigentes.</p>
       <ul className="list-disc ml-8 my-2">
         <li>O crédito de permuta é pessoal e intransferível, salvo acordo expresso entre as partes.</li>
-        <li>A utilização do crédito deverá ser solicitada com antecedência mínima de 48 horas, salvo disposição específica em contrário.</li>
-        <li>O crédito não utilizado não poderá ser convertido em dinheiro.</li>
-        <li>O CONTRATADO manterá controle de saldo e fornecerá extrato sempre que solicitado.</li>
+        <li>A utilização do crédito deverá ser solicitada com antecedência mínima de 48 horas, salvo disposição específica registrada neste contrato.</li>
+        <li>O crédito não poderá ser convertido em dinheiro por iniciativa do CONTRATADO, exceto nas hipóteses de descumprimento da permuta previstas neste anexo.</li>
+        <li>O CONTRATADO poderá utilizar o crédito de forma parcial, em uma ou mais utilizações, até o limite do valor total disponível, não podendo o CONTRATANTE exigir consumo integral em única utilização.</li>
       </ul>
 
-      <h2 className="text-sm font-bold mt-6 mb-2">{data.permuta_descricao && data.permuta_condicoes ? '6' : data.permuta_descricao || data.permuta_condicoes ? '5' : '4'}. PRAZO DE VALIDADE</h2>
-      <p>O crédito de permuta terá validade de <strong>24 (vinte e quatro) meses</strong> a partir da data de confirmação do contrato.</p>
-      <p className="mt-2">Após este prazo, o saldo não utilizado será considerado expirado, sem direito a restituição ou compensação.</p>
-
-      <h2 className="text-sm font-bold mt-6 mb-2">{data.permuta_descricao && data.permuta_condicoes ? '7' : data.permuta_descricao || data.permuta_condicoes ? '6' : '5'}. DESCUMPRIMENTO</h2>
-      <p>O não cumprimento das obrigações de fornecimento de produtos/serviços por parte do CONTRATANTE dentro do prazo acordado poderá resultar em:</p>
+      <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. CONTROLE DE SALDO DA PERMUTA</h2>
+      <p>O saldo da permuta será controlado pelo CONTRATADO, podendo ser registradas utilizações parciais até o limite do crédito disponível.</p>
+      <p className="mt-2">A cada utilização poderão ser registrados:</p>
       <ul className="list-disc ml-8 my-2">
-        <li>Suspensão dos serviços contratados até regularização;</li>
-        <li>Cobrança do valor equivalente em moeda corrente;</li>
-        <li>Rescisão do contrato, sem prejuízo de perdas e danos.</li>
+        <li>valor utilizado</li>
+        <li>descrição da utilização</li>
+        <li>data da utilização</li>
+        <li>saldo restante</li>
       </ul>
+      <p className="mt-2">Esses registros poderão ser compartilhados com o CONTRATANTE para fins de transparência e acompanhamento da utilização da permuta.</p>
+
+      <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. PRAZO DE VALIDADE</h2>
+      <p>O crédito de permuta terá validade de <strong>24 (vinte e quatro) meses</strong> a partir da data de confirmação do contrato.</p>
+      <p className="mt-2">Caso o CONTRATADO não utilize o crédito dentro desse prazo, o saldo remanescente será considerado expirado, não sendo possível posterior cobrança financeira relacionada à permuta.</p>
+
+      <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. SOLICITAÇÃO DE UTILIZAÇÃO</h2>
+      <p>Sempre que desejar utilizar a permuta, o CONTRATADO poderá registrar solicitação de utilização do crédito.</p>
+      <p className="mt-2">A solicitação poderá ser realizada por meio eletrônico, mensagem, sistema ou outro meio de comunicação entre as partes.</p>
+
+      <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. DESCUMPRIMENTO DA PERMUTA</h2>
+      <p>Caso o CONTRATANTE impeça, recuse, dificulte ou deixe de disponibilizar os produtos ou serviços previstos na permuta, o CONTRATADO poderá registrar solicitação de utilização do crédito.</p>
+      <p className="mt-2">Não sendo possível a utilização no prazo de até <strong>10 (dez) dias corridos</strong> após a solicitação formal, a permuta será considerada não cumprida.</p>
+      <p className="mt-2">Nessa hipótese, o valor correspondente ao saldo da permuta será automaticamente convertido em obrigação financeira em moeda corrente.</p>
+
+      <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. ENCARGOS POR INADIMPLEMENTO</h2>
+      <p>Após a conversão da permuta em obrigação financeira, o valor devido ficará sujeito às seguintes condições:</p>
+      <ul className="list-disc ml-8 my-2">
+        <li>multa moratória de 2% sobre o valor devido</li>
+        <li>juros de 1% ao mês, calculados proporcionalmente ao período de atraso</li>
+        <li>correção monetária conforme índice oficial aplicável</li>
+      </ul>
+      <p className="mt-2">Persistindo a inadimplência, o débito poderá ser encaminhado para cobrança administrativa ou judicial.</p>
+      <p className="mt-2">O valor devido também poderá ser registrado em sistemas de proteção ao crédito, conforme legislação vigente.</p>
+
+      <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. ENCERRAMENTO DAS ATIVIDADES OU ALTERAÇÃO DA EMPRESA</h2>
+      <p>Caso o CONTRATANTE encerre suas atividades, altere a titularidade da empresa ou deixe de oferecer os produtos ou serviços originalmente vinculados à permuta, a obrigação assumida neste contrato permanecerá válida.</p>
+      <p className="mt-2">Nessa hipótese, o valor correspondente ao saldo da permuta não utilizada poderá ser convertido em obrigação financeira equivalente ou substituído por outro produto ou serviço de valor equivalente mediante acordo entre as partes.</p>
+
+      <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. EQUILÍBRIO CONTRATUAL</h2>
+      <p>As regras previstas neste anexo têm como objetivo garantir equilíbrio entre as partes, assegurando que tanto o CONTRATANTE quanto o CONTRATADO possam cumprir suas obrigações de forma justa, transparente e proporcional.</p>
+      <p className="mt-2">Nenhuma das partes poderá utilizar as disposições da permuta para impor vantagens indevidas ou prejudicar a outra parte.</p>
     </div>
   );
 }
