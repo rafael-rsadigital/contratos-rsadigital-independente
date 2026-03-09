@@ -275,9 +275,9 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
         {hasEntrada && (
           <li>Entrada: <strong>R$ {Number(data.valor_entrada).toLocaleString('formatBRL(Number(data.valor_entrada)orma_paformatBRL(Number(data.valor_entrada)ta: <strong>R$ {Number(data.permuta_valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strformatBRL(Number(data.permuta_valor)    )}
         <li>
-          Saldo restante: <strong>R$ {Number(saldoRestante).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong>
+          Saldo restante: <strong>R$ {formatBRL(Number(saldoRestante))}</strong>
           {isPB && data.numero_parcelas > 1 ? (
-            <>, parcelado em <strong>{data.numero_parcelas}x de R$ {Number(valorParcelaReal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> via {paymentLabel[data.forma_pagamento]}.</>
+            <>, parcelado em <strong>{data.numero_parcelas}x de R$ {formatBRL(Number(valorParcelaReal))}</strong> via {paymentLabel[data.forma_pagamento]}.</>
           ) : isCard ? (
             <>, pago via cartão de crédito no ato da contratação.</>
           ) : isCash ? (
