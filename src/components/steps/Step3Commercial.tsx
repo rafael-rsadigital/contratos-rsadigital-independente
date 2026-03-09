@@ -7,20 +7,23 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { PaymentMethod, EntradaPaymentMethod } from "@/types/contract";
-import { DollarSign, Info } from "lucide-react";
+import { DollarSign, Info, Repeat } from "lucide-react";
 
 const schema = z.object({
   valor_total: z.coerce.number().min(1, "Valor deve ser maior que zero"),
-  forma_pagamento: z.enum(["pix_boleto", "cartao", "dinheiro"]),
+  forma_pagamento: z.enum(["pix_boleto", "cartao", "dinheiro", "permuta"]),
   numero_parcelas: z.coerce.number().int().min(1).max(48),
   data_primeiro_vencimento: z.string().optional(),
   tem_entrada: z.boolean(),
   valor_entrada: z.coerce.number().min(0).optional(),
   forma_pagamento_entrada: z.enum(["pix", "cartao", "dinheiro"]).optional(),
   numero_paginas: z.coerce.number().int().min(0).optional(),
+  permuta_valor: z.coerce.number().min(0).optional(),
+  permuta_descricao: z.string().optional(),
+  permuta_condicoes: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -34,6 +37,9 @@ interface Props {
     valor_entrada: number;
     forma_pagamento_entrada: EntradaPaymentMethod;
     numero_paginas: number;
+    permuta_valor: number;
+    permuta_descricao: string;
+    permuta_condicoes: string;
   };
   hasWebsite: boolean;
   isInstitucional: boolean;
@@ -46,6 +52,9 @@ interface Props {
     valor_entrada: number;
     forma_pagamento_entrada: EntradaPaymentMethod;
     numero_paginas: number;
+    permuta_valor: number;
+    permuta_descricao: string;
+    permuta_condicoes: string;
   }) => void;
   onBack: () => void;
 }
@@ -62,6 +71,9 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
       valor_entrada: data.valor_entrada || 0,
       forma_pagamento_entrada: data.forma_pagamento_entrada || 'pix',
       numero_paginas: data.numero_paginas || 5,
+      permuta_valor: data.permuta_valor || 0,
+      permuta_descricao: data.permuta_descricao || '',
+      permuta_condicoes: data.permuta_condicoes || '',
     },
   });
 
@@ -70,9 +82,13 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
   const valorTotal = form.watch("valor_total");
   const temEntrada = form.watch("tem_entrada");
   const valorEntrada = form.watch("valor_entrada") || 0;
+  const permutaValor = form.watch("permuta_valor") || 0;
 
+  const isPermuta = formaPagamento === "permuta";
   const showParcelas = formaPagamento === "pix_boleto";
   const showVencimento = formaPagamento === "pix_boleto";
+  
+  // Calculate remaining value after entrada and permuta
   const valorParcelado = showParcelas ? Math.max(0, valorTotal - valorEntrada) : 0;
   const valorParcela = showParcelas && numeroParcelas > 0 ? (valorParcelado / numeroParcelas).toFixed(2) : '0.00';
 
@@ -90,6 +106,9 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
       valor_entrada: values.tem_entrada ? (values.valor_entrada || 0) : 0,
       forma_pagamento_entrada: (values.forma_pagamento_entrada || 'pix') as EntradaPaymentMethod,
       numero_paginas: values.numero_paginas || 0,
+      permuta_valor: isPermuta ? (values.permuta_valor || 0) : 0,
+      permuta_descricao: isPermuta ? (values.permuta_descricao || '') : '',
+      permuta_condicoes: isPermuta ? (values.permuta_condicoes || '') : '',
     });
   };
 
@@ -97,6 +116,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
     pix_boleto: "PIX / Boleto",
     cartao: "Cartão",
     dinheiro: "Dinheiro",
+    permuta: "Permuta",
   };
 
   return (
@@ -133,6 +153,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
                       <SelectItem value="pix_boleto">PIX / Boleto</SelectItem>
                       <SelectItem value="cartao">Cartão</SelectItem>
                       <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                      <SelectItem value="permuta">Permuta</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -164,49 +185,90 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
               )}
             </div>
 
-            {/* Entrada */}
-            <div className="border rounded-lg p-4 space-y-4">
-              <FormField control={form.control} name="tem_entrada" render={({ field }) => (
-                <FormItem className="flex items-center justify-between">
-                  <FormLabel className="font-semibold">Incluir Entrada?</FormLabel>
-                  <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
-                  </FormControl>
-                </FormItem>
-              )} />
-
-              {temEntrada && (
+            {/* Permuta Section */}
+            {isPermuta && (
+              <div className="border rounded-lg p-4 space-y-4 bg-accent/5 border-accent/30">
+                <div className="flex items-center gap-2 text-accent">
+                  <Repeat className="w-5 h-5" />
+                  <h3 className="font-semibold">Detalhes da Permuta</h3>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField control={form.control} name="valor_entrada" render={({ field }) => (
+                  <FormField control={form.control} name="permuta_valor" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Valor da Entrada (R$)</FormLabel>
+                      <FormLabel>Valor em Crédito de Permuta (R$)</FormLabel>
                       <FormControl>
-                        <Input type="number" step="0.01" min="0" placeholder="500.00" {...field} />
+                        <Input type="number" step="0.01" min="0" placeholder="1500.00" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
-                  <FormField control={form.control} name="forma_pagamento_entrada" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Pagamento da Entrada</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecione" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="pix">PIX</SelectItem>
-                          <SelectItem value="cartao">Cartão</SelectItem>
-                          <SelectItem value="dinheiro">Dinheiro</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
                 </div>
-              )}
-            </div>
+                <FormField control={form.control} name="permuta_descricao" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Descrição dos produtos/serviços a receber</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Ex: Serviços de fotografia, produtos alimentícios, etc." rows={2} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="permuta_condicoes" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Condições de utilização (opcional)</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Ex: Validade de 24 meses, agendamento com 48h de antecedência, etc." rows={2} {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
+            )}
+
+            {/* Entrada (não para permuta) */}
+            {!isPermuta && (
+              <div className="border rounded-lg p-4 space-y-4">
+                <FormField control={form.control} name="tem_entrada" render={({ field }) => (
+                  <FormItem className="flex items-center justify-between">
+                    <FormLabel className="font-semibold">Incluir Entrada?</FormLabel>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+
+                {temEntrada && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField control={form.control} name="valor_entrada" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Valor da Entrada (R$)</FormLabel>
+                        <FormControl>
+                          <Input type="number" step="0.01" min="0" placeholder="500.00" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="forma_pagamento_entrada" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Pagamento da Entrada</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecione" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="pix">PIX</SelectItem>
+                            <SelectItem value="cartao">Cartão</SelectItem>
+                            <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Número de páginas for Site Institucional */}
             {hasWebsite && isInstitucional && (
@@ -224,19 +286,34 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
             {/* Summary */}
             {valorTotal > 0 && (
               <div className="p-4 rounded-lg bg-muted/50 border space-y-1">
-                {temEntrada && valorEntrada > 0 && (
-                  <p className="text-sm text-muted-foreground">
-                    Entrada: <strong>R$ {Number(valorEntrada).toFixed(2)}</strong>
-                  </p>
-                )}
-                {showParcelas && numeroParcelas > 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    {numeroParcelas}x de <strong>R$ {valorParcela}</strong> via {paymentLabels[formaPagamento]}
-                  </p>
+                {isPermuta ? (
+                  <>
+                    <p className="text-sm text-muted-foreground">
+                      Valor total: <strong>R$ {Number(valorTotal).toFixed(2)}</strong>
+                    </p>
+                    {permutaValor > 0 && (
+                      <p className="text-sm text-muted-foreground">
+                        Crédito de permuta: <strong>R$ {Number(permutaValor).toFixed(2)}</strong>
+                      </p>
+                    )}
+                  </>
                 ) : (
-                  <p className="text-sm text-muted-foreground">
-                    Pagamento {formaPagamento === 'cartao' ? 'no cartão no ato' : 'à vista em dinheiro'}: <strong>R$ {Number(valorTotal - (temEntrada ? valorEntrada : 0)).toFixed(2)}</strong>
-                  </p>
+                  <>
+                    {temEntrada && valorEntrada > 0 && (
+                      <p className="text-sm text-muted-foreground">
+                        Entrada: <strong>R$ {Number(valorEntrada).toFixed(2)}</strong>
+                      </p>
+                    )}
+                    {showParcelas && numeroParcelas > 0 ? (
+                      <p className="text-sm text-muted-foreground">
+                        {numeroParcelas}x de <strong>R$ {valorParcela}</strong> via {paymentLabels[formaPagamento]}
+                      </p>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        Pagamento {formaPagamento === 'cartao' ? 'no cartão no ato' : 'à vista em dinheiro'}: <strong>R$ {Number(valorTotal - (temEntrada ? valorEntrada : 0)).toFixed(2)}</strong>
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
             )}

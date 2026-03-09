@@ -11,9 +11,12 @@ import { ContractFormData, PaymentMethod, EntradaPaymentMethod, CONTRATADO, Anex
 import { Download, Check } from "lucide-react";
 import { toast } from "sonner";
 import { PaymentScreen } from "@/components/PaymentScreen";
+import { PermutaControl } from "@/components/PermutaControl";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function ContratoView() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [contractData, setContractData] = useState<ContractFormData | null>(null);
   const [confirmed, setConfirmed] = useState(false);
@@ -94,6 +97,9 @@ export default function ContratoView() {
           valor_entrada: Number((data as any).valor_entrada) || 0,
           forma_pagamento_entrada: ((data as any).forma_pagamento_entrada || 'pix') as EntradaPaymentMethod,
           numero_paginas: (data as any).numero_paginas || 0,
+          permuta_valor: Number((data as any).permuta_valor) || 0,
+          permuta_descricao: (data as any).permuta_descricao || '',
+          permuta_condicoes: (data as any).permuta_condicoes || '',
           anexos: (anexos || []).map((a: any): AnexoData => ({ id: a.id, titulo: a.titulo, descricao: a.descricao, data: a.data })),
           aditivos: (aditivos || []).map((a: any): AditivoData => ({ id: a.id, titulo: a.titulo, descricao: a.descricao, data: a.data })),
         });
@@ -283,6 +289,17 @@ export default function ContratoView() {
             numeroContrato={numeroContrato}
           />
         </div>
+
+        {/* Permuta Control - only for authenticated admin users */}
+        {user && contractData.forma_pagamento === 'permuta' && contractData.permuta_valor > 0 && id && (
+          <div className="mt-6 no-print">
+            <PermutaControl
+              contractId={id}
+              permutaValor={contractData.permuta_valor}
+              clienteNome={contractData.client.nome}
+            />
+          </div>
+        )}
 
         {/* Bottom confirm button */}
         {!confirmed && contractStatus !== 'cancelado' && (

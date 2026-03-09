@@ -183,6 +183,9 @@ export type Database = {
           numero_contrato: string | null
           numero_paginas: number | null
           numero_parcelas: number
+          permuta_condicoes: string | null
+          permuta_descricao: string | null
+          permuta_valor: number | null
           prazo_google: string | null
           servico_principal: string | null
           servicos: string[]
@@ -210,6 +213,9 @@ export type Database = {
           numero_contrato?: string | null
           numero_paginas?: number | null
           numero_parcelas?: number
+          permuta_condicoes?: string | null
+          permuta_descricao?: string | null
+          permuta_valor?: number | null
           prazo_google?: string | null
           servico_principal?: string | null
           servicos?: string[]
@@ -237,6 +243,9 @@ export type Database = {
           numero_contrato?: string | null
           numero_paginas?: number | null
           numero_parcelas?: number
+          permuta_condicoes?: string | null
+          permuta_descricao?: string | null
+          permuta_valor?: number | null
           prazo_google?: string | null
           servico_principal?: string | null
           servicos?: string[]
@@ -252,6 +261,41 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      permuta_utilizacoes: {
+        Row: {
+          contract_id: string
+          created_at: string
+          data_utilizacao: string
+          descricao: string
+          id: string
+          valor_utilizado: number
+        }
+        Insert: {
+          contract_id: string
+          created_at?: string
+          data_utilizacao?: string
+          descricao: string
+          id?: string
+          valor_utilizado: number
+        }
+        Update: {
+          contract_id?: string
+          created_at?: string
+          data_utilizacao?: string
+          descricao?: string
+          id?: string
+          valor_utilizado?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permuta_utilizacoes_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
             referencedColumns: ["id"]
           },
         ]

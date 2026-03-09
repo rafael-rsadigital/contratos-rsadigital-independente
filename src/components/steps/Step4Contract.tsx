@@ -107,6 +107,9 @@ export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props)
           numero_paginas: data.numero_paginas || null,
           servico_principal: servicos[0] || null,
           prazo_google: data.prazo_google || '30 dias',
+          permuta_valor: data.permuta_valor || 0,
+          permuta_descricao: data.permuta_descricao || null,
+          permuta_condicoes: data.permuta_condicoes || null,
         } as any)
         .select()
         .single();
