@@ -30,7 +30,7 @@ export function PaymentScreen({
   onBack,
   saving,
 }: PaymentScreenProps) {
-  const [valorEntradaStr, setValorEntradaStr] = useState(valorEntradaMinimo.toFixed(2));
+  const [valorEntradaStr, setValorEntradaStr] = useState(formatBRL(valorEntradaMinimo));
   const [parcelasSelecionadas, setParcelasSelecionadas] = useState(numeroParcelas);
   const [copied, setCopied] = useState(false);
 
