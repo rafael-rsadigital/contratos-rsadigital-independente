@@ -26,6 +26,8 @@ export default function ContratoView() {
   const [codigoVerificacao, setCodigoVerificacao] = useState("");
   const [numeroContrato, setNumeroContrato] = useState("");
   const [contractStatus, setContractStatus] = useState("");
+  const [ipConfirmacao, setIpConfirmacao] = useState("");
+  const [navegadorConfirmacao, setNavegadorConfirmacao] = useState("");
 
   // Confirmation dialog
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
