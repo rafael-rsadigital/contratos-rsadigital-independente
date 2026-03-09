@@ -160,36 +160,70 @@ function ContratanteHeader({ data }: { data: ContractFormData }) {
   );
 }
 
-/* ─── CONFIRMAÇÃO FOOTER ─── */
-function ConfirmacaoFooter({ confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, codigoVerificacao, ipConfirmacao, navegadorConfirmacao }: {
-  confirmed: boolean; confirmDate?: string; nomeConfirmacao?: string; emailConfirmacao?: string; codigoVerificacao?: string; ipConfirmacao?: string; navegadorConfirmacao?: string;
+/* ─── CONFIRMAÇÃO FOOTER (versão cliente) ─── */
+function ConfirmacaoFooter({ confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, codigoVerificacao, ipConfirmacao, navegadorConfirmacao, isAdmin }: {
+  confirmed: boolean; confirmDate?: string; nomeConfirmacao?: string; emailConfirmacao?: string; codigoVerificacao?: string; ipConfirmacao?: string; navegadorConfirmacao?: string; isAdmin?: boolean;
 }) {
+  // Parse navegador for friendly display
+  const parseBrowser = (ua?: string) => {
+    if (!ua) return { browser: '', device: '' };
+    let browser = 'Navegador desconhecido';
+    let device = 'Dispositivo desconhecido';
+    if (ua.includes('Chrome') && ua.includes('Mobile')) browser = 'Chrome Mobile';
+    else if (ua.includes('Chrome')) browser = 'Chrome';
+    else if (ua.includes('Firefox')) browser = 'Firefox';
+    else if (ua.includes('Safari') && !ua.includes('Chrome')) browser = 'Safari';
+    if (ua.includes('Android')) device = 'Android';
+    else if (ua.includes('iPhone')) device = 'iPhone';
+    else if (ua.includes('Windows')) device = 'Windows';
+    else if (ua.includes('Mac')) device = 'macOS';
+    else if (ua.includes('Linux')) device = 'Linux';
+    return { browser, device };
+  };
+
+  const { browser, device } = parseBrowser(navegadorConfirmacao);
+  const horaAceite = confirmDate || '';
+
   return (
     <>
       <h2 className="text-sm font-bold mt-6 mb-2">CONFIRMAÇÃO</h2>
       {confirmed ? (
         <div className="mt-3 space-y-4">
-          <div className="p-4 border rounded-md bg-muted/30 space-y-2">
-            <p className="text-center font-medium">✅ Lido e confirmado em {confirmDate}</p>
-            {nomeConfirmacao && <p className="text-sm">Responsável: <strong>{nomeConfirmacao}</strong></p>}
-            {emailConfirmacao && <p className="text-sm">Email: <strong>{emailConfirmacao}</strong></p>}
-          </div>
-
-          {/* Comprovante de Aceite Digital */}
-          <div className="border-2 border-primary/20 rounded-lg p-5 space-y-3">
-            <h3 className="text-center text-sm font-bold tracking-wide">COMPROVANTE DE ACEITE DIGITAL</h3>
-            <div className="text-sm space-y-1">
+          {/* Comprovante de Aceite Digital — versão cliente */}
+          <div className="border-2 border-primary/20 rounded-lg p-6 space-y-4">
+            <h3 className="text-center text-sm font-bold tracking-widest uppercase">Comprovante de Aceite Digital</h3>
+            <div className="border-b pb-3 space-y-1 text-sm">
               {nomeConfirmacao && <p>Contratante: <strong>{nomeConfirmacao}</strong></p>}
               {emailConfirmacao && <p>Email: <strong>{emailConfirmacao}</strong></p>}
-              {confirmDate && <p>Data do aceite: <strong>{confirmDate}</strong></p>}
-              {ipConfirmacao && <p>IP: <strong>{ipConfirmacao}</strong></p>}
-              {navegadorConfirmacao && <p>Dispositivo: <strong>{navegadorConfirmacao.substring(0, 80)}{navegadorConfirmacao.length > 80 ? '...' : ''}</strong></p>}
-              {codigoVerificacao && <p>Código de verificação: <strong>{codigoVerificacao}</strong></p>}
             </div>
-            <p className="text-xs text-muted-foreground mt-3 italic">
-              O contratante declara que leu e aceitou integralmente os termos do contrato. Este registro eletrônico constitui prova de aceite formal e válido.
-            </p>
+            <div className="space-y-1 text-sm">
+              {horaAceite && <p>Data do aceite: <strong>{horaAceite}</strong></p>}
+            </div>
+            <div className="bg-muted/30 rounded-md p-3 text-sm italic text-muted-foreground">
+              <p className="font-medium text-foreground not-italic mb-1">Declaração:</p>
+              <p>O contratante declara que leu e aceitou integralmente os termos do contrato.</p>
+              <p className="mt-2">Este registro eletrônico constitui prova de aceite formal e válido do contrato firmado entre as partes.</p>
+            </div>
+            {codigoVerificacao && (
+              <p className="text-sm">Código de verificação do aceite: <strong className="font-mono">{codigoVerificacao}</strong></p>
+            )}
           </div>
+
+          {/* Log técnico interno — apenas admin */}
+          {isAdmin && (
+            <div className="border rounded-lg p-5 space-y-3 bg-muted/10">
+              <h3 className="text-xs font-bold tracking-wide text-muted-foreground uppercase">🔐 Log Técnico (interno)</h3>
+              <div className="text-xs space-y-1 font-mono">
+                {nomeConfirmacao && <p>Cliente: {nomeConfirmacao}</p>}
+                {horaAceite && <p>Data/Hora: {horaAceite}</p>}
+                {ipConfirmacao && <p>IP: {ipConfirmacao}</p>}
+                {navegadorConfirmacao && <p>User Agent: {navegadorConfirmacao}</p>}
+                {browser && <p>Navegador: {browser}</p>}
+                {device && <p>Dispositivo: {device}</p>}
+                {codigoVerificacao && <p>Código: {codigoVerificacao}</p>}
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <p className="text-muted-foreground italic">Aguardando confirmação do contratante.</p>
