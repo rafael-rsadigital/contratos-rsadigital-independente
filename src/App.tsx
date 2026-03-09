@@ -7,6 +7,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import NovoContrato from "./pages/NovoContrato";
 import Historico from "./pages/Historico";
+import CRM from "./pages/CRM";
 import ContratoView from "./pages/ContratoView";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
           <Route path="/novo-contrato" element={<ProtectedRoute><NovoContrato /></ProtectedRoute>} />
           <Route path="/historico" element={<ProtectedRoute><Historico /></ProtectedRoute>} />
+          <Route path="/crm" element={<ProtectedRoute><CRM /></ProtectedRoute>} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>
