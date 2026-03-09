@@ -10,6 +10,7 @@ import Historico from "./pages/Historico";
 import CRM from "./pages/CRM";
 import ContratoView from "./pages/ContratoView";
 import VerificarContrato from "./pages/VerificarContrato";
+import AditivoView from "./pages/AditivoView";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
