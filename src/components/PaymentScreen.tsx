@@ -67,7 +67,7 @@ export function PaymentScreen({
   const opçõesParcelas = Array.from({ length: numeroParcelas }, (_, i) => i + 1);
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-full overflow-x-hidden px-1 sm:px-0 space-y-6">
       {/* Logo */}
       <div className="flex justify-center">
         <img src={logoRsa} alt="RSA Digital" className="h-14 object-contain" />
