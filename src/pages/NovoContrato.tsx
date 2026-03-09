@@ -35,6 +35,7 @@ export default function NovoContrato() {
     valor_entrada: 0,
     forma_pagamento_entrada: "pix",
     numero_paginas: 5,
+    tem_permuta: false,
     permuta_valor: 0,
     permuta_descricao: "",
     permuta_condicoes: "",
