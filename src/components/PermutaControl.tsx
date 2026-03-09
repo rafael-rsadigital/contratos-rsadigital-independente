@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Repeat, Plus, MessageCircle, History } from "lucide-react";
 import { CONTRATADO } from "@/types/contract";
+import { formatBRL } from "@/lib/utils";
 
 interface Utilizacao {
   id: string;
