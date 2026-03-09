@@ -40,7 +40,12 @@ export default function ContratoView() {
   const [confirmNome, setConfirmNome] = useState("");
   const [confirmEmail, setConfirmEmail] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [acceptData, setAcceptData] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [nomeEditado, setNomeEditado] = useState(false);
+  const [emailEditado, setEmailEditado] = useState(false);
+  const [nomeOriginal, setNomeOriginal] = useState("");
+  const [emailOriginal, setEmailOriginal] = useState("");
 
   // Aditivo dialog
   const [showAditivoDialog, setShowAditivoDialog] = useState(false);
@@ -145,8 +150,32 @@ export default function ContratoView() {
   }, [id]);
 
   const handleStartConfirmation = () => {
+    const nome = contractData?.client.nome || "";
+    const email = contractData?.client.email || "";
+    setConfirmNome(nome);
+    setConfirmEmail(email);
+    setNomeOriginal(nome);
+    setEmailOriginal(email);
+    setNomeEditado(false);
+    setEmailEditado(false);
+    setAcceptData(false);
+    setAcceptTerms(false);
     setConfirmStep(1);
     setShowConfirmDialog(true);
+  };
+
+  const handleNomeChange = (value: string) => {
+    setConfirmNome(value);
+    if (value !== nomeOriginal) {
+      setNomeEditado(true);
+    }
+  };
+
+  const handleEmailChange = (value: string) => {
+    setConfirmEmail(value);
+    if (value !== emailOriginal) {
+      setEmailEditado(true);
+    }
   };
 
   const handleConfirmContract = async (valorEntradaFinal?: number, parcelasFinal?: number) => {
@@ -193,6 +222,7 @@ export default function ContratoView() {
       const entradaFinal = valorEntradaFinal ?? entradaOriginal;
       const parcFinal = parcelasFinal ?? parcelasOriginal;
 
+      // Create anexo for payment changes
       if (entradaFinal !== entradaOriginal || parcFinal !== parcelasOriginal) {
         const hoje = new Date().toLocaleDateString('pt-BR');
         let descricao = `Alteração na forma de pagamento solicitada pelo cliente ${confirmNome} em ${hoje}.\n\n`;
@@ -210,6 +240,28 @@ export default function ContratoView() {
         await (supabase.from('contract_anexos') as any).insert({
           contract_id: id,
           titulo: 'Alteração na Forma de Pagamento',
+          descricao,
+          data: hoje,
+        });
+      }
+
+      // Create anexo for client data changes
+      if (nomeEditado || emailEditado) {
+        const hoje = new Date().toLocaleDateString('pt-BR');
+        let descricao = `Alteração de dados cadastrais realizada pelo cliente durante a confirmação do contrato em ${hoje}.\n\n`;
+        
+        if (nomeEditado) {
+          descricao += `Nome original (preenchido pelo contratante): ${nomeOriginal}\n`;
+          descricao += `Nome final (confirmado pelo cliente): ${confirmNome}\n\n`;
+        }
+        if (emailEditado) {
+          descricao += `Email original (preenchido pelo contratante): ${emailOriginal}\n`;
+          descricao += `Email final (confirmado pelo cliente): ${confirmEmail}\n`;
+        }
+
+        await (supabase.from('contract_anexos') as any).insert({
+          contract_id: id,
+          titulo: 'Alteração de Dados pelo Cliente',
           descricao,
           data: hoje,
         });
@@ -437,14 +489,57 @@ export default function ContratoView() {
 
           {confirmStep === 1 && (
             <div className="space-y-4 py-2">
+              <p className="text-sm text-muted-foreground">
+                Confira seus dados antes de assinar. Se necessário, clique no campo para corrigir.
+              </p>
               <div>
-                <Label htmlFor="confirm-nome">Nome completo</Label>
-                <Input id="confirm-nome" value={confirmNome} onChange={e => setConfirmNome(e.target.value)} placeholder="Seu nome completo" />
+                <Label htmlFor="confirm-nome" className="flex items-center gap-2">
+                  Nome completo
+                  <span className="text-xs text-muted-foreground">✏️ editável</span>
+                </Label>
+                <Input 
+                  id="confirm-nome" 
+                  value={confirmNome} 
+                  onChange={e => handleNomeChange(e.target.value)} 
+                  className={nomeEditado ? "border-yellow-500 focus-visible:ring-yellow-500" : ""}
+                />
+                {nomeEditado && (
+                  <p className="text-xs text-yellow-600 mt-1">
+                    ⚠️ Nome alterado (original: {nomeOriginal})
+                  </p>
+                )}
               </div>
               <div>
-                <Label htmlFor="confirm-email">Email</Label>
-                <Input id="confirm-email" type="email" value={confirmEmail} onChange={e => setConfirmEmail(e.target.value)} placeholder="email@exemplo.com" />
+                <Label htmlFor="confirm-email" className="flex items-center gap-2">
+                  Email
+                  <span className="text-xs text-muted-foreground">✏️ editável</span>
+                </Label>
+                <Input 
+                  id="confirm-email" 
+                  type="email" 
+                  value={confirmEmail} 
+                  onChange={e => handleEmailChange(e.target.value)}
+                  className={emailEditado ? "border-yellow-500 focus-visible:ring-yellow-500" : ""}
+                />
+                {emailEditado && (
+                  <p className="text-xs text-yellow-600 mt-1">
+                    ⚠️ Alterar o email mudará o endereço onde o contrato será enviado.
+                  </p>
+                )}
               </div>
+              <div className="flex items-start gap-3 pt-2 border-t">
+                <Checkbox
+                  id="accept-data"
+                  checked={acceptData}
+                  onCheckedChange={(v) => setAcceptData(!!v)}
+                />
+                <Label htmlFor="accept-data" className="text-sm cursor-pointer leading-relaxed">
+                  Confirmo que meus dados estão corretos
+                </Label>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Se precisar corrigir dados após a assinatura, entre em contato com o contratado.
+              </p>
             </div>
           )}
 
@@ -484,12 +579,12 @@ export default function ContratoView() {
 
           {confirmStep !== 3 && (
             <DialogFooter>
-              {confirmStep === 1 ? (
+            {confirmStep === 1 ? (
                 <>
                   <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>Cancelar</Button>
                   <Button
                     onClick={() => setConfirmStep(2)}
-                    disabled={!confirmNome.trim() || !confirmEmail.trim()}
+                    disabled={!confirmNome.trim() || !confirmEmail.trim() || !/^\S+@\S+\.\S+$/.test(confirmEmail) || !acceptData}
                   >
                     Próximo
                   </Button>
