@@ -304,7 +304,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
             {valorBase > 0 && (
               <div className="p-4 rounded-lg bg-muted/50 border space-y-1">
                 <p className="text-sm text-muted-foreground">
-                  Valor total: <strong>R$ {Number(valorBase).toFixed(2)}</strong>
+                  Valor total: <strong>R$ {formatBRL(Number(valorBase))}</strong>
                 </p>
                 {temEntrada && valorEntrada > 0 && (
                   <p className="text-sm text-muted-foreground">
