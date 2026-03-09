@@ -475,6 +475,32 @@ export default function ContratoView() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Aditivo Dialog */}
+      <Dialog open={showAditivoDialog} onOpenChange={setShowAditivoDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Adicionar Aditivo Contratual</DialogTitle>
+            <DialogDescription>Insira os dados do termo aditivo.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <Label htmlFor="aditivo-titulo">Título</Label>
+              <Input id="aditivo-titulo" value={aditivoTitulo} onChange={e => setAditivoTitulo(e.target.value)} placeholder="Ex: Renovação de prazo" />
+            </div>
+            <div>
+              <Label htmlFor="aditivo-desc">Descrição</Label>
+              <Textarea id="aditivo-desc" value={aditivoDescricao} onChange={e => setAditivoDescricao(e.target.value)} placeholder="Descreva os termos do aditivo..." rows={5} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAditivoDialog(false)}>Cancelar</Button>
+            <Button onClick={handleAddAditivo} disabled={savingAditivo || !aditivoTitulo.trim() || !aditivoDescricao.trim()}>
+              {savingAditivo ? "Salvando..." : "Adicionar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
