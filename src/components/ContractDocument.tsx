@@ -453,7 +453,7 @@ function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailC
         );
       })()}
 
-      <ConfirmacaoFooter confirmed={confirmed} confirmDate={confirmDate} nomeConfirmacao={nomeConfirmacao} emailConfirmacao={emailConfirmacao} codigoVerificacao={undefined} ipConfirmacao={ipConfirmacao} navegadorConfirmacao={navegadorConfirmacao} isAdmin={isAdmin} />
+      <ConfirmacaoFooter confirmed={confirmed} confirmDate={confirmDate} nomeConfirmacao={nomeConfirmacao} emailConfirmacao={emailConfirmacao} codigoVerificacao={undefined} ipConfirmacao={ipConfirmacao} navegadorConfirmacao={navegadorConfirmacao} timezoneConfirmacao={timezoneConfirmacao} idiomaConfirmacao={idiomaConfirmacao} resolucaoConfirmacao={resolucaoConfirmacao} isAdmin={isAdmin} />
     </div>
   );
 }
