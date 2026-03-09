@@ -222,6 +222,7 @@ export default function ContratoView() {
       const entradaFinal = valorEntradaFinal ?? entradaOriginal;
       const parcFinal = parcelasFinal ?? parcelasOriginal;
 
+      // Create anexo for payment changes
       if (entradaFinal !== entradaOriginal || parcFinal !== parcelasOriginal) {
         const hoje = new Date().toLocaleDateString('pt-BR');
         let descricao = `Alteração na forma de pagamento solicitada pelo cliente ${confirmNome} em ${hoje}.\n\n`;
@@ -239,6 +240,28 @@ export default function ContratoView() {
         await (supabase.from('contract_anexos') as any).insert({
           contract_id: id,
           titulo: 'Alteração na Forma de Pagamento',
+          descricao,
+          data: hoje,
+        });
+      }
+
+      // Create anexo for client data changes
+      if (nomeEditado || emailEditado) {
+        const hoje = new Date().toLocaleDateString('pt-BR');
+        let descricao = `Alteração de dados cadastrais realizada pelo cliente durante a confirmação do contrato em ${hoje}.\n\n`;
+        
+        if (nomeEditado) {
+          descricao += `Nome original (preenchido pelo contratante): ${nomeOriginal}\n`;
+          descricao += `Nome final (confirmado pelo cliente): ${confirmNome}\n\n`;
+        }
+        if (emailEditado) {
+          descricao += `Email original (preenchido pelo contratante): ${emailOriginal}\n`;
+          descricao += `Email final (confirmado pelo cliente): ${confirmEmail}\n`;
+        }
+
+        await (supabase.from('contract_anexos') as any).insert({
+          contract_id: id,
+          titulo: 'Alteração de Dados pelo Cliente',
           descricao,
           data: hoje,
         });
