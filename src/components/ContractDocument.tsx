@@ -555,7 +555,10 @@ function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailCo
       <h2 className="text-sm font-bold mt-6 mb-2">13. RESOLUÇÃO DE CONFLITOS</h2>
       <p>Fica eleito o foro da comarca de Jacareí – SP.</p>
 
-      <h2 className="text-sm font-bold mt-6 mb-2">14. ACEITE DIGITAL</h2>
+      <h2 className="text-sm font-bold mt-6 mb-2">14. ALTERAÇÕES CONTRATUAIS</h2>
+      <p>Alterações no presente contrato somente terão validade quando formalizadas por meio de termo aditivo, devidamente registrado e aceito eletronicamente pelas partes.</p>
+
+      <h2 className="text-sm font-bold mt-6 mb-2">15. ACEITE DIGITAL</h2>
       <p>Ao clicar em "Confirmar contratação", o CONTRATANTE declara que leu, compreendeu e concorda com todas as condições.</p>
       <p className="mt-2">O registro eletrônico constitui aceite formal, dispensando assinatura física.</p>
 
