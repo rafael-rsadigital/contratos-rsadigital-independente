@@ -292,6 +292,8 @@ export default function ContratoView() {
             emailConfirmacao={emailConfirmacao}
             codigoVerificacao={codigoVerificacao}
             numeroContrato={numeroContrato}
+            ipConfirmacao={ipConfirmacao}
+            navegadorConfirmacao={navegadorConfirmacao}
           />
         </div>
 
