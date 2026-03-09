@@ -280,6 +280,7 @@ export default function ContratoView() {
     }
   };
 
+  const handleDownloadPDF = async () => {
     const element = document.getElementById('contract-document');
     if (!element) return;
     const html2pdf = (await import('html2pdf.js')).default;
