@@ -108,7 +108,7 @@ export function PermutaControl({ contractId, permutaValor, clienteNome }: Props)
         <div className="grid grid-cols-3 gap-3 text-center">
           <div className="p-3 rounded-lg bg-background border">
             <p className="text-xs text-muted-foreground">Crédito Inicial</p>
-            <p className="text-lg font-bold">R$ {permutaValor.toFixed(2)}</p>
+            <p className="text-lg font-bold">R$ {formatBRL(permutaValor)}</p>
           </div>
           <div className="p-3 rounded-lg bg-background border">
             <p className="text-xs text-muted-foreground">Utilizado</p>
