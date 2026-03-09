@@ -254,7 +254,32 @@ export default function ContratoView() {
     toast.success("Pagamento confirmado!");
   };
 
-  const handleDownloadPDF = async () => {
+  const handleAddAditivo = async () => {
+    if (!id || !aditivoTitulo.trim() || !aditivoDescricao.trim()) return;
+    setSavingAditivo(true);
+    try {
+      const hoje = new Date().toLocaleDateString('pt-BR');
+      await supabase.from('contract_aditivos').insert({
+        contract_id: id,
+        titulo: aditivoTitulo.trim(),
+        descricao: aditivoDescricao.trim(),
+        data: hoje,
+      });
+      setContractData(prev => prev ? {
+        ...prev,
+        aditivos: [...prev.aditivos, { id: crypto.randomUUID(), titulo: aditivoTitulo.trim(), descricao: aditivoDescricao.trim(), data: hoje }],
+      } : prev);
+      setAditivoTitulo("");
+      setAditivoDescricao("");
+      setShowAditivoDialog(false);
+      toast.success("Aditivo adicionado!");
+    } catch {
+      toast.error("Erro ao adicionar aditivo.");
+    } finally {
+      setSavingAditivo(false);
+    }
+  };
+
     const element = document.getElementById('contract-document');
     if (!element) return;
     const html2pdf = (await import('html2pdf.js')).default;
