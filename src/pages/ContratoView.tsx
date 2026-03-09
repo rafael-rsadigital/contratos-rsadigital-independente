@@ -26,6 +26,8 @@ export default function ContratoView() {
   const [codigoVerificacao, setCodigoVerificacao] = useState("");
   const [numeroContrato, setNumeroContrato] = useState("");
   const [contractStatus, setContractStatus] = useState("");
+  const [ipConfirmacao, setIpConfirmacao] = useState("");
+  const [navegadorConfirmacao, setNavegadorConfirmacao] = useState("");
 
   // Confirmation dialog
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -110,6 +112,8 @@ export default function ContratoView() {
         setCodigoVerificacao((data as any).codigo_verificacao || '');
         setNumeroContrato((data as any).numero_contrato || '');
         setNomeConfirmacao((data as any).nome_confirmacao || '');
+        setIpConfirmacao((data as any).ip_confirmacao || '');
+        setNavegadorConfirmacao((data as any).navegador_confirmacao || '');
         setEmailConfirmacao(data.email_confirmacao || '');
         if (data.data_confirmacao) {
           setConfirmDate(new Date(data.data_confirmacao).toLocaleDateString('pt-BR', {
@@ -288,6 +292,8 @@ export default function ContratoView() {
             emailConfirmacao={emailConfirmacao}
             codigoVerificacao={codigoVerificacao}
             numeroContrato={numeroContrato}
+            ipConfirmacao={ipConfirmacao}
+            navegadorConfirmacao={navegadorConfirmacao}
           />
         </div>
 

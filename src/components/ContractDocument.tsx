@@ -11,13 +11,14 @@ interface Props {
   emailConfirmacao?: string;
   codigoVerificacao?: string;
   numeroContrato?: string;
+  ipConfirmacao?: string;
+  navegadorConfirmacao?: string;
 }
 
 const paymentLabel: Record<string, string> = {
   pix_boleto: "PIX / Boleto",
-  cartao: "Cartão",
+  cartao: "Cartão de Crédito",
   dinheiro: "Dinheiro",
-  permuta: "Permuta",
 };
 
 const entradaPaymentLabel: Record<string, string> = {
@@ -42,7 +43,7 @@ function isOptimized(servico: string): boolean {
   return servico.includes('Otimizado') && !servico.includes('não otimizado');
 }
 
-export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, codigoVerificacao, numeroContrato }: Props) {
+export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, codigoVerificacao, numeroContrato, ipConfirmacao, navegadorConfirmacao }: Props) {
   const hasWebsite = !!data.servico_website;
   const hasGoogle = !!data.servico_google;
   const hasBoth = hasWebsite && hasGoogle;
@@ -75,6 +76,8 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
           confirmDate={confirmDate}
           nomeConfirmacao={nomeConfirmacao}
           emailConfirmacao={emailConfirmacao}
+          ipConfirmacao={ipConfirmacao}
+          navegadorConfirmacao={navegadorConfirmacao}
           valorParcela={valorParcela}
           vencimentos={vencimentos}
           isComplementar={false}
@@ -90,6 +93,8 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
             confirmDate={confirmDate}
             nomeConfirmacao={nomeConfirmacao}
             emailConfirmacao={emailConfirmacao}
+            ipConfirmacao={ipConfirmacao}
+            navegadorConfirmacao={navegadorConfirmacao}
             valorParcela={valorParcela}
             vencimentos={vencimentos}
             isComplementar={hasBoth}
@@ -156,17 +161,35 @@ function ContratanteHeader({ data }: { data: ContractFormData }) {
 }
 
 /* ─── CONFIRMAÇÃO FOOTER ─── */
-function ConfirmacaoFooter({ confirmed, confirmDate, nomeConfirmacao, emailConfirmacao }: {
-  confirmed: boolean; confirmDate?: string; nomeConfirmacao?: string; emailConfirmacao?: string;
+function ConfirmacaoFooter({ confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, codigoVerificacao, ipConfirmacao, navegadorConfirmacao }: {
+  confirmed: boolean; confirmDate?: string; nomeConfirmacao?: string; emailConfirmacao?: string; codigoVerificacao?: string; ipConfirmacao?: string; navegadorConfirmacao?: string;
 }) {
   return (
     <>
       <h2 className="text-sm font-bold mt-6 mb-2">CONFIRMAÇÃO</h2>
       {confirmed ? (
-        <div className="mt-3 p-4 border rounded-md bg-muted/30 space-y-2">
-          <p className="text-center font-medium">✅ Lido e confirmado em {confirmDate}</p>
-          {nomeConfirmacao && <p className="text-sm">Responsável: <strong>{nomeConfirmacao}</strong></p>}
-          {emailConfirmacao && <p className="text-sm">Email: <strong>{emailConfirmacao}</strong></p>}
+        <div className="mt-3 space-y-4">
+          <div className="p-4 border rounded-md bg-muted/30 space-y-2">
+            <p className="text-center font-medium">✅ Lido e confirmado em {confirmDate}</p>
+            {nomeConfirmacao && <p className="text-sm">Responsável: <strong>{nomeConfirmacao}</strong></p>}
+            {emailConfirmacao && <p className="text-sm">Email: <strong>{emailConfirmacao}</strong></p>}
+          </div>
+
+          {/* Comprovante de Aceite Digital */}
+          <div className="border-2 border-primary/20 rounded-lg p-5 space-y-3">
+            <h3 className="text-center text-sm font-bold tracking-wide">COMPROVANTE DE ACEITE DIGITAL</h3>
+            <div className="text-sm space-y-1">
+              {nomeConfirmacao && <p>Contratante: <strong>{nomeConfirmacao}</strong></p>}
+              {emailConfirmacao && <p>Email: <strong>{emailConfirmacao}</strong></p>}
+              {confirmDate && <p>Data do aceite: <strong>{confirmDate}</strong></p>}
+              {ipConfirmacao && <p>IP: <strong>{ipConfirmacao}</strong></p>}
+              {navegadorConfirmacao && <p>Dispositivo: <strong>{navegadorConfirmacao.substring(0, 80)}{navegadorConfirmacao.length > 80 ? '...' : ''}</strong></p>}
+              {codigoVerificacao && <p>Código de verificação: <strong>{codigoVerificacao}</strong></p>}
+            </div>
+            <p className="text-xs text-muted-foreground mt-3 italic">
+              O contratante declara que leu e aceitou integralmente os termos do contrato. Este registro eletrônico constitui prova de aceite formal e válido.
+            </p>
+          </div>
         </div>
       ) : (
         <p className="text-muted-foreground italic">Aguardando confirmação do contratante.</p>
@@ -187,43 +210,50 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
   const isCash = data.forma_pagamento === 'dinheiro';
   const isCard = data.forma_pagamento === 'cartao';
   const hasPermuta = data.permuta_valor > 0;
+  const hasEntrada = data.valor_entrada > 0;
+
+  const saldoRestante = data.valor_total - (hasEntrada ? data.valor_entrada : 0) - (hasPermuta ? data.permuta_valor : 0);
+  const valorParcelaReal = data.numero_parcelas > 1
+    ? (saldoRestante / data.numero_parcelas).toFixed(2)
+    : saldoRestante.toFixed(2);
 
   return (
     <>
       <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum}. VALOR E CONDIÇÕES DE PAGAMENTO</h2>
       <p>Pela execução dos serviços descritos neste contrato, o CONTRATANTE pagará ao CONTRATADO o valor total de:</p>
-      <p className="ml-4 font-bold text-base">R$ {Number(data.valor_total).toFixed(2)}</p>
+      <p className="ml-4 font-bold text-base">R$ {Number(data.valor_total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
 
-      {data.valor_entrada > 0 && (
-        <p className="mt-2">Entrada: <strong>R$ {Number(data.valor_entrada).toFixed(2)}</strong> via {entradaPaymentLabel[data.forma_pagamento_entrada]}.</p>
-      )}
-
-      {hasPermuta && (
-        <p className="mt-2">Permuta: <strong>R$ {Number(data.permuta_valor).toFixed(2)}</strong> em produtos/serviços, conforme Anexo de Permuta.</p>
-      )}
-
-      <p className="mt-2">Forma de pagamento: <strong>{paymentLabel[data.forma_pagamento]}</strong></p>
-
-      {isPB && data.numero_parcelas > 1 ? (
-        <>
-          <p className="mt-2">Parcelamento: <strong>{data.numero_parcelas} parcelas de R$ {valorParcela}</strong></p>
-          {vencimentos.length > 0 && (
-            <>
-              <p className="mt-2">Vencimentos:</p>
-              <ul className="list-disc ml-8 my-2">
-                {vencimentos.map((v, i) => (
-                  <li key={i}>{i + 1}ª parcela — {v}</li>
-                ))}
-              </ul>
-            </>
+      <p className="mt-4 font-semibold">Forma de pagamento:</p>
+      <ul className="list-disc ml-8 my-2 space-y-1">
+        {hasEntrada && (
+          <li>Entrada: <strong>R$ {Number(data.valor_entrada).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> via {entradaPaymentLabel[data.forma_pagamento_entrada]}.</li>
+        )}
+        {hasPermuta && (
+          <li>Permuta: <strong>R$ {Number(data.permuta_valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> em produtos/serviços, conforme Anexo de Permuta deste contrato.</li>
+        )}
+        <li>
+          Saldo restante: <strong>R$ {Number(saldoRestante).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong>
+          {isPB && data.numero_parcelas > 1 ? (
+            <>, parcelado em <strong>{data.numero_parcelas}x de R$ {Number(valorParcelaReal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> via {paymentLabel[data.forma_pagamento]}.</>
+          ) : isCard ? (
+            <>, pago via cartão de crédito no ato da contratação.</>
+          ) : isCash ? (
+            <>, pago em dinheiro no ato da contratação.</>
+          ) : (
+            <>, pago à vista via {paymentLabel[data.forma_pagamento]} no ato da contratação.</>
           )}
+        </li>
+      </ul>
+
+      {isPB && data.numero_parcelas > 1 && vencimentos.length > 0 && (
+        <>
+          <p className="mt-2">Vencimentos das parcelas:</p>
+          <ul className="list-disc ml-8 my-2">
+            {vencimentos.map((v, i) => (
+              <li key={i}>{i + 1}ª parcela — {v} — R$ {Number(valorParcelaReal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</li>
+            ))}
+          </ul>
         </>
-      ) : isCard ? (
-        <p className="mt-2">Pagamento realizado no ato da contratação via cartão.</p>
-      ) : isCash ? (
-        <p className="mt-2">Pagamento à vista em dinheiro no ato da contratação.</p>
-      ) : (
-        <p className="mt-2">Pagamento à vista no ato da contratação.</p>
       )}
 
       <p className="mt-2">O parcelamento refere-se exclusivamente à forma de pagamento do serviço contratado, não caracterizando mensalidade, assinatura ou prestação de serviço recorrente.</p>
@@ -234,7 +264,7 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
 }
 
 /* ═══ CONTRATO WEBSITE ═══ */
-function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, valorParcela, vencimentos, isComplementar }: Props & {
+function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, ipConfirmacao, navegadorConfirmacao, valorParcela, vencimentos, isComplementar }: Props & {
   valorParcela: string; vencimentos: string[]; isComplementar: boolean;
 }) {
   const optimized = isOptimized(data.servico_website);
@@ -373,13 +403,13 @@ function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailC
         );
       })()}
 
-      <ConfirmacaoFooter confirmed={confirmed} confirmDate={confirmDate} nomeConfirmacao={nomeConfirmacao} emailConfirmacao={emailConfirmacao} />
+      <ConfirmacaoFooter confirmed={confirmed} confirmDate={confirmDate} nomeConfirmacao={nomeConfirmacao} emailConfirmacao={emailConfirmacao} codigoVerificacao={undefined} ipConfirmacao={ipConfirmacao} navegadorConfirmacao={navegadorConfirmacao} />
     </div>
   );
 }
 
 /* ═══ CONTRATO GOOGLE ═══ */
-function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, valorParcela, vencimentos, isComplementar }: Props & {
+function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, ipConfirmacao, navegadorConfirmacao, valorParcela, vencimentos, isComplementar }: Props & {
   valorParcela: string; vencimentos: string[]; isComplementar: boolean;
 }) {
   return (
@@ -469,7 +499,7 @@ function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailCo
       <p>Ao clicar em "Confirmar contratação", o CONTRATANTE declara que leu, compreendeu e concorda com todas as condições.</p>
       <p className="mt-2">O registro eletrônico constitui aceite formal, dispensando assinatura física.</p>
 
-      <ConfirmacaoFooter confirmed={confirmed} confirmDate={confirmDate} nomeConfirmacao={nomeConfirmacao} emailConfirmacao={emailConfirmacao} />
+      <ConfirmacaoFooter confirmed={confirmed} confirmDate={confirmDate} nomeConfirmacao={nomeConfirmacao} emailConfirmacao={emailConfirmacao} codigoVerificacao={undefined} ipConfirmacao={ipConfirmacao} navegadorConfirmacao={navegadorConfirmacao} />
     </div>
   );
 }
@@ -482,12 +512,12 @@ function PermutaAnexo({ data }: { data: ContractFormData }) {
     <div className="contract-document max-w-3xl mx-auto text-[15px] leading-relaxed">
       <h1 className="text-center text-lg mb-4 tracking-widest font-bold">ANEXO DE PERMUTA</h1>
       <p className="text-center text-sm text-muted-foreground mb-6">
-        Este anexo é parte integrante do contrato de prestação de serviços acima.
+        Este anexo complementa o contrato principal, possuindo o mesmo valor jurídico e devendo ser interpretado em conjunto com as demais cláusulas contratuais.
       </p>
 
       <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. VALOR DA PERMUTA</h2>
       <p>O CONTRATANTE concorda em disponibilizar ao CONTRATADO créditos em produtos e/ou serviços no valor de:</p>
-      <p className="ml-4 font-bold text-base">R$ {Number(data.permuta_valor).toFixed(2)}</p>
+      <p className="ml-4 font-bold text-base">R$ {Number(data.permuta_valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
 
       {data.permuta_descricao && (
         <>
@@ -535,13 +565,13 @@ function PermutaAnexo({ data }: { data: ContractFormData }) {
       <p className="mt-2">Caso o CONTRATADO não utilize o crédito dentro desse prazo, o saldo remanescente será considerado expirado, não sendo possível posterior cobrança financeira relacionada à permuta.</p>
 
       <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. SOLICITAÇÃO DE UTILIZAÇÃO</h2>
-      <p>Sempre que desejar utilizar a permuta, o CONTRATADO poderá registrar solicitação de utilização do crédito.</p>
-      <p className="mt-2">A solicitação poderá ser realizada por meio eletrônico, mensagem, sistema ou outro meio de comunicação entre as partes.</p>
+      <p>O CONTRATADO poderá solicitar a utilização da permuta por qualquer meio de comunicação entre as partes, incluindo sistema eletrônico, mensagem escrita ou outro meio que permita comprovação da solicitação.</p>
 
       <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. DESCUMPRIMENTO DA PERMUTA</h2>
-      <p>Caso o CONTRATANTE impeça, recuse, dificulte ou deixe de disponibilizar os produtos ou serviços previstos na permuta, o CONTRATADO poderá registrar solicitação de utilização do crédito.</p>
+      <p>Caso o CONTRATANTE impeça, recuse, dificulte ou deixe de disponibilizar os produtos ou serviços previstos na permuta, o CONTRATADO poderá registrar solicitação formal de utilização do crédito.</p>
       <p className="mt-2">Não sendo possível a utilização no prazo de até <strong>10 (dez) dias corridos</strong> após a solicitação formal, a permuta será considerada não cumprida.</p>
       <p className="mt-2">Nessa hipótese, o valor correspondente ao saldo da permuta será automaticamente convertido em obrigação financeira em moeda corrente.</p>
+      <p className="mt-2">A partir do término do prazo de 10 (dez) dias mencionado nesta cláusula, o saldo da permuta passará a ser considerado dívida vencida, sujeita aos encargos previstos neste contrato.</p>
 
       <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. ENCARGOS POR INADIMPLEMENTO</h2>
       <p>Após a conversão da permuta em obrigação financeira, o valor devido ficará sujeito às seguintes condições:</p>
@@ -560,6 +590,10 @@ function PermutaAnexo({ data }: { data: ContractFormData }) {
       <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. EQUILÍBRIO CONTRATUAL</h2>
       <p>As regras previstas neste anexo têm como objetivo garantir equilíbrio entre as partes, assegurando que tanto o CONTRATANTE quanto o CONTRATADO possam cumprir suas obrigações de forma justa, transparente e proporcional.</p>
       <p className="mt-2">Nenhuma das partes poderá utilizar as disposições da permuta para impor vantagens indevidas ou prejudicar a outra parte.</p>
+
+      <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. BOA-FÉ NA UTILIZAÇÃO DA PERMUTA</h2>
+      <p>O CONTRATADO compromete-se a exercer o direito de utilização da permuta de forma razoável e dentro do prazo estabelecido neste contrato.</p>
+      <p className="mt-2">A ausência de solicitação de utilização do crédito durante o prazo de validade da permuta não poderá ser utilizada como fundamento para cobrança financeira posterior, salvo nas hipóteses expressamente previstas de descumprimento por parte do CONTRATANTE.</p>
     </div>
   );
 }
