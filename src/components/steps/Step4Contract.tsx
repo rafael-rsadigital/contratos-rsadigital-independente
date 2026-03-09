@@ -12,11 +12,12 @@ import { ContractDocument } from "@/components/ContractDocument";
 
 interface Props {
   data: ContractFormData;
+  existingClientId?: string;
   onBack: () => void;
   onConfirmed: (contractId: string) => void;
 }
 
-export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props) {
+export function Step4Contract({ data: initialData, existingClientId, onBack, onConfirmed }: Props) {
   const [data, setData] = useState(initialData);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
