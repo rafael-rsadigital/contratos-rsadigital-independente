@@ -187,43 +187,50 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
   const isCash = data.forma_pagamento === 'dinheiro';
   const isCard = data.forma_pagamento === 'cartao';
   const hasPermuta = data.permuta_valor > 0;
+  const hasEntrada = data.valor_entrada > 0;
+
+  const saldoRestante = data.valor_total - (hasEntrada ? data.valor_entrada : 0) - (hasPermuta ? data.permuta_valor : 0);
+  const valorParcelaReal = data.numero_parcelas > 1
+    ? (saldoRestante / data.numero_parcelas).toFixed(2)
+    : saldoRestante.toFixed(2);
 
   return (
     <>
       <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum}. VALOR E CONDIÇÕES DE PAGAMENTO</h2>
       <p>Pela execução dos serviços descritos neste contrato, o CONTRATANTE pagará ao CONTRATADO o valor total de:</p>
-      <p className="ml-4 font-bold text-base">R$ {Number(data.valor_total).toFixed(2)}</p>
+      <p className="ml-4 font-bold text-base">R$ {Number(data.valor_total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
 
-      {data.valor_entrada > 0 && (
-        <p className="mt-2">Entrada: <strong>R$ {Number(data.valor_entrada).toFixed(2)}</strong> via {entradaPaymentLabel[data.forma_pagamento_entrada]}.</p>
-      )}
-
-      {hasPermuta && (
-        <p className="mt-2">Permuta: <strong>R$ {Number(data.permuta_valor).toFixed(2)}</strong> em produtos/serviços, conforme Anexo de Permuta.</p>
-      )}
-
-      <p className="mt-2">Forma de pagamento: <strong>{paymentLabel[data.forma_pagamento]}</strong></p>
-
-      {isPB && data.numero_parcelas > 1 ? (
-        <>
-          <p className="mt-2">Parcelamento: <strong>{data.numero_parcelas} parcelas de R$ {valorParcela}</strong></p>
-          {vencimentos.length > 0 && (
-            <>
-              <p className="mt-2">Vencimentos:</p>
-              <ul className="list-disc ml-8 my-2">
-                {vencimentos.map((v, i) => (
-                  <li key={i}>{i + 1}ª parcela — {v}</li>
-                ))}
-              </ul>
-            </>
+      <p className="mt-4 font-semibold">Forma de pagamento:</p>
+      <ul className="list-disc ml-8 my-2 space-y-1">
+        {hasEntrada && (
+          <li>Entrada: <strong>R$ {Number(data.valor_entrada).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> via {entradaPaymentLabel[data.forma_pagamento_entrada]}.</li>
+        )}
+        {hasPermuta && (
+          <li>Permuta: <strong>R$ {Number(data.permuta_valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> em produtos/serviços, conforme Anexo de Permuta deste contrato.</li>
+        )}
+        <li>
+          Saldo restante: <strong>R$ {Number(saldoRestante).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong>
+          {isPB && data.numero_parcelas > 1 ? (
+            <>, parcelado em <strong>{data.numero_parcelas}x de R$ {Number(valorParcelaReal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> via {paymentLabel[data.forma_pagamento]}.</>
+          ) : isCard ? (
+            <>, pago via cartão de crédito no ato da contratação.</>
+          ) : isCash ? (
+            <>, pago em dinheiro no ato da contratação.</>
+          ) : (
+            <>, pago à vista via {paymentLabel[data.forma_pagamento]} no ato da contratação.</>
           )}
+        </li>
+      </ul>
+
+      {isPB && data.numero_parcelas > 1 && vencimentos.length > 0 && (
+        <>
+          <p className="mt-2">Vencimentos das parcelas:</p>
+          <ul className="list-disc ml-8 my-2">
+            {vencimentos.map((v, i) => (
+              <li key={i}>{i + 1}ª parcela — {v} — R$ {Number(valorParcelaReal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</li>
+            ))}
+          </ul>
         </>
-      ) : isCard ? (
-        <p className="mt-2">Pagamento realizado no ato da contratação via cartão.</p>
-      ) : isCash ? (
-        <p className="mt-2">Pagamento à vista em dinheiro no ato da contratação.</p>
-      ) : (
-        <p className="mt-2">Pagamento à vista no ato da contratação.</p>
       )}
 
       <p className="mt-2">O parcelamento refere-se exclusivamente à forma de pagamento do serviço contratado, não caracterizando mensalidade, assinatura ou prestação de serviço recorrente.</p>
