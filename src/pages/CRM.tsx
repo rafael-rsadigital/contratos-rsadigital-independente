@@ -52,9 +52,7 @@ export default function CRM() {
   
   const [searchClients, setSearchClients] = useState("");
   const [searchContracts, setSearchContracts] = useState("");
-  const [activeTab, setActiveTab] = useState("clientes");
-
-  const [stats, setStats] = useState({
+  const [activeTab, setActiveTab] = useState("clientest [stats, setStats] = useState({
     totalClients: 0,
     totalContracts: 0,
     totalValue: 0,
@@ -197,7 +195,7 @@ export default function CRM() {
 
         {/* Tabs */}
         <Card className="border-0 shadow-lg">
-          <Tabs defaultValue="clientes" className="w-full">
+          <Tabs defaultValuvalue={activeTab} onValueChange={setActiveTab}"w-full">
             <CardHeader>
               <TabsList className="grid w-full max-w-md grid-cols-2">
                 <TabsTrigger value="clientes">Clientes</TabsTrigger>
