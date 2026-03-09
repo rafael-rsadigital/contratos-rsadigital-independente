@@ -174,8 +174,8 @@ function ContratanteHeader({ data }: { data: ContractFormData }) {
 }
 
 /* ─── CONFIRMAÇÃO FOOTER (versão cliente) ─── */
-function ConfirmacaoFooter({ confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, codigoVerificacao, ipConfirmacao, navegadorConfirmacao, isAdmin }: {
-  confirmed: boolean; confirmDate?: string; nomeConfirmacao?: string; emailConfirmacao?: string; codigoVerificacao?: string; ipConfirmacao?: string; navegadorConfirmacao?: string; isAdmin?: boolean;
+function ConfirmacaoFooter({ confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, codigoVerificacao, ipConfirmacao, navegadorConfirmacao, timezoneConfirmacao, idiomaConfirmacao, resolucaoConfirmacao, isAdmin }: {
+  confirmed: boolean; confirmDate?: string; nomeConfirmacao?: string; emailConfirmacao?: string; codigoVerificacao?: string; ipConfirmacao?: string; navegadorConfirmacao?: string; timezoneConfirmacao?: string; idiomaConfirmacao?: string; resolucaoConfirmacao?: string; isAdmin?: boolean;
 }) {
   // Parse navegador for friendly display
   const parseBrowser = (ua?: string) => {
