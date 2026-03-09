@@ -150,8 +150,32 @@ export default function ContratoView() {
   }, [id]);
 
   const handleStartConfirmation = () => {
+    const nome = contractData?.client.nome || "";
+    const email = contractData?.client.email || "";
+    setConfirmNome(nome);
+    setConfirmEmail(email);
+    setNomeOriginal(nome);
+    setEmailOriginal(email);
+    setNomeEditado(false);
+    setEmailEditado(false);
+    setAcceptData(false);
+    setAcceptTerms(false);
     setConfirmStep(1);
     setShowConfirmDialog(true);
+  };
+
+  const handleNomeChange = (value: string) => {
+    setConfirmNome(value);
+    if (value !== nomeOriginal) {
+      setNomeEditado(true);
+    }
+  };
+
+  const handleEmailChange = (value: string) => {
+    setConfirmEmail(value);
+    if (value !== emailOriginal) {
+      setEmailEditado(true);
+    }
   };
 
   const handleConfirmContract = async (valorEntradaFinal?: number, parcelasFinal?: number) => {
