@@ -112,6 +112,8 @@ export default function ContratoView() {
         setCodigoVerificacao((data as any).codigo_verificacao || '');
         setNumeroContrato((data as any).numero_contrato || '');
         setNomeConfirmacao((data as any).nome_confirmacao || '');
+        setIpConfirmacao((data as any).ip_confirmacao || '');
+        setNavegadorConfirmacao((data as any).navegador_confirmacao || '');
         setEmailConfirmacao(data.email_confirmacao || '');
         if (data.data_confirmacao) {
           setConfirmDate(new Date(data.data_confirmacao).toLocaleDateString('pt-BR', {
