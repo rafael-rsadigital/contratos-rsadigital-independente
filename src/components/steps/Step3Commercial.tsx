@@ -96,7 +96,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
   // Valor restante após entrada e permuta
   const valorBase = valorTotal || 0;
   const valorAposDesconto = Math.max(0, valorBase - (temEntrada ? valorEntrada : 0) - (temPermuta ? permutaValor : 0));
-  const valorParcela = showParcelas && numeroParcelas > 0 ? (valorAposDesconto / numeroParcelas).toFixed(2) : '0.00';
+  const valorParcela = showParcelas && numeroParcelas > 0 ? formatBRL(valorAposDesconto / numeroParcelas) : '0,00';
 
   const [descontoRegressivo, setDescontoRegressivo] = useState(false);
   const hasDesconto = formaPagamento === "pix_boleto" && numeroParcelas >= 10;
