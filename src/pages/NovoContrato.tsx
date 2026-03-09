@@ -100,6 +100,9 @@ export default function NovoContrato() {
               valor_entrada: formData.valor_entrada,
               forma_pagamento_entrada: formData.forma_pagamento_entrada,
               numero_paginas: formData.numero_paginas,
+              permuta_valor: formData.permuta_valor,
+              permuta_descricao: formData.permuta_descricao,
+              permuta_condicoes: formData.permuta_condicoes,
             }}
             hasWebsite={!!formData.servico_website}
             isInstitucional={isInstitucional}
