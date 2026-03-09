@@ -500,7 +500,7 @@ function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailCo
       <p>Ao clicar em "Confirmar contratação", o CONTRATANTE declara que leu, compreendeu e concorda com todas as condições.</p>
       <p className="mt-2">O registro eletrônico constitui aceite formal, dispensando assinatura física.</p>
 
-      <ConfirmacaoFooter confirmed={confirmed} confirmDate={confirmDate} nomeConfirmacao={nomeConfirmacao} emailConfirmacao={emailConfirmacao} />
+      <ConfirmacaoFooter confirmed={confirmed} confirmDate={confirmDate} nomeConfirmacao={nomeConfirmacao} emailConfirmacao={emailConfirmacao} codigoVerificacao={undefined} ipConfirmacao={ipConfirmacao} navegadorConfirmacao={navegadorConfirmacao} />
     </div>
   );
 }
