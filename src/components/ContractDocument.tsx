@@ -264,8 +264,8 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
 
   const saldoRestante = data.valor_total - (hasEntrada ? data.valor_entrada : 0) - (hasPermuta ? data.permuta_valor : 0);
   const valorParcelaReal = data.numero_parcelas > 1
-    ? (saldoRestante / data.numero_parcelas).toFixed(2)
-    : saldoRestante.toFixed(2);
+    ? formatBRL(saldoRestante / data.numero_parcelas)
+    : formatBRL(saldoRestante);
 
   return (
     <>

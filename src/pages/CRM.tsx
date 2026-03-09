@@ -327,7 +327,7 @@ export default function CRM() {
                               {c.servicos.join(', ')}
                             </TableCell>
                             <TableCell className="text-sm font-medium">
-                              R$ {Number(c.valor_total).toFixed(2)}
+                              R$ {formatBRL(Number(c.valor_total))}
                             </TableCell>
                             <TableCell>
                               <Badge variant={st.variant} className="text-xs">{st.label}</Badge>
