@@ -560,7 +560,7 @@ function PermutaAnexo({ data }: { data: ContractFormData }) {
 
       <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. VALOR DA PERMUTA</h2>
       <p>O CONTRATANTE concorda em disponibilizar ao CONTRATADO créditos em produtos e/ou serviços no valor de:</p>
-      <p className="ml-4 font-bold text-base">R$ {Number(data.permuta_valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+      <p className="ml-4 font-bold text-base">R$ {formatBRL(Number(data.permuta_valor))}</p>
 
       {data.permuta_descricao && (
         <>
