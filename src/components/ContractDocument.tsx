@@ -271,7 +271,7 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
     <>
       <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum}. VALOR E CONDIÇÕES DE PAGAMENTO</h2>
       <p>Pela execução dos serviços descritos neste contrato, o CONTRATANTE pagará ao CONTRATADO o valor total de:</p>
-      <p className="ml-4 font-bold text-base">R$ {Number(data.valor_total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+      <p className="ml-4 font-bold text-base">R$ {formatBRL(Number(data.valor_total))}</p>
 
       <p className="mt-4 font-semibold">Forma de pagamento:</p>
       <ul className="list-disc ml-8 my-2 space-y-1">
