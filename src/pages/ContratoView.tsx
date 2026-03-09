@@ -466,14 +466,57 @@ export default function ContratoView() {
 
           {confirmStep === 1 && (
             <div className="space-y-4 py-2">
+              <p className="text-sm text-muted-foreground">
+                Confira seus dados antes de assinar. Se necessário, clique no campo para corrigir.
+              </p>
               <div>
-                <Label htmlFor="confirm-nome">Nome completo</Label>
-                <Input id="confirm-nome" value={confirmNome} onChange={e => setConfirmNome(e.target.value)} placeholder="Seu nome completo" />
+                <Label htmlFor="confirm-nome" className="flex items-center gap-2">
+                  Nome completo
+                  <span className="text-xs text-muted-foreground">✏️ editável</span>
+                </Label>
+                <Input 
+                  id="confirm-nome" 
+                  value={confirmNome} 
+                  onChange={e => handleNomeChange(e.target.value)} 
+                  className={nomeEditado ? "border-yellow-500 focus-visible:ring-yellow-500" : ""}
+                />
+                {nomeEditado && (
+                  <p className="text-xs text-yellow-600 mt-1">
+                    ⚠️ Nome alterado (original: {nomeOriginal})
+                  </p>
+                )}
               </div>
               <div>
-                <Label htmlFor="confirm-email">Email</Label>
-                <Input id="confirm-email" type="email" value={confirmEmail} onChange={e => setConfirmEmail(e.target.value)} placeholder="email@exemplo.com" />
+                <Label htmlFor="confirm-email" className="flex items-center gap-2">
+                  Email
+                  <span className="text-xs text-muted-foreground">✏️ editável</span>
+                </Label>
+                <Input 
+                  id="confirm-email" 
+                  type="email" 
+                  value={confirmEmail} 
+                  onChange={e => handleEmailChange(e.target.value)}
+                  className={emailEditado ? "border-yellow-500 focus-visible:ring-yellow-500" : ""}
+                />
+                {emailEditado && (
+                  <p className="text-xs text-yellow-600 mt-1">
+                    ⚠️ Alterar o email mudará o endereço onde o contrato será enviado.
+                  </p>
+                )}
               </div>
+              <div className="flex items-start gap-3 pt-2 border-t">
+                <Checkbox
+                  id="accept-data"
+                  checked={acceptData}
+                  onCheckedChange={(v) => setAcceptData(!!v)}
+                />
+                <Label htmlFor="accept-data" className="text-sm cursor-pointer leading-relaxed">
+                  Confirmo que meus dados estão corretos
+                </Label>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Se precisar corrigir dados após a assinatura, entre em contato com o contratado.
+              </p>
             </div>
           )}
 
