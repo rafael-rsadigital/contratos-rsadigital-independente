@@ -2,6 +2,7 @@ import { ContractFormData, AnexoData, AditivoData, CONTRATADO } from "@/types/co
 import { format, addMonths, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import logoRsa from "@/assets/logo-rsa-digital.png";
+import { formatBRL } from "@/lib/utils";
 
 interface Props {
   data: ContractFormData;
@@ -13,6 +14,9 @@ interface Props {
   numeroContrato?: string;
   ipConfirmacao?: string;
   navegadorConfirmacao?: string;
+  timezoneConfirmacao?: string;
+  idiomaConfirmacao?: string;
+  resolucaoConfirmacao?: string;
   isAdmin?: boolean;
 }
 
