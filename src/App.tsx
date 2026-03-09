@@ -11,6 +11,7 @@ import CRM from "./pages/CRM";
 import ContratoView from "./pages/ContratoView";
 import VerificarContrato from "./pages/VerificarContrato";
 import AditivoView from "./pages/AditivoView";
+import ClienteView from "./pages/ClienteView";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
