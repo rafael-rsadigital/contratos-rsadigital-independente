@@ -43,14 +43,14 @@ export function PaymentScreen({
   }, [valorTotal, valorEntrada, parcelasSelecionadas]);
 
   const handleValorEntradaBlur = () => {
-    const num = parseFloat(valorEntradaStr) || 0;
+    const num = parseFloat(valorEntradaStr.replace(/\./g, '').replace(',', '.')) || 0;
     if (num < valorEntradaMinimo) {
-      setValorEntradaStr(valorEntradaMinimo.toFixed(2));
-      toast.error(`O valor mínimo da entrada é R$ ${valorEntradaMinimo.toFixed(2)}`);
+      setValorEntradaStr(formatBRL(valorEntradaMinimo));
+      toast.error(`O valor mínimo da entrada é R$ ${formatBRL(valorEntradaMinimo)}`);
     } else if (num > valorTotal) {
-      setValorEntradaStr(valorTotal.toFixed(2));
+      setValorEntradaStr(formatBRL(valorTotal));
     } else {
-      setValorEntradaStr(num.toFixed(2));
+      setValorEntradaStr(formatBRL(num));
     }
   };
 
