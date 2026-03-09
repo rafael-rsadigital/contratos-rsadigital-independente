@@ -121,7 +121,7 @@ export function PaymentScreen({
             <SelectContent>
               {opçõesParcelas.map((n) => (
                 <SelectItem key={n} value={String(n)}>
-                  {n}x de R$ {((valorTotal - valorEntrada) / n).toFixed(2)}
+                  {n}x de R$ {formatBRL((valorTotal - valorEntrada) / n)}
                 </SelectItem>
               ))}
             </SelectContent>
