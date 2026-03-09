@@ -318,6 +318,9 @@ export default function ContratoView() {
             numeroContrato={numeroContrato}
             ipConfirmacao={ipConfirmacao}
             navegadorConfirmacao={navegadorConfirmacao}
+            timezoneConfirmacao={timezoneConfirmacao}
+            idiomaConfirmacao={idiomaConfirmacao}
+            resolucaoConfirmacao={resolucaoConfirmacao}
             isAdmin={!!user}
           />
         </div>
