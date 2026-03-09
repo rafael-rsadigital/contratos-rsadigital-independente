@@ -450,9 +450,12 @@ function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailC
                   <h2 className="text-sm font-bold mt-6 mb-2">{m + 3}. RESOLUÇÃO DE CONFLITOS</h2>
                   <p>Fica eleito o foro da comarca de Jacareí – SP.</p>
 
-                  <h2 className="text-sm font-bold mt-6 mb-2">{m + 4}. ACEITE DIGITAL</h2>
-                  <p>Ao clicar em "Confirmar contratação", o CONTRATANTE declara que leu integralmente este contrato, compreendeu seus termos e concorda com todas as condições.</p>
-                  <p className="mt-2">O registro eletrônico constitui aceite formal e válido, dispensando assinatura física.</p>
+                   <h2 className="text-sm font-bold mt-6 mb-2">{m + 4}. ALTERAÇÕES CONTRATUAIS</h2>
+                   <p>Alterações no presente contrato somente terão validade quando formalizadas por meio de termo aditivo, devidamente registrado e aceito eletronicamente pelas partes.</p>
+
+                   <h2 className="text-sm font-bold mt-6 mb-2">{m + 5}. ACEITE DIGITAL</h2>
+                   <p>Ao clicar em "Confirmar contratação", o CONTRATANTE declara que leu integralmente este contrato, compreendeu seus termos e concorda com todas as condições.</p>
+                   <p className="mt-2">O registro eletrônico constitui aceite formal e válido, dispensando assinatura física.</p>
                 </>
               );
             })()}
