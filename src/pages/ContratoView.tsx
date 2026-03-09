@@ -292,7 +292,7 @@ export default function ContratoView() {
         </div>
 
         {/* Permuta Control - only for authenticated admin users */}
-        {user && contractData.forma_pagamento === 'permuta' && contractData.permuta_valor > 0 && id && (
+        {user && contractData.permuta_valor > 0 && id && (
           <div className="mt-6 no-print">
             <PermutaControl
               contractId={id}
