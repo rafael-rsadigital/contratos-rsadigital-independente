@@ -262,21 +262,48 @@ export default function ContratoView() {
     setSavingAditivo(true);
     try {
       const hoje = new Date().toLocaleDateString('pt-BR');
-      await supabase.from('contract_aditivos').insert({
+      const novoNumero = (contractData?.aditivos?.length || 0) + 1;
+      const insertData: any = {
         contract_id: id,
         titulo: aditivoTitulo.trim(),
         descricao: aditivoDescricao.trim(),
         data: hoje,
-      });
-      const novoNumero = (contractData?.aditivos?.length || 0) + 1;
+        numero: novoNumero,
+        status: 'pendente',
+      };
+      if (aditivoClausulas.trim()) insertData.clausulas_alteradas = aditivoClausulas.trim();
+      if (aditivoNovoValor) insertData.novo_valor = parseFloat(aditivoNovoValor);
+      if (aditivoNovoPrazo.trim()) insertData.novo_prazo = aditivoNovoPrazo.trim();
+
+      const { data: inserted } = await (supabase.from('contract_aditivos') as any).insert(insertData).select().single();
+      
       setContractData(prev => prev ? {
         ...prev,
-        aditivos: [...prev.aditivos, { id: crypto.randomUUID(), numero: novoNumero, titulo: aditivoTitulo.trim(), descricao: aditivoDescricao.trim(), data: hoje, status: 'pendente' as const }],
+        aditivos: [...prev.aditivos, { 
+          id: inserted?.id || crypto.randomUUID(), 
+          numero: novoNumero, 
+          titulo: aditivoTitulo.trim(), 
+          descricao: aditivoDescricao.trim(), 
+          data: hoje, 
+          status: 'pendente' as const,
+          clausulas_alteradas: aditivoClausulas.trim() || undefined,
+          novo_valor: aditivoNovoValor ? parseFloat(aditivoNovoValor) : undefined,
+          novo_prazo: aditivoNovoPrazo.trim() || undefined,
+        }],
       } : prev);
       setAditivoTitulo("");
       setAditivoDescricao("");
+      setAditivoClausulas("");
+      setAditivoNovoValor("");
+      setAditivoNovoPrazo("");
       setShowAditivoDialog(false);
-      toast.success("Aditivo adicionado!");
+      toast.success("Aditivo criado! Envie o link para o cliente aceitar.");
+      
+      // Copy link
+      const aditivoLink = `${window.location.origin}/aditivo/${inserted?.id}`;
+      navigator.clipboard.writeText(aditivoLink).then(() => {
+        toast.info(`Link copiado: ${aditivoLink}`);
+      }).catch(() => {});
     } catch {
       toast.error("Erro ao adicionar aditivo.");
     } finally {
