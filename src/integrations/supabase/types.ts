@@ -64,27 +64,69 @@ export type Database = {
       }
       contract_aditivos: {
         Row: {
+          clausulas_alteradas: string | null
+          codigo_verificacao: string | null
           contract_id: string
           created_at: string
           data: string
+          data_aceite: string | null
           descricao: string
+          email_aceite: string | null
           id: string
+          idioma_aceite: string | null
+          ip_aceite: string | null
+          navegador_aceite: string | null
+          nome_aceite: string | null
+          novo_prazo: string | null
+          novo_valor: number | null
+          numero: number
+          resolucao_aceite: string | null
+          status: string
+          timezone_aceite: string | null
           titulo: string
         }
         Insert: {
+          clausulas_alteradas?: string | null
+          codigo_verificacao?: string | null
           contract_id: string
           created_at?: string
           data: string
+          data_aceite?: string | null
           descricao: string
+          email_aceite?: string | null
           id?: string
+          idioma_aceite?: string | null
+          ip_aceite?: string | null
+          navegador_aceite?: string | null
+          nome_aceite?: string | null
+          novo_prazo?: string | null
+          novo_valor?: number | null
+          numero?: number
+          resolucao_aceite?: string | null
+          status?: string
+          timezone_aceite?: string | null
           titulo: string
         }
         Update: {
+          clausulas_alteradas?: string | null
+          codigo_verificacao?: string | null
           contract_id?: string
           created_at?: string
           data?: string
+          data_aceite?: string | null
           descricao?: string
+          email_aceite?: string | null
           id?: string
+          idioma_aceite?: string | null
+          ip_aceite?: string | null
+          navegador_aceite?: string | null
+          nome_aceite?: string | null
+          novo_prazo?: string | null
+          novo_valor?: number | null
+          numero?: number
+          resolucao_aceite?: string | null
+          status?: string
+          timezone_aceite?: string | null
           titulo?: string
         }
         Relationships: [
