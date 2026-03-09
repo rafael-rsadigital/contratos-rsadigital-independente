@@ -86,7 +86,7 @@ export function PermutaControl({ contractId, permutaValor, clienteNome }: Props)
   const handleShareWhatsApp = () => {
     const link = window.location.href;
     const message = encodeURIComponent(
-      `Olá ${clienteNome}!\n\n*Extrato de Permuta*\n\nValor inicial: R$ ${permutaValor.toFixed(2)}\nValor utilizado: R$ ${totalUtilizado.toFixed(2)}\n*Saldo restante: R$ ${saldoRestante.toFixed(2)}*\n\n${utilizacoes.length > 0 ? `Últimas utilizações:\n${utilizacoes.slice(0, 5).map(u => `• ${new Date(u.data_utilizacao).toLocaleDateString('pt-BR')} - R$ ${u.valor_utilizado.toFixed(2)} - ${u.descricao}`).join('\n')}` : 'Nenhuma utilização registrada.'}\n\nAcesse o contrato:\n${link}`
+      `Olá ${clienteNome}!\n\n*Extrato de Permuta*\n\nValor inicial: R$ ${formatBRL(permutaValor)}\nValor utilizado: R$ ${formatBRL(totalUtilizado)}\n*Saldo restante: R$ ${formatBRL(saldoRestante)}*\n\n${utilizacoes.length > 0 ? `Últimas utilizações:\n${utilizacoes.slice(0, 5).map(u => `• ${new Date(u.data_utilizacao).toLocaleDateString('pt-BR')} - R$ ${formatBRL(u.valor_utilizado)} - ${u.descricao}`).join('\n')}` : 'Nenhuma utilização registrada.'}\n\nAcesse o contrato:\n${link}`
     );
     window.open(`https://wa.me/55${CONTRATADO.whatsapp}?text=${message}`, '_blank');
   };
