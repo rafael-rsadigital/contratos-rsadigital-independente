@@ -177,6 +177,7 @@ export type Database = {
           forma_pagamento: string
           forma_pagamento_entrada: string | null
           id: string
+          idioma_confirmacao: string | null
           ip_confirmacao: string | null
           navegador_confirmacao: string | null
           nome_confirmacao: string | null
@@ -187,9 +188,11 @@ export type Database = {
           permuta_descricao: string | null
           permuta_valor: number | null
           prazo_google: string | null
+          resolucao_confirmacao: string | null
           servico_principal: string | null
           servicos: string[]
           status: string
+          timezone_confirmacao: string | null
           tipo: string
           updated_at: string
           valor_entrada: number
@@ -207,6 +210,7 @@ export type Database = {
           forma_pagamento: string
           forma_pagamento_entrada?: string | null
           id?: string
+          idioma_confirmacao?: string | null
           ip_confirmacao?: string | null
           navegador_confirmacao?: string | null
           nome_confirmacao?: string | null
@@ -217,9 +221,11 @@ export type Database = {
           permuta_descricao?: string | null
           permuta_valor?: number | null
           prazo_google?: string | null
+          resolucao_confirmacao?: string | null
           servico_principal?: string | null
           servicos?: string[]
           status?: string
+          timezone_confirmacao?: string | null
           tipo: string
           updated_at?: string
           valor_entrada?: number
@@ -237,6 +243,7 @@ export type Database = {
           forma_pagamento?: string
           forma_pagamento_entrada?: string | null
           id?: string
+          idioma_confirmacao?: string | null
           ip_confirmacao?: string | null
           navegador_confirmacao?: string | null
           nome_confirmacao?: string | null
@@ -247,9 +254,11 @@ export type Database = {
           permuta_descricao?: string | null
           permuta_valor?: number | null
           prazo_google?: string | null
+          resolucao_confirmacao?: string | null
           servico_principal?: string | null
           servicos?: string[]
           status?: string
+          timezone_confirmacao?: string | null
           tipo?: string
           updated_at?: string
           valor_entrada?: number
