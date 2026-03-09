@@ -677,22 +677,96 @@ function AnexosSection({ anexos }: { anexos: AnexoData[] }) {
 }
 
 /* ═══ ADITIVOS ═══ */
-function AditivosSection({ aditivos }: { aditivos: AditivoData[] }) {
+function AditivosSection({ aditivos, numeroContrato, isAdmin }: { aditivos: AditivoData[]; numeroContrato?: string; isAdmin?: boolean }) {
   return (
     <div className="contract-document max-w-3xl mx-auto text-[15px] leading-relaxed">
-      <h1 className="text-center text-lg mb-4 tracking-widest font-bold">ADITIVOS CONTRATUAIS</h1>
+      <h1 className="text-center text-lg mb-4 tracking-widest font-bold">HISTÓRICO DO CONTRATO</h1>
       <p className="text-center text-sm text-muted-foreground mb-6">
-        Os aditivos registram renovações de prazo ou novos serviços.
+        Termos aditivos vinculados ao contrato {numeroContrato ? `nº ${numeroContrato}` : 'principal'}.
       </p>
-      <div className="space-y-6">
-        {aditivos.map((aditivo, index) => (
-          <div key={aditivo.id} className="border rounded-lg p-4">
-            <h3 className="font-bold text-sm mb-1">ADITIVO {index + 1} — {aditivo.titulo}</h3>
-            <p className="text-xs text-muted-foreground mb-2">Data: {aditivo.data}</p>
-            <p className="whitespace-pre-wrap">{aditivo.descricao}</p>
+
+      <div className="space-y-2 mb-8">
+        {aditivos.map((aditivo) => (
+          <div key={aditivo.id} className="flex items-center justify-between border rounded-lg p-3">
+            <div>
+              <p className="font-bold text-sm">Aditivo {aditivo.numero} — {aditivo.titulo}</p>
+              <p className="text-xs text-muted-foreground">{aditivo.data}</p>
+            </div>
+            <span className={`text-xs font-medium px-2 py-1 rounded ${
+              aditivo.status === 'aceito' 
+                ? 'bg-green-100 text-green-700' 
+                : 'bg-yellow-100 text-yellow-700'
+            }`}>
+              {aditivo.status === 'aceito' ? '✓ Aceito' : '⏳ Pendente'}
+            </span>
           </div>
         ))}
       </div>
+
+      {aditivos.map((aditivo) => (
+        <div key={aditivo.id} className="mb-10">
+          <div className="border-t-2 border-primary/10 pt-6">
+            <h2 className="text-center text-base font-bold tracking-widest mb-1">
+              TERMO ADITIVO Nº {aditivo.numero}
+            </h2>
+            <p className="text-center text-sm text-muted-foreground mb-6">
+              AO CONTRATO Nº {numeroContrato || '—'}
+            </p>
+
+            <h3 className="text-sm font-bold mt-4 mb-2">DESCRIÇÃO DAS ALTERAÇÕES</h3>
+            <div className="ml-4 p-3 bg-muted/30 rounded border">
+              <p className="whitespace-pre-wrap">{aditivo.descricao}</p>
+            </div>
+
+            {aditivo.clausulas_alteradas && (
+              <>
+                <h3 className="text-sm font-bold mt-4 mb-2">CLÁUSULAS ALTERADAS</h3>
+                <div className="ml-4 p-3 bg-muted/30 rounded border">
+                  <p className="whitespace-pre-wrap">{aditivo.clausulas_alteradas}</p>
+                </div>
+              </>
+            )}
+
+            {aditivo.novo_valor != null && aditivo.novo_valor > 0 && (
+              <p className="mt-3">Novo valor: <strong>R$ {formatBRL(aditivo.novo_valor)}</strong></p>
+            )}
+
+            {aditivo.novo_prazo && (
+              <p className="mt-2">Novo prazo: <strong>{aditivo.novo_prazo}</strong></p>
+            )}
+
+            <p className="mt-4 italic text-muted-foreground text-sm">
+              Todas as demais cláusulas permanecem inalteradas.
+            </p>
+
+            {/* Acceptance proof */}
+            {aditivo.status === 'aceito' && aditivo.data_aceite && (
+              <div className="mt-4 border-2 border-primary/20 rounded-lg p-4 space-y-2">
+                <h4 className="text-center text-xs font-bold tracking-widest uppercase">Comprovante de Aceite</h4>
+                <div className="text-sm space-y-1">
+                  {aditivo.nome_aceite && <p>Contratante: <strong>{aditivo.nome_aceite}</strong></p>}
+                  <p>Data do aceite: <strong>{new Date(aditivo.data_aceite).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</strong></p>
+                  {aditivo.codigo_verificacao && <p>Código: <strong className="font-mono">{aditivo.codigo_verificacao}</strong></p>}
+                </div>
+              </div>
+            )}
+
+            {/* Admin log */}
+            {isAdmin && aditivo.status === 'aceito' && aditivo.ip_aceite && (
+              <div className="mt-3 border rounded-lg p-4 bg-muted/10">
+                <h4 className="text-xs font-bold tracking-wide text-muted-foreground uppercase mb-2">🔐 Log Técnico</h4>
+                <div className="text-xs space-y-1 font-mono">
+                  {aditivo.ip_aceite && <p>IP: {aditivo.ip_aceite}</p>}
+                  {aditivo.navegador_aceite && <p>User Agent: {aditivo.navegador_aceite}</p>}
+                  {aditivo.timezone_aceite && <p>Timezone: {aditivo.timezone_aceite}</p>}
+                  {aditivo.idioma_aceite && <p>Idioma: {aditivo.idioma_aceite}</p>}
+                  {aditivo.resolucao_aceite && <p>Resolução: {aditivo.resolucao_aceite}</p>}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
