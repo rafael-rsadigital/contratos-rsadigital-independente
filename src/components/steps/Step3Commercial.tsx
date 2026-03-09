@@ -308,7 +308,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
                 </p>
                 {temEntrada && valorEntrada > 0 && (
                   <p className="text-sm text-muted-foreground">
-                    Entrada ({entradaLabels[form.watch("forma_pagamento_entrada") || 'pix']}): <strong>R$ {Number(valorEntrada).toFixed(2)}</strong>
+                    Entrada ({entradaLabels[form.watch("forma_pagamento_entrada") || 'pix']}): <strong>R$ {formatBRL(Number(valorEntrada))}</strong>
                   </p>
                 )}
                 {temPermuta && permutaValor > 0 && (
