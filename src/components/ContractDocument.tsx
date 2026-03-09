@@ -97,6 +97,13 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
         </>
       )}
 
+      {data.forma_pagamento === 'permuta' && data.permuta_valor > 0 && (
+        <>
+          <div className="border-t-4 border-primary/20 my-12" />
+          <PermutaAnexo data={data} />
+        </>
+      )}
+
       {data.anexos.length > 0 && (
         <>
           <div className="border-t-4 border-primary/20 my-12" />
