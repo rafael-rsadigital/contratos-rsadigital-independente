@@ -94,6 +94,9 @@ export default function ContratoView() {
           valor_entrada: Number((data as any).valor_entrada) || 0,
           forma_pagamento_entrada: ((data as any).forma_pagamento_entrada || 'pix') as EntradaPaymentMethod,
           numero_paginas: (data as any).numero_paginas || 0,
+          permuta_valor: Number((data as any).permuta_valor) || 0,
+          permuta_descricao: (data as any).permuta_descricao || '',
+          permuta_condicoes: (data as any).permuta_condicoes || '',
           anexos: (anexos || []).map((a: any): AnexoData => ({ id: a.id, titulo: a.titulo, descricao: a.descricao, data: a.data })),
           aditivos: (aditivos || []).map((a: any): AditivoData => ({ id: a.id, titulo: a.titulo, descricao: a.descricao, data: a.data })),
         });
