@@ -40,7 +40,12 @@ export default function ContratoView() {
   const [confirmNome, setConfirmNome] = useState("");
   const [confirmEmail, setConfirmEmail] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [acceptData, setAcceptData] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [nomeEditado, setNomeEditado] = useState(false);
+  const [emailEditado, setEmailEditado] = useState(false);
+  const [nomeOriginal, setNomeOriginal] = useState("");
+  const [emailOriginal, setEmailOriginal] = useState("");
 
   // Aditivo dialog
   const [showAditivoDialog, setShowAditivoDialog] = useState(false);
