@@ -188,14 +188,14 @@ export default function ContratoView() {
         let descricao = `Alteração na forma de pagamento solicitada pelo cliente ${confirmNome} em ${hoje}.\n\n`;
         
         if (entradaFinal !== entradaOriginal) {
-          descricao += `Valor da entrada alterado de R$ ${entradaOriginal.toFixed(2)} para R$ ${entradaFinal.toFixed(2)}.\n`;
+          descricao += `Valor da entrada alterado de R$ ${formatBRL(entradaOriginal)} para R$ ${formatBRL(entradaFinal)}.\n`;
         }
         if (parcFinal !== parcelasOriginal) {
           const valorParcela = (contractData.valor_total - entradaFinal) / parcFinal;
-          descricao += `Número de parcelas alterado de ${parcelasOriginal}x para ${parcFinal}x de R$ ${valorParcela.toFixed(2)}.\n`;
+          descricao += `Número de parcelas alterado de ${parcelasOriginal}x para ${parcFinal}x de R$ ${formatBRL(valorParcela)}.\n`;
         }
 
-        descricao += `\nValor total do contrato permanece: R$ ${contractData.valor_total.toFixed(2)}.`;
+        descricao += `\nValor total do contrato permanece: R$ ${formatBRL(contractData.valor_total)}.`;
 
         await (supabase.from('contract_anexos') as any).insert({
           contract_id: id,
