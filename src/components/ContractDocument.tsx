@@ -11,6 +11,8 @@ interface Props {
   emailConfirmacao?: string;
   codigoVerificacao?: string;
   numeroContrato?: string;
+  ipConfirmacao?: string;
+  navegadorConfirmacao?: string;
 }
 
 const paymentLabel: Record<string, string> = {
