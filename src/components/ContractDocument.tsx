@@ -301,7 +301,7 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
 }
 
 /* ═══ CONTRATO WEBSITE ═══ */
-function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, ipConfirmacao, navegadorConfirmacao, valorParcela, vencimentos, isComplementar }: Props & {
+function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, ipConfirmacao, navegadorConfirmacao, valorParcela, vencimentos, isComplementar, isAdmin }: Props & {
   valorParcela: string; vencimentos: string[]; isComplementar: boolean;
 }) {
   const optimized = isOptimized(data.servico_website);
