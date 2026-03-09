@@ -233,6 +233,9 @@ function ConfirmacaoFooter({ confirmed, confirmDate, nomeConfirmacao, emailConfi
                 {navegadorConfirmacao && <p>User Agent: {navegadorConfirmacao}</p>}
                 {browser && <p>Navegador: {browser}</p>}
                 {device && <p>Dispositivo: {device}</p>}
+                {timezoneConfirmacao && <p>Timezone: {timezoneConfirmacao}</p>}
+                {idiomaConfirmacao && <p>Idioma: {idiomaConfirmacao}</p>}
+                {resolucaoConfirmacao && <p>Resolução: {resolucaoConfirmacao}</p>}
                 {codigoVerificacao && <p>Código: {codigoVerificacao}</p>}
               </div>
             </div>
