@@ -25,6 +25,7 @@ const App = () => (
         <Routes>
           {/* Public */}
           <Route path="/contrato/:id" element={<ContratoView />} />
+          <Route path="/aditivo/:id" element={<AditivoView />} />
           <Route path="/verificar-contrato" element={<VerificarContrato />} />
           <Route path="/login" element={<Login />} />
 
