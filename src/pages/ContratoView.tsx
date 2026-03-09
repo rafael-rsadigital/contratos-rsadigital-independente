@@ -227,6 +227,13 @@ export default function ContratoView() {
     }
   };
 
+  const handleAdminConfirm = async () => {
+    if (!id) return;
+    await supabase.from('contracts').update({ status: 'confirmado' }).eq('id', id);
+    setContractStatus('confirmado');
+    toast.success("Pagamento confirmado!");
+  };
+
   const handleDownloadPDF = async () => {
     const element = document.getElementById('contract-document');
     if (!element) return;
