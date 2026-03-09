@@ -46,6 +46,9 @@ export default function ContratoView() {
   const [showAditivoDialog, setShowAditivoDialog] = useState(false);
   const [aditivoTitulo, setAditivoTitulo] = useState("");
   const [aditivoDescricao, setAditivoDescricao] = useState("");
+  const [aditivoClausulas, setAditivoClausulas] = useState("");
+  const [aditivoNovoValor, setAditivoNovoValor] = useState("");
+  const [aditivoNovoPrazo, setAditivoNovoPrazo] = useState("");
   const [savingAditivo, setSavingAditivo] = useState(false);
 
   // Track view on load
