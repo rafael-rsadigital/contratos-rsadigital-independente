@@ -53,6 +53,7 @@ export default function CRM() {
   const [searchClients, setSearchClients] = useState("");
   const [searchContracts, setSearchContracts] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("todos");
+  const [activeTab, setActiveTab] = useState("clientes");
 
   const [stats, setStats] = useState({
     totalClients: 0,
@@ -197,7 +198,7 @@ export default function CRM() {
 
         {/* Tabs */}
         <Card className="border-0 shadow-lg">
-          <Tabs defaultValue="clientes" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <CardHeader>
               <TabsList className="grid w-full max-w-md grid-cols-2">
                 <TabsTrigger value="clientes">Clientes</TabsTrigger>
@@ -240,7 +241,15 @@ export default function CRM() {
                     </TableHeader>
                     <TableBody>
                       {filteredClients.map(c => (
-                        <TableRow key={c.id}>
+                        <TableRow key={c.id} className="cursor-pointer hover:bg-muted/50" onClick={() => {
+                          const clientContracts = contracts.filter(ct => ct.client_nome === c.nome);
+                          if (clientContracts.length === 1) {
+                            window.location.href = `/contrato/${clientContracts[0].id}`;
+                          } else if (clientContracts.length > 1) {
+                            setSearchContracts(c.nome);
+                            setActiveTab("contratos");
+                          }
+                        }}>
                           <TableCell className="font-medium">{c.nome}</TableCell>
                           <TableCell className="text-xs font-mono">{c.cpf_cnpj}</TableCell>
                           <TableCell className="text-sm">{c.email || '—'}</TableCell>

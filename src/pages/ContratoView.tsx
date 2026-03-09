@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { ContractDocument } from "@/components/ContractDocument";
 import { ContractFormData, PaymentMethod, EntradaPaymentMethod, CONTRATADO, AnexoData, AditivoData } from "@/types/contract";
-import { Download, Check } from "lucide-react";
+import { Download, Check, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { PaymentScreen } from "@/components/PaymentScreen";
 import { PermutaControl } from "@/components/PermutaControl";
@@ -227,6 +227,13 @@ export default function ContratoView() {
     }
   };
 
+  const handleAdminConfirm = async () => {
+    if (!id) return;
+    await supabase.from('contracts').update({ status: 'confirmado' }).eq('id', id);
+    setContractStatus('confirmado');
+    toast.success("Pagamento confirmado!");
+  };
+
   const handleDownloadPDF = async () => {
     const element = document.getElementById('contract-document');
     if (!element) return;
@@ -268,6 +275,11 @@ export default function ContratoView() {
             <Button onClick={handleDownloadPDF} variant="outline" size="sm" className="gap-2">
               <Download className="w-4 h-4" /> PDF
             </Button>
+            {user && contractStatus === 'a_confirmar' && (
+              <Button onClick={handleAdminConfirm} size="sm" variant="default" className="gap-2">
+                <CheckCircle className="w-4 h-4" /> Confirmar Pagamento
+              </Button>
+            )}
             {!confirmed && contractStatus !== 'cancelado' && (
               <Button onClick={handleStartConfirmation} size="sm" className="gap-2">
                 <Check className="w-4 h-4" /> Confirmar Contratação
@@ -294,6 +306,7 @@ export default function ContratoView() {
             numeroContrato={numeroContrato}
             ipConfirmacao={ipConfirmacao}
             navegadorConfirmacao={navegadorConfirmacao}
+            isAdmin={!!user}
           />
         </div>
 
