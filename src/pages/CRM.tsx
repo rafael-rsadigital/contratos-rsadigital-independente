@@ -247,8 +247,7 @@ export default function CRM() {
                             window.location.href = `/contrato/${clientContracts[0].id}`;
                           } else if (clientContracts.length > 1) {
                             setSearchContracts(c.nome);
-                            const tabEl = document.querySelector('[data-value="contratos"]') as HTMLElement;
-                            tabEl?.click();
+                            setActiveTab("contratos");
                           }
                         }}>
                           <TableCell className="font-medium">{c.nome}</TableCell>
