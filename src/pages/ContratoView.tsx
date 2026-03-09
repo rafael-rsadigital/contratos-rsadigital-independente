@@ -42,6 +42,12 @@ export default function ContratoView() {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // Aditivo dialog
+  const [showAditivoDialog, setShowAditivoDialog] = useState(false);
+  const [aditivoTitulo, setAditivoTitulo] = useState("");
+  const [aditivoDescricao, setAditivoDescricao] = useState("");
+  const [savingAditivo, setSavingAditivo] = useState(false);
+
   // Track view on load
   useEffect(() => {
     const trackView = async () => {
