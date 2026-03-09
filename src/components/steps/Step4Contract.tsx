@@ -118,7 +118,7 @@ export function Step4Contract({ data: initialData, existingClientId, onBack, onC
       const { data: contractRow, error: contractErr } = await supabase
         .from('contracts')
         .insert({
-          client_id: clientRow.id,
+          client_id: clientId,
           tipo: servicos[0] || 'website',
           servicos,
           valor_total: data.valor_total,
