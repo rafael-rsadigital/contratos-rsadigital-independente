@@ -99,6 +99,7 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
             valorParcela={valorParcela}
             vencimentos={vencimentos}
             isComplementar={hasBoth}
+            isAdmin={isAdmin}
           />
         </>
       )}
