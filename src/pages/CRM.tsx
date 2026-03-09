@@ -191,7 +191,7 @@ export default function CRM() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">R$ {stats.totalValue.toFixed(2)}</div>
+              <div className="text-2xl font-bold">R$ {formatBRL(stats.totalValue)}</div>
             </CardContent>
           </Card>
         </div>
