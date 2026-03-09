@@ -151,6 +151,9 @@ export default function ContratoView() {
 
       const navegador = navigator.userAgent;
       const now = new Date().toISOString();
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+      const idioma = navigator.language || '';
+      const resolucao = `${window.screen.width}x${window.screen.height}`;
 
       const updateData: any = {
         status: 'a_confirmar',
@@ -159,6 +162,9 @@ export default function ContratoView() {
         email_confirmacao: confirmEmail,
         ip_confirmacao: ip,
         navegador_confirmacao: navegador,
+        timezone_confirmacao: timezone,
+        idioma_confirmacao: idioma,
+        resolucao_confirmacao: resolucao,
       };
 
       if (valorEntradaFinal !== undefined) {
