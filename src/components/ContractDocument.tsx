@@ -216,6 +216,8 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
         </>
       ) : isCard ? (
         <p className="mt-2">Pagamento realizado no ato da contratação via cartão.</p>
+      ) : isPermuta ? (
+        <p className="mt-2">Pagamento realizado por meio de <strong>permuta de produtos/serviços</strong>, conforme detalhado no Anexo de Permuta deste contrato.</p>
       ) : isCash ? (
         <p className="mt-2">Pagamento à vista em dinheiro no ato da contratação.</p>
       ) : (
