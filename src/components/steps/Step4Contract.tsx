@@ -71,25 +71,47 @@ export function Step4Contract({ data: initialData, existingClientId, onBack, onC
   const handleSaveContract = async () => {
     setSaving(true);
     try {
-      // Save client
-      const { data: clientRow, error: clientErr } = await supabase
-        .from('clients')
-        .insert({
-          nome: data.client.nome,
-          cpf_cnpj: data.client.cpf_cnpj,
-          celular: data.client.celular,
-          logradouro: data.client.logradouro,
-          numero: data.client.numero,
-          bairro: data.client.bairro,
-          cep: data.client.cep,
-          municipio: data.client.municipio,
-          estado: data.client.estado,
-          email: data.client.email || '',
-        })
-        .select()
-        .single();
+      let clientId = existingClientId;
 
-      if (clientErr) throw clientErr;
+      if (!clientId) {
+        // Create new client
+        const { data: clientRow, error: clientErr } = await supabase
+          .from('clients')
+          .insert({
+            nome: data.client.nome,
+            cpf_cnpj: data.client.cpf_cnpj,
+            celular: data.client.celular,
+            logradouro: data.client.logradouro,
+            numero: data.client.numero,
+            bairro: data.client.bairro,
+            cep: data.client.cep,
+            municipio: data.client.municipio,
+            estado: data.client.estado,
+            email: data.client.email || '',
+          })
+          .select()
+          .single();
+
+        if (clientErr) throw clientErr;
+        clientId = clientRow.id;
+      } else {
+        // Update existing client data
+        await supabase
+          .from('clients')
+          .update({
+            nome: data.client.nome,
+            cpf_cnpj: data.client.cpf_cnpj,
+            celular: data.client.celular,
+            logradouro: data.client.logradouro,
+            numero: data.client.numero,
+            bairro: data.client.bairro,
+            cep: data.client.cep,
+            municipio: data.client.municipio,
+            estado: data.client.estado,
+            email: data.client.email || '',
+          })
+          .eq('id', clientId);
+      }
 
       const servicos = [data.servico_website, data.servico_google].filter(Boolean);
 
