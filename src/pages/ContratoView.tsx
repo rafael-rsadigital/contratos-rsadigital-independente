@@ -584,7 +584,7 @@ export default function ContratoView() {
                   <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>Cancelar</Button>
                   <Button
                     onClick={() => setConfirmStep(2)}
-                    disabled={!confirmNome.trim() || !confirmEmail.trim() || !acceptData}
+                    disabled={!confirmNome.trim() || !confirmEmail.trim() || !/^\S+@\S+\.\S+$/.test(confirmEmail) || !acceptData}
                   >
                     Próximo
                   </Button>
