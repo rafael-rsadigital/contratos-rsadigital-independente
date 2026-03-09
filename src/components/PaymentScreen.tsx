@@ -92,7 +92,7 @@ export function PaymentScreen({
 
       {/* Valor da entrada */}
       <div className="space-y-2">
-        <Label htmlFor="valor-entrada">Valor da entrada (mínimo R$ {valorEntradaMinimo.toFixed(2)})</Label>
+        <Label htmlFor="valor-entrada">Valor da entrada (mínimo R$ {formatBRL(valorEntradaMinimo)})</Label>
         <Input
           id="valor-entrada"
           type="text"
