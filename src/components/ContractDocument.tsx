@@ -132,8 +132,15 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
       {data.aditivos.length > 0 && (
         <>
           <div className="border-t-4 border-primary/20 my-12" />
-          <AditivosSection aditivos={data.aditivos} />
+          <AditivosSection aditivos={data.aditivos} numeroContrato={numeroContrato} isAdmin={isAdmin} />
         </>
+      )}
+
+      {/* Pending aditivo warning */}
+      {data.aditivos.some(a => a.status === 'pendente') && (
+        <div className="rounded-lg border-2 border-yellow-500/40 bg-yellow-500/10 p-4 text-center mt-8">
+          <p className="text-sm font-medium">⚠ Existe(m) termo(s) aditivo(s) aguardando confirmação.</p>
+        </div>
       )}
 
       {codigoVerificacao && (
