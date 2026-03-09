@@ -29,9 +29,11 @@ export function PaymentScreen({
   onBack,
   saving,
 }: PaymentScreenProps) {
-  const [valorEntrada, setValorEntrada] = useState(valorEntradaMinimo);
+  const [valorEntradaStr, setValorEntradaStr] = useState(valorEntradaMinimo.toFixed(2));
   const [parcelasSelecionadas, setParcelasSelecionadas] = useState(numeroParcelas);
   const [copied, setCopied] = useState(false);
+
+  const valorEntrada = parseFloat(valorEntradaStr) || 0;
 
   const resumo = useMemo(() => {
     const restante = valorTotal - valorEntrada;
@@ -39,18 +41,15 @@ export function PaymentScreen({
     return { restante, valorParcela };
   }, [valorTotal, valorEntrada, parcelasSelecionadas]);
 
-  const handleValorEntradaChange = (value: string) => {
-    const num = parseFloat(value) || 0;
-    setValorEntrada(num);
-  };
-
   const handleValorEntradaBlur = () => {
-    if (valorEntrada < valorEntradaMinimo) {
-      setValorEntrada(valorEntradaMinimo);
+    const num = parseFloat(valorEntradaStr) || 0;
+    if (num < valorEntradaMinimo) {
+      setValorEntradaStr(valorEntradaMinimo.toFixed(2));
       toast.error(`O valor mínimo da entrada é R$ ${valorEntradaMinimo.toFixed(2)}`);
-    }
-    if (valorEntrada > valorTotal) {
-      setValorEntrada(valorTotal);
+    } else if (num > valorTotal) {
+      setValorEntradaStr(valorTotal.toFixed(2));
+    } else {
+      setValorEntradaStr(num.toFixed(2));
     }
   };
 
@@ -68,7 +67,7 @@ export function PaymentScreen({
   const opçõesParcelas = Array.from({ length: numeroParcelas }, (_, i) => i + 1);
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-full overflow-x-hidden px-1 sm:px-0 space-y-6">
       {/* Logo */}
       <div className="flex justify-center">
         <img src={logoRsa} alt="RSA Digital" className="h-14 object-contain" />
@@ -95,12 +94,11 @@ export function PaymentScreen({
         <Label htmlFor="valor-entrada">Valor da entrada (mínimo R$ {valorEntradaMinimo.toFixed(2)})</Label>
         <Input
           id="valor-entrada"
-          type="number"
-          min={valorEntradaMinimo}
-          max={valorTotal}
-          step="0.01"
-          value={valorEntrada}
-          onChange={(e) => handleValorEntradaChange(e.target.value)}
+          type="text"
+          inputMode="decimal"
+          pattern="[0-9]*[.,]?[0-9]*"
+          value={valorEntradaStr}
+          onChange={(e) => setValorEntradaStr(e.target.value)}
           onBlur={handleValorEntradaBlur}
         />
         <p className="text-xs text-muted-foreground">

@@ -195,8 +195,17 @@ export default function ContratoView() {
       // Open WhatsApp to admin
       const link = window.location.href;
       const servicos = [contractData?.servico_website, contractData?.servico_google].filter(Boolean).join(' + ');
+      
+      const valorParcela = parcFinal > 0 
+        ? (contractData.valor_total - entradaFinal) / parcFinal 
+        : 0;
+      
+      const parcelasInfo = parcFinal > 0 
+        ? `\nParcelas: ${parcFinal}x de R$ ${valorParcela.toFixed(2)}` 
+        : '';
+      
       const message = encodeURIComponent(
-        `Olá Rafael, informei o pagamento da entrada do contrato.\n\nCliente: ${confirmNome}\nServiço: ${servicos}\nValor: R$ ${Number(contractData?.valor_total || 0).toFixed(2)}\nEntrada paga: R$ ${Number(entradaFinal).toFixed(2)}\n\nLink do contrato:\n${link}`
+        `Olá Rafael, informei o pagamento da entrada do contrato.\n\nCliente: ${confirmNome}\nServiço: ${servicos}\nValor total: R$ ${Number(contractData?.valor_total || 0).toFixed(2)}\nEntrada paga: R$ ${Number(entradaFinal).toFixed(2)}${parcelasInfo}\n\nLink do contrato:\n${link}`
       );
       window.open(`https://wa.me/${CONTRATADO.whatsapp}?text=${message}`, '_blank');
     } catch (err) {
