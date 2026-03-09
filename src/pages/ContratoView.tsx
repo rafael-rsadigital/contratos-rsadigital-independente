@@ -265,9 +265,10 @@ export default function ContratoView() {
         descricao: aditivoDescricao.trim(),
         data: hoje,
       });
+      const novoNumero = (contractData?.aditivos?.length || 0) + 1;
       setContractData(prev => prev ? {
         ...prev,
-        aditivos: [...prev.aditivos, { id: crypto.randomUUID(), titulo: aditivoTitulo.trim(), descricao: aditivoDescricao.trim(), data: hoje }],
+        aditivos: [...prev.aditivos, { id: crypto.randomUUID(), numero: novoNumero, titulo: aditivoTitulo.trim(), descricao: aditivoDescricao.trim(), data: hoje, status: 'pendente' as const }],
       } : prev);
       setAditivoTitulo("");
       setAditivoDescricao("");

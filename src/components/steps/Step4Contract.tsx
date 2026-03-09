@@ -57,6 +57,8 @@ export function Step4Contract({ data: initialData, onBack, onConfirmed }: Props)
       titulo: aditivoTitulo.trim(),
       descricao: aditivoDescricao.trim(),
       data: new Date().toLocaleDateString('pt-BR'),
+      numero: data.aditivos.length + 1,
+      status: 'pendente',
     };
     setData(d => ({ ...d, aditivos: [...d.aditivos, novo] }));
     setAditivoTitulo("");
