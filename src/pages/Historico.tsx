@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { formatBRL } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -148,7 +149,7 @@ export default function Historico() {
                         <TableCell className="text-sm">{new Date(c.created_at).toLocaleDateString('pt-BR')}</TableCell>
                         <TableCell className="font-medium text-sm">{c.client_nome}</TableCell>
                         <TableCell className="text-xs max-w-[200px] truncate">{c.servicos.join(', ')}</TableCell>
-                        <TableCell className="text-sm">R$ {Number(c.valor_total).toFixed(2)}</TableCell>
+                        <TableCell className="text-sm">R$ {formatBRL(Number(c.valor_total))}</TableCell>
                         <TableCell>
                           <Badge variant={st.variant} className="text-xs">{st.label}</Badge>
                         </TableCell>

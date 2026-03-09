@@ -3,13 +3,15 @@ import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { ContractDocument } from "@/components/ContractDocument";
 import { ContractFormData, PaymentMethod, EntradaPaymentMethod, CONTRATADO, AnexoData, AditivoData } from "@/types/contract";
-import { Download, Check, CheckCircle } from "lucide-react";
+import { Download, Check, CheckCircle, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { formatBRL } from "@/lib/utils";
 import { PaymentScreen } from "@/components/PaymentScreen";
 import { PermutaControl } from "@/components/PermutaControl";
 import { useAuth } from "@/hooks/useAuth";
@@ -28,6 +30,9 @@ export default function ContratoView() {
   const [contractStatus, setContractStatus] = useState("");
   const [ipConfirmacao, setIpConfirmacao] = useState("");
   const [navegadorConfirmacao, setNavegadorConfirmacao] = useState("");
+  const [timezoneConfirmacao, setTimezoneConfirmacao] = useState("");
+  const [idiomaConfirmacao, setIdiomaConfirmacao] = useState("");
+  const [resolucaoConfirmacao, setResolucaoConfirmacao] = useState("");
 
   // Confirmation dialog
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -36,6 +41,12 @@ export default function ContratoView() {
   const [confirmEmail, setConfirmEmail] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Aditivo dialog
+  const [showAditivoDialog, setShowAditivoDialog] = useState(false);
+  const [aditivoTitulo, setAditivoTitulo] = useState("");
+  const [aditivoDescricao, setAditivoDescricao] = useState("");
+  const [savingAditivo, setSavingAditivo] = useState(false);
 
   // Track view on load
   useEffect(() => {
@@ -114,6 +125,9 @@ export default function ContratoView() {
         setNomeConfirmacao((data as any).nome_confirmacao || '');
         setIpConfirmacao((data as any).ip_confirmacao || '');
         setNavegadorConfirmacao((data as any).navegador_confirmacao || '');
+        setTimezoneConfirmacao((data as any).timezone_confirmacao || '');
+        setIdiomaConfirmacao((data as any).idioma_confirmacao || '');
+        setResolucaoConfirmacao((data as any).resolucao_confirmacao || '');
         setEmailConfirmacao(data.email_confirmacao || '');
         if (data.data_confirmacao) {
           setConfirmDate(new Date(data.data_confirmacao).toLocaleDateString('pt-BR', {
@@ -145,6 +159,9 @@ export default function ContratoView() {
 
       const navegador = navigator.userAgent;
       const now = new Date().toISOString();
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+      const idioma = navigator.language || '';
+      const resolucao = `${window.screen.width}x${window.screen.height}`;
 
       const updateData: any = {
         status: 'a_confirmar',
@@ -153,6 +170,9 @@ export default function ContratoView() {
         email_confirmacao: confirmEmail,
         ip_confirmacao: ip,
         navegador_confirmacao: navegador,
+        timezone_confirmacao: timezone,
+        idioma_confirmacao: idioma,
+        resolucao_confirmacao: resolucao,
       };
 
       if (valorEntradaFinal !== undefined) {
@@ -175,14 +195,14 @@ export default function ContratoView() {
         let descricao = `Alteração na forma de pagamento solicitada pelo cliente ${confirmNome} em ${hoje}.\n\n`;
         
         if (entradaFinal !== entradaOriginal) {
-          descricao += `Valor da entrada alterado de R$ ${entradaOriginal.toFixed(2)} para R$ ${entradaFinal.toFixed(2)}.\n`;
+          descricao += `Valor da entrada alterado de R$ ${formatBRL(entradaOriginal)} para R$ ${formatBRL(entradaFinal)}.\n`;
         }
         if (parcFinal !== parcelasOriginal) {
           const valorParcela = (contractData.valor_total - entradaFinal) / parcFinal;
-          descricao += `Número de parcelas alterado de ${parcelasOriginal}x para ${parcFinal}x de R$ ${valorParcela.toFixed(2)}.\n`;
+          descricao += `Número de parcelas alterado de ${parcelasOriginal}x para ${parcFinal}x de R$ ${formatBRL(valorParcela)}.\n`;
         }
 
-        descricao += `\nValor total do contrato permanece: R$ ${contractData.valor_total.toFixed(2)}.`;
+        descricao += `\nValor total do contrato permanece: R$ ${formatBRL(contractData.valor_total)}.`;
 
         await (supabase.from('contract_anexos') as any).insert({
           contract_id: id,
@@ -212,11 +232,11 @@ export default function ContratoView() {
         : 0;
       
       const parcelasInfo = parcFinal > 0 
-        ? `\nParcelas: ${parcFinal}x de R$ ${valorParcela.toFixed(2)}` 
+        ? `\nParcelas: ${parcFinal}x de R$ ${formatBRL(valorParcela)}` 
         : '';
       
       const message = encodeURIComponent(
-        `Olá Rafael, informei o pagamento da entrada do contrato.\n\nCliente: ${confirmNome}\nServiço: ${servicos}\nValor total: R$ ${Number(contractData?.valor_total || 0).toFixed(2)}\nEntrada paga: R$ ${Number(entradaFinal).toFixed(2)}${parcelasInfo}\n\nLink do contrato:\n${link}`
+        `Olá Rafael, informei o pagamento da entrada do contrato.\n\nCliente: ${confirmNome}\nServiço: ${servicos}\nValor total: R$ ${formatBRL(Number(contractData?.valor_total || 0))}\nEntrada paga: R$ ${formatBRL(Number(entradaFinal))}${parcelasInfo}\n\nLink do contrato:\n${link}`
       );
       window.open(`https://wa.me/${CONTRATADO.whatsapp}?text=${message}`, '_blank');
     } catch (err) {
@@ -232,6 +252,32 @@ export default function ContratoView() {
     await supabase.from('contracts').update({ status: 'confirmado' }).eq('id', id);
     setContractStatus('confirmado');
     toast.success("Pagamento confirmado!");
+  };
+
+  const handleAddAditivo = async () => {
+    if (!id || !aditivoTitulo.trim() || !aditivoDescricao.trim()) return;
+    setSavingAditivo(true);
+    try {
+      const hoje = new Date().toLocaleDateString('pt-BR');
+      await supabase.from('contract_aditivos').insert({
+        contract_id: id,
+        titulo: aditivoTitulo.trim(),
+        descricao: aditivoDescricao.trim(),
+        data: hoje,
+      });
+      setContractData(prev => prev ? {
+        ...prev,
+        aditivos: [...prev.aditivos, { id: crypto.randomUUID(), titulo: aditivoTitulo.trim(), descricao: aditivoDescricao.trim(), data: hoje }],
+      } : prev);
+      setAditivoTitulo("");
+      setAditivoDescricao("");
+      setShowAditivoDialog(false);
+      toast.success("Aditivo adicionado!");
+    } catch {
+      toast.error("Erro ao adicionar aditivo.");
+    } finally {
+      setSavingAditivo(false);
+    }
   };
 
   const handleDownloadPDF = async () => {
@@ -306,6 +352,9 @@ export default function ContratoView() {
             numeroContrato={numeroContrato}
             ipConfirmacao={ipConfirmacao}
             navegadorConfirmacao={navegadorConfirmacao}
+            timezoneConfirmacao={timezoneConfirmacao}
+            idiomaConfirmacao={idiomaConfirmacao}
+            resolucaoConfirmacao={resolucaoConfirmacao}
             isAdmin={!!user}
           />
         </div>
@@ -321,7 +370,15 @@ export default function ContratoView() {
           </div>
         )}
 
-        {/* Bottom confirm button */}
+        {/* Admin: Add Aditivo */}
+        {user && (
+          <div className="mt-6 no-print">
+            <Button onClick={() => setShowAditivoDialog(true)} variant="outline" size="sm" className="gap-2">
+              <Plus className="w-4 h-4" /> Adicionar Aditivo
+            </Button>
+          </div>
+        )}
+
         {!confirmed && contractStatus !== 'cancelado' && (
           <div className="mt-6 text-center no-print">
             <Button onClick={handleStartConfirmation} size="lg" className="gap-2">
@@ -416,6 +473,32 @@ export default function ContratoView() {
               )}
             </DialogFooter>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Aditivo Dialog */}
+      <Dialog open={showAditivoDialog} onOpenChange={setShowAditivoDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Adicionar Aditivo Contratual</DialogTitle>
+            <DialogDescription>Insira os dados do termo aditivo.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <Label htmlFor="aditivo-titulo">Título</Label>
+              <Input id="aditivo-titulo" value={aditivoTitulo} onChange={e => setAditivoTitulo(e.target.value)} placeholder="Ex: Renovação de prazo" />
+            </div>
+            <div>
+              <Label htmlFor="aditivo-desc">Descrição</Label>
+              <Textarea id="aditivo-desc" value={aditivoDescricao} onChange={e => setAditivoDescricao(e.target.value)} placeholder="Descreva os termos do aditivo..." rows={5} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAditivoDialog(false)}>Cancelar</Button>
+            <Button onClick={handleAddAditivo} disabled={savingAditivo || !aditivoTitulo.trim() || !aditivoDescricao.trim()}>
+              {savingAditivo ? "Salvando..." : "Adicionar"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

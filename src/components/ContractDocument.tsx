@@ -2,6 +2,7 @@ import { ContractFormData, AnexoData, AditivoData, CONTRATADO } from "@/types/co
 import { format, addMonths, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import logoRsa from "@/assets/logo-rsa-digital.png";
+import { formatBRL } from "@/lib/utils";
 
 interface Props {
   data: ContractFormData;
@@ -13,6 +14,9 @@ interface Props {
   numeroContrato?: string;
   ipConfirmacao?: string;
   navegadorConfirmacao?: string;
+  timezoneConfirmacao?: string;
+  idiomaConfirmacao?: string;
+  resolucaoConfirmacao?: string;
   isAdmin?: boolean;
 }
 
@@ -44,15 +48,15 @@ function isOptimized(servico: string): boolean {
   return servico.includes('Otimizado') && !servico.includes('não otimizado');
 }
 
-export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, codigoVerificacao, numeroContrato, ipConfirmacao, navegadorConfirmacao, isAdmin }: Props) {
+export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, codigoVerificacao, numeroContrato, ipConfirmacao, navegadorConfirmacao, timezoneConfirmacao, idiomaConfirmacao, resolucaoConfirmacao, isAdmin }: Props) {
   const hasWebsite = !!data.servico_website;
   const hasGoogle = !!data.servico_google;
   const hasBoth = hasWebsite && hasGoogle;
 
   const valorLiquido = data.valor_total - data.valor_entrada;
   const valorParcela = data.numero_parcelas > 1
-    ? (valorLiquido / data.numero_parcelas).toFixed(2)
-    : valorLiquido.toFixed(2);
+    ? formatBRL(valorLiquido / data.numero_parcelas)
+    : formatBRL(valorLiquido);
 
   const vencimentos = formatVencimentos(data.data_primeiro_vencimento, data.numero_parcelas);
 
@@ -79,6 +83,9 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
           emailConfirmacao={emailConfirmacao}
           ipConfirmacao={ipConfirmacao}
           navegadorConfirmacao={navegadorConfirmacao}
+          timezoneConfirmacao={timezoneConfirmacao}
+          idiomaConfirmacao={idiomaConfirmacao}
+          resolucaoConfirmacao={resolucaoConfirmacao}
           valorParcela={valorParcela}
           vencimentos={vencimentos}
           isComplementar={false}
@@ -97,6 +104,9 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
             emailConfirmacao={emailConfirmacao}
             ipConfirmacao={ipConfirmacao}
             navegadorConfirmacao={navegadorConfirmacao}
+            timezoneConfirmacao={timezoneConfirmacao}
+            idiomaConfirmacao={idiomaConfirmacao}
+            resolucaoConfirmacao={resolucaoConfirmacao}
             valorParcela={valorParcela}
             vencimentos={vencimentos}
             isComplementar={hasBoth}
@@ -164,8 +174,8 @@ function ContratanteHeader({ data }: { data: ContractFormData }) {
 }
 
 /* ─── CONFIRMAÇÃO FOOTER (versão cliente) ─── */
-function ConfirmacaoFooter({ confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, codigoVerificacao, ipConfirmacao, navegadorConfirmacao, isAdmin }: {
-  confirmed: boolean; confirmDate?: string; nomeConfirmacao?: string; emailConfirmacao?: string; codigoVerificacao?: string; ipConfirmacao?: string; navegadorConfirmacao?: string; isAdmin?: boolean;
+function ConfirmacaoFooter({ confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, codigoVerificacao, ipConfirmacao, navegadorConfirmacao, timezoneConfirmacao, idiomaConfirmacao, resolucaoConfirmacao, isAdmin }: {
+  confirmed: boolean; confirmDate?: string; nomeConfirmacao?: string; emailConfirmacao?: string; codigoVerificacao?: string; ipConfirmacao?: string; navegadorConfirmacao?: string; timezoneConfirmacao?: string; idiomaConfirmacao?: string; resolucaoConfirmacao?: string; isAdmin?: boolean;
 }) {
   // Parse navegador for friendly display
   const parseBrowser = (ua?: string) => {
@@ -223,6 +233,9 @@ function ConfirmacaoFooter({ confirmed, confirmDate, nomeConfirmacao, emailConfi
                 {navegadorConfirmacao && <p>User Agent: {navegadorConfirmacao}</p>}
                 {browser && <p>Navegador: {browser}</p>}
                 {device && <p>Dispositivo: {device}</p>}
+                {timezoneConfirmacao && <p>Timezone: {timezoneConfirmacao}</p>}
+                {idiomaConfirmacao && <p>Idioma: {idiomaConfirmacao}</p>}
+                {resolucaoConfirmacao && <p>Resolução: {resolucaoConfirmacao}</p>}
                 {codigoVerificacao && <p>Código: {codigoVerificacao}</p>}
               </div>
             </div>
@@ -251,27 +264,27 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
 
   const saldoRestante = data.valor_total - (hasEntrada ? data.valor_entrada : 0) - (hasPermuta ? data.permuta_valor : 0);
   const valorParcelaReal = data.numero_parcelas > 1
-    ? (saldoRestante / data.numero_parcelas).toFixed(2)
-    : saldoRestante.toFixed(2);
+    ? formatBRL(saldoRestante / data.numero_parcelas)
+    : formatBRL(saldoRestante);
 
   return (
     <>
       <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum}. VALOR E CONDIÇÕES DE PAGAMENTO</h2>
       <p>Pela execução dos serviços descritos neste contrato, o CONTRATANTE pagará ao CONTRATADO o valor total de:</p>
-      <p className="ml-4 font-bold text-base">R$ {Number(data.valor_total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+      <p className="ml-4 font-bold text-base">R$ {formatBRL(data.valor_total)}</p>
 
       <p className="mt-4 font-semibold">Forma de pagamento:</p>
       <ul className="list-disc ml-8 my-2 space-y-1">
         {hasEntrada && (
-          <li>Entrada: <strong>R$ {Number(data.valor_entrada).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> via {entradaPaymentLabel[data.forma_pagamento_entrada]}.</li>
+          <li>Entrada: <strong>R$ {formatBRL(data.valor_entrada)}</strong> via {entradaPaymentLabel[data.forma_pagamento_entrada]}.</li>
         )}
         {hasPermuta && (
-          <li>Permuta: <strong>R$ {Number(data.permuta_valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> em produtos/serviços, conforme Anexo de Permuta deste contrato.</li>
+          <li>Permuta: <strong>R$ {formatBRL(data.permuta_valor)}</strong> em produtos/serviços, conforme Anexo de Permuta deste contrato.</li>
         )}
         <li>
-          Saldo restante: <strong>R$ {Number(saldoRestante).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong>
+          Saldo restante: <strong>R$ {formatBRL(saldoRestante)}</strong>
           {isPB && data.numero_parcelas > 1 ? (
-            <>, parcelado em <strong>{data.numero_parcelas}x de R$ {Number(valorParcelaReal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong> via {paymentLabel[data.forma_pagamento]}.</>
+            <>, parcelado em <strong>{data.numero_parcelas}x de R$ {valorParcelaReal}</strong> via {paymentLabel[data.forma_pagamento]}.</>
           ) : isCard ? (
             <>, pago via cartão de crédito no ato da contratação.</>
           ) : isCash ? (
@@ -287,7 +300,7 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
           <p className="mt-2">Vencimentos das parcelas:</p>
           <ul className="list-disc ml-8 my-2">
             {vencimentos.map((v, i) => (
-              <li key={i}>{i + 1}ª parcela — {v} — R$ {Number(valorParcelaReal).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</li>
+              <li key={i}>{i + 1}ª parcela — {v} — R$ {valorParcelaReal}</li>
             ))}
           </ul>
         </>
@@ -301,7 +314,7 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
 }
 
 /* ═══ CONTRATO WEBSITE ═══ */
-function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, ipConfirmacao, navegadorConfirmacao, valorParcela, vencimentos, isComplementar, isAdmin }: Props & {
+function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, ipConfirmacao, navegadorConfirmacao, timezoneConfirmacao, idiomaConfirmacao, resolucaoConfirmacao, valorParcela, vencimentos, isComplementar, isAdmin }: Props & {
   valorParcela: string; vencimentos: string[]; isComplementar: boolean;
 }) {
   const optimized = isOptimized(data.servico_website);
@@ -440,13 +453,13 @@ function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailC
         );
       })()}
 
-      <ConfirmacaoFooter confirmed={confirmed} confirmDate={confirmDate} nomeConfirmacao={nomeConfirmacao} emailConfirmacao={emailConfirmacao} codigoVerificacao={undefined} ipConfirmacao={ipConfirmacao} navegadorConfirmacao={navegadorConfirmacao} isAdmin={isAdmin} />
+      <ConfirmacaoFooter confirmed={confirmed} confirmDate={confirmDate} nomeConfirmacao={nomeConfirmacao} emailConfirmacao={emailConfirmacao} codigoVerificacao={undefined} ipConfirmacao={ipConfirmacao} navegadorConfirmacao={navegadorConfirmacao} timezoneConfirmacao={timezoneConfirmacao} idiomaConfirmacao={idiomaConfirmacao} resolucaoConfirmacao={resolucaoConfirmacao} isAdmin={isAdmin} />
     </div>
   );
 }
 
 /* ═══ CONTRATO GOOGLE ═══ */
-function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, ipConfirmacao, navegadorConfirmacao, valorParcela, vencimentos, isComplementar, isAdmin }: Props & {
+function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, ipConfirmacao, navegadorConfirmacao, timezoneConfirmacao, idiomaConfirmacao, resolucaoConfirmacao, valorParcela, vencimentos, isComplementar, isAdmin }: Props & {
   valorParcela: string; vencimentos: string[]; isComplementar: boolean;
 }) {
   return (
@@ -536,7 +549,7 @@ function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailCo
       <p>Ao clicar em "Confirmar contratação", o CONTRATANTE declara que leu, compreendeu e concorda com todas as condições.</p>
       <p className="mt-2">O registro eletrônico constitui aceite formal, dispensando assinatura física.</p>
 
-      <ConfirmacaoFooter confirmed={confirmed} confirmDate={confirmDate} nomeConfirmacao={nomeConfirmacao} emailConfirmacao={emailConfirmacao} codigoVerificacao={undefined} ipConfirmacao={ipConfirmacao} navegadorConfirmacao={navegadorConfirmacao} isAdmin={isAdmin} />
+      <ConfirmacaoFooter confirmed={confirmed} confirmDate={confirmDate} nomeConfirmacao={nomeConfirmacao} emailConfirmacao={emailConfirmacao} codigoVerificacao={undefined} ipConfirmacao={ipConfirmacao} navegadorConfirmacao={navegadorConfirmacao} timezoneConfirmacao={timezoneConfirmacao} idiomaConfirmacao={idiomaConfirmacao} resolucaoConfirmacao={resolucaoConfirmacao} isAdmin={isAdmin} />
     </div>
   );
 }
@@ -554,7 +567,7 @@ function PermutaAnexo({ data }: { data: ContractFormData }) {
 
       <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. VALOR DA PERMUTA</h2>
       <p>O CONTRATANTE concorda em disponibilizar ao CONTRATADO créditos em produtos e/ou serviços no valor de:</p>
-      <p className="ml-4 font-bold text-base">R$ {Number(data.permuta_valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+      <p className="ml-4 font-bold text-base">R$ {formatBRL(Number(data.permuta_valor))}</p>
 
       {data.permuta_descricao && (
         <>

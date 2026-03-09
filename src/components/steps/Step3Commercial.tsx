@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { formatBRL } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -95,7 +96,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
   // Valor restante após entrada e permuta
   const valorBase = valorTotal || 0;
   const valorAposDesconto = Math.max(0, valorBase - (temEntrada ? valorEntrada : 0) - (temPermuta ? permutaValor : 0));
-  const valorParcela = showParcelas && numeroParcelas > 0 ? (valorAposDesconto / numeroParcelas).toFixed(2) : '0.00';
+  const valorParcela = showParcelas && numeroParcelas > 0 ? formatBRL(valorAposDesconto / numeroParcelas) : '0,00';
 
   const [descontoRegressivo, setDescontoRegressivo] = useState(false);
   const hasDesconto = formaPagamento === "pix_boleto" && numeroParcelas >= 10;
@@ -303,16 +304,16 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
             {valorBase > 0 && (
               <div className="p-4 rounded-lg bg-muted/50 border space-y-1">
                 <p className="text-sm text-muted-foreground">
-                  Valor total: <strong>R$ {Number(valorBase).toFixed(2)}</strong>
+                  Valor total: <strong>R$ {formatBRL(Number(valorBase))}</strong>
                 </p>
                 {temEntrada && valorEntrada > 0 && (
                   <p className="text-sm text-muted-foreground">
-                    Entrada ({entradaLabels[form.watch("forma_pagamento_entrada") || 'pix']}): <strong>R$ {Number(valorEntrada).toFixed(2)}</strong>
+                    Entrada ({entradaLabels[form.watch("forma_pagamento_entrada") || 'pix']}): <strong>R$ {formatBRL(Number(valorEntrada))}</strong>
                   </p>
                 )}
                 {temPermuta && permutaValor > 0 && (
                   <p className="text-sm text-muted-foreground">
-                    Permuta: <strong>R$ {Number(permutaValor).toFixed(2)}</strong>
+                    Permuta: <strong>R$ {formatBRL(Number(permutaValor))}</strong>
                   </p>
                 )}
                 {showParcelas && numeroParcelas > 0 ? (
@@ -321,7 +322,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
                   </p>
                 ) : (
                   <p className="text-sm font-medium">
-                    Restante: <strong>R$ {Number(valorAposDesconto).toFixed(2)}</strong> via {paymentLabels[formaPagamento]}
+                    Restante: <strong>R$ {formatBRL(Number(valorAposDesconto))}</strong> via {paymentLabels[formaPagamento]}
                   </p>
                 )}
               </div>

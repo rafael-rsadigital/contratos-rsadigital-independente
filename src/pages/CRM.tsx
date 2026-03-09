@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { formatBRL } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -191,7 +192,7 @@ export default function CRM() {
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">R$ {stats.totalValue.toFixed(2)}</div>
+              <div className="text-2xl font-bold">R$ {formatBRL(stats.totalValue)}</div>
             </CardContent>
           </Card>
         </div>
@@ -256,7 +257,7 @@ export default function CRM() {
                           <TableCell className="text-sm">{c.celular || '—'}</TableCell>
                           <TableCell className="text-sm">{c.municipio}/{c.estado}</TableCell>
                           <TableCell className="text-center">{c.contract_count}</TableCell>
-                          <TableCell className="text-sm font-medium">R$ {c.total_value.toFixed(2)}</TableCell>
+                          <TableCell className="text-sm font-medium">R$ {formatBRL(c.total_value)}</TableCell>
                           <TableCell className="text-xs text-muted-foreground">
                             {new Date(c.created_at).toLocaleDateString('pt-BR')}
                           </TableCell>
@@ -327,7 +328,7 @@ export default function CRM() {
                               {c.servicos.join(', ')}
                             </TableCell>
                             <TableCell className="text-sm font-medium">
-                              R$ {Number(c.valor_total).toFixed(2)}
+                              R$ {formatBRL(Number(c.valor_total))}
                             </TableCell>
                             <TableCell>
                               <Badge variant={st.variant} className="text-xs">{st.label}</Badge>

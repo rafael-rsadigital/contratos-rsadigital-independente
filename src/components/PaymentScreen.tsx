@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CONTRATADO } from "@/types/contract";
+import { formatBRL } from "@/lib/utils";
 import { Copy, Check, ArrowLeft } from "lucide-react";
 import logoRsa from "@/assets/logo-rsa-digital.png";
 import { toast } from "sonner";
@@ -29,11 +30,11 @@ export function PaymentScreen({
   onBack,
   saving,
 }: PaymentScreenProps) {
-  const [valorEntradaStr, setValorEntradaStr] = useState(valorEntradaMinimo.toFixed(2));
+  const [valorEntradaStr, setValorEntradaStr] = useState(formatBRL(valorEntradaMinimo));
   const [parcelasSelecionadas, setParcelasSelecionadas] = useState(numeroParcelas);
   const [copied, setCopied] = useState(false);
 
-  const valorEntrada = parseFloat(valorEntradaStr) || 0;
+  const valorEntrada = parseFloat(valorEntradaStr.replace(/\./g, '').replace(',', '.')) || 0;
 
   const resumo = useMemo(() => {
     const restante = valorTotal - valorEntrada;
@@ -42,14 +43,14 @@ export function PaymentScreen({
   }, [valorTotal, valorEntrada, parcelasSelecionadas]);
 
   const handleValorEntradaBlur = () => {
-    const num = parseFloat(valorEntradaStr) || 0;
+    const num = parseFloat(valorEntradaStr.replace(/\./g, '').replace(',', '.')) || 0;
     if (num < valorEntradaMinimo) {
-      setValorEntradaStr(valorEntradaMinimo.toFixed(2));
-      toast.error(`O valor mínimo da entrada é R$ ${valorEntradaMinimo.toFixed(2)}`);
+      setValorEntradaStr(formatBRL(valorEntradaMinimo));
+      toast.error(`O valor mínimo da entrada é R$ ${formatBRL(valorEntradaMinimo)}`);
     } else if (num > valorTotal) {
-      setValorEntradaStr(valorTotal.toFixed(2));
+      setValorEntradaStr(formatBRL(valorTotal));
     } else {
-      setValorEntradaStr(num.toFixed(2));
+      setValorEntradaStr(formatBRL(num));
     }
   };
 
@@ -85,13 +86,13 @@ export function PaymentScreen({
       <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Valor total do contrato</span>
-          <span className="font-semibold">R$ {valorTotal.toFixed(2)}</span>
+          <span className="font-semibold">R$ {formatBRL(valorTotal)}</span>
         </div>
       </div>
 
       {/* Valor da entrada */}
       <div className="space-y-2">
-        <Label htmlFor="valor-entrada">Valor da entrada (mínimo R$ {valorEntradaMinimo.toFixed(2)})</Label>
+        <Label htmlFor="valor-entrada">Valor da entrada (mínimo R$ {formatBRL(valorEntradaMinimo)})</Label>
         <Input
           id="valor-entrada"
           type="text"
@@ -120,7 +121,7 @@ export function PaymentScreen({
             <SelectContent>
               {opçõesParcelas.map((n) => (
                 <SelectItem key={n} value={String(n)}>
-                  {n}x de R$ {((valorTotal - valorEntrada) / n).toFixed(2)}
+                  {n}x de R$ {formatBRL((valorTotal - valorEntrada) / n)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -133,13 +134,13 @@ export function PaymentScreen({
         <h3 className="font-semibold text-sm text-foreground">Resumo do pagamento</h3>
         <div className="flex justify-between text-sm">
           <span>Entrada (agora)</span>
-          <span className="font-bold text-primary">R$ {valorEntrada.toFixed(2)}</span>
+          <span className="font-bold text-primary">R$ {formatBRL(valorEntrada)}</span>
         </div>
         {numeroParcelas > 1 && (
           <div className="flex justify-between text-sm">
             <span>Restante ({parcelasSelecionadas}x)</span>
             <span className="font-medium">
-              R$ {resumo.restante.toFixed(2)} ({parcelasSelecionadas}x de R$ {resumo.valorParcela.toFixed(2)})
+              R$ {formatBRL(resumo.restante)} ({parcelasSelecionadas}x de R$ {formatBRL(resumo.valorParcela)})
             </span>
           </div>
         )}
@@ -175,7 +176,7 @@ export function PaymentScreen({
 
         <div className="text-center">
           <p className="text-xs text-muted-foreground">Valor a transferir</p>
-          <p className="text-2xl font-bold text-primary">R$ {valorEntrada.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-primary">R$ {formatBRL(valorEntrada)}</p>
         </div>
 
         <Button onClick={handleCopyPix} variant="outline" className="w-full gap-2">

@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Repeat, Plus, MessageCircle, History } from "lucide-react";
 import { CONTRATADO } from "@/types/contract";
+import { formatBRL } from "@/lib/utils";
 
 interface Utilizacao {
   id: string;
@@ -85,7 +86,7 @@ export function PermutaControl({ contractId, permutaValor, clienteNome }: Props)
   const handleShareWhatsApp = () => {
     const link = window.location.href;
     const message = encodeURIComponent(
-      `Olá ${clienteNome}!\n\n*Extrato de Permuta*\n\nValor inicial: R$ ${permutaValor.toFixed(2)}\nValor utilizado: R$ ${totalUtilizado.toFixed(2)}\n*Saldo restante: R$ ${saldoRestante.toFixed(2)}*\n\n${utilizacoes.length > 0 ? `Últimas utilizações:\n${utilizacoes.slice(0, 5).map(u => `• ${new Date(u.data_utilizacao).toLocaleDateString('pt-BR')} - R$ ${u.valor_utilizado.toFixed(2)} - ${u.descricao}`).join('\n')}` : 'Nenhuma utilização registrada.'}\n\nAcesse o contrato:\n${link}`
+      `Olá ${clienteNome}!\n\n*Extrato de Permuta*\n\nValor inicial: R$ ${formatBRL(permutaValor)}\nValor utilizado: R$ ${formatBRL(totalUtilizado)}\n*Saldo restante: R$ ${formatBRL(saldoRestante)}*\n\n${utilizacoes.length > 0 ? `Últimas utilizações:\n${utilizacoes.slice(0, 5).map(u => `• ${new Date(u.data_utilizacao).toLocaleDateString('pt-BR')} - R$ ${formatBRL(u.valor_utilizado)} - ${u.descricao}`).join('\n')}` : 'Nenhuma utilização registrada.'}\n\nAcesse o contrato:\n${link}`
     );
     window.open(`https://wa.me/55${CONTRATADO.whatsapp}?text=${message}`, '_blank');
   };
@@ -107,16 +108,16 @@ export function PermutaControl({ contractId, permutaValor, clienteNome }: Props)
         <div className="grid grid-cols-3 gap-3 text-center">
           <div className="p-3 rounded-lg bg-background border">
             <p className="text-xs text-muted-foreground">Crédito Inicial</p>
-            <p className="text-lg font-bold">R$ {permutaValor.toFixed(2)}</p>
+            <p className="text-lg font-bold">R$ {formatBRL(permutaValor)}</p>
           </div>
           <div className="p-3 rounded-lg bg-background border">
             <p className="text-xs text-muted-foreground">Utilizado</p>
-            <p className="text-lg font-bold text-destructive">R$ {totalUtilizado.toFixed(2)}</p>
+            <p className="text-lg font-bold text-destructive">R$ {formatBRL(totalUtilizado)}</p>
           </div>
           <div className="p-3 rounded-lg bg-background border">
             <p className="text-xs text-muted-foreground">Saldo</p>
             <p className={`text-lg font-bold ${saldoRestante > 0 ? 'text-green-600' : 'text-muted-foreground'}`}>
-              R$ {saldoRestante.toFixed(2)}
+              R$ {formatBRL(saldoRestante)}
             </p>
           </div>
         </div>
@@ -150,7 +151,7 @@ export function PermutaControl({ contractId, permutaValor, clienteNome }: Props)
                       })}
                     </p>
                   </div>
-                  <span className="font-mono text-destructive">-R$ {u.valor_utilizado.toFixed(2)}</span>
+                  <span className="font-mono text-destructive">-R$ {formatBRL(u.valor_utilizado)}</span>
                 </div>
               ))}
             </div>
@@ -164,7 +165,7 @@ export function PermutaControl({ contractId, permutaValor, clienteNome }: Props)
           <DialogHeader>
             <DialogTitle>Registrar Utilização de Permuta</DialogTitle>
             <DialogDescription>
-              Saldo disponível: R$ {saldoRestante.toFixed(2)}
+              Saldo disponível: R$ {formatBRL(saldoRestante)}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
