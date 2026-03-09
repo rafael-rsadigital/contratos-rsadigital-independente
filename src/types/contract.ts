@@ -66,9 +66,23 @@ export interface AnexoData {
 
 export interface AditivoData {
   id: string;
+  numero: number;
   titulo: string;
   descricao: string;
+  clausulas_alteradas?: string;
+  novo_valor?: number;
+  novo_prazo?: string;
   data: string;
+  status: 'pendente' | 'aceito';
+  data_aceite?: string;
+  nome_aceite?: string;
+  email_aceite?: string;
+  ip_aceite?: string;
+  navegador_aceite?: string;
+  timezone_aceite?: string;
+  idioma_aceite?: string;
+  resolucao_aceite?: string;
+  codigo_verificacao?: string;
 }
 
 export interface ContractRecord {

@@ -46,6 +46,9 @@ export default function ContratoView() {
   const [showAditivoDialog, setShowAditivoDialog] = useState(false);
   const [aditivoTitulo, setAditivoTitulo] = useState("");
   const [aditivoDescricao, setAditivoDescricao] = useState("");
+  const [aditivoClausulas, setAditivoClausulas] = useState("");
+  const [aditivoNovoValor, setAditivoNovoValor] = useState("");
+  const [aditivoNovoPrazo, setAditivoNovoPrazo] = useState("");
   const [savingAditivo, setSavingAditivo] = useState(false);
 
   // Track view on load
@@ -115,7 +118,7 @@ export default function ContratoView() {
           permuta_condicoes: (data as any).permuta_condicoes || '',
           tem_permuta: Number((data as any).permuta_valor) > 0,
           anexos: (anexos || []).map((a: any): AnexoData => ({ id: a.id, titulo: a.titulo, descricao: a.descricao, data: a.data })),
-          aditivos: (aditivos || []).map((a: any): AditivoData => ({ id: a.id, titulo: a.titulo, descricao: a.descricao, data: a.data })),
+          aditivos: (aditivos || []).map((a: any): AditivoData => ({ id: a.id, numero: a.numero || 1, titulo: a.titulo, descricao: a.descricao, data: a.data, status: a.status || 'pendente', data_aceite: a.data_aceite, nome_aceite: a.nome_aceite, email_aceite: a.email_aceite, ip_aceite: a.ip_aceite, navegador_aceite: a.navegador_aceite, timezone_aceite: a.timezone_aceite, idioma_aceite: a.idioma_aceite, resolucao_aceite: a.resolucao_aceite, codigo_verificacao: a.codigo_verificacao, clausulas_alteradas: a.clausulas_alteradas, novo_valor: a.novo_valor, novo_prazo: a.novo_prazo })),
         });
 
         setContractStatus(data.status);
@@ -259,20 +262,48 @@ export default function ContratoView() {
     setSavingAditivo(true);
     try {
       const hoje = new Date().toLocaleDateString('pt-BR');
-      await supabase.from('contract_aditivos').insert({
+      const novoNumero = (contractData?.aditivos?.length || 0) + 1;
+      const insertData: any = {
         contract_id: id,
         titulo: aditivoTitulo.trim(),
         descricao: aditivoDescricao.trim(),
         data: hoje,
-      });
+        numero: novoNumero,
+        status: 'pendente',
+      };
+      if (aditivoClausulas.trim()) insertData.clausulas_alteradas = aditivoClausulas.trim();
+      if (aditivoNovoValor) insertData.novo_valor = parseFloat(aditivoNovoValor);
+      if (aditivoNovoPrazo.trim()) insertData.novo_prazo = aditivoNovoPrazo.trim();
+
+      const { data: inserted } = await (supabase.from('contract_aditivos') as any).insert(insertData).select().single();
+      
       setContractData(prev => prev ? {
         ...prev,
-        aditivos: [...prev.aditivos, { id: crypto.randomUUID(), titulo: aditivoTitulo.trim(), descricao: aditivoDescricao.trim(), data: hoje }],
+        aditivos: [...prev.aditivos, { 
+          id: inserted?.id || crypto.randomUUID(), 
+          numero: novoNumero, 
+          titulo: aditivoTitulo.trim(), 
+          descricao: aditivoDescricao.trim(), 
+          data: hoje, 
+          status: 'pendente' as const,
+          clausulas_alteradas: aditivoClausulas.trim() || undefined,
+          novo_valor: aditivoNovoValor ? parseFloat(aditivoNovoValor) : undefined,
+          novo_prazo: aditivoNovoPrazo.trim() || undefined,
+        }],
       } : prev);
       setAditivoTitulo("");
       setAditivoDescricao("");
+      setAditivoClausulas("");
+      setAditivoNovoValor("");
+      setAditivoNovoPrazo("");
       setShowAditivoDialog(false);
-      toast.success("Aditivo adicionado!");
+      toast.success("Aditivo criado! Envie o link para o cliente aceitar.");
+      
+      // Copy link
+      const aditivoLink = `${window.location.origin}/aditivo/${inserted?.id}`;
+      navigator.clipboard.writeText(aditivoLink).then(() => {
+        toast.info(`Link copiado: ${aditivoLink}`);
+      }).catch(() => {});
     } catch {
       toast.error("Erro ao adicionar aditivo.");
     } finally {
@@ -478,25 +509,39 @@ export default function ContratoView() {
 
       {/* Aditivo Dialog */}
       <Dialog open={showAditivoDialog} onOpenChange={setShowAditivoDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Adicionar Aditivo Contratual</DialogTitle>
-            <DialogDescription>Insira os dados do termo aditivo.</DialogDescription>
+            <DialogTitle>Criar Termo Aditivo</DialogTitle>
+            <DialogDescription>O aditivo será enviado ao cliente para aceite eletrônico.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div>
-              <Label htmlFor="aditivo-titulo">Título</Label>
-              <Input id="aditivo-titulo" value={aditivoTitulo} onChange={e => setAditivoTitulo(e.target.value)} placeholder="Ex: Renovação de prazo" />
+              <Label htmlFor="aditivo-titulo">Título do aditivo</Label>
+              <Input id="aditivo-titulo" value={aditivoTitulo} onChange={e => setAditivoTitulo(e.target.value)} placeholder="Ex: Alteração de prazo" />
             </div>
             <div>
-              <Label htmlFor="aditivo-desc">Descrição</Label>
-              <Textarea id="aditivo-desc" value={aditivoDescricao} onChange={e => setAditivoDescricao(e.target.value)} placeholder="Descreva os termos do aditivo..." rows={5} />
+              <Label htmlFor="aditivo-desc">Descrição das alterações</Label>
+              <Textarea id="aditivo-desc" value={aditivoDescricao} onChange={e => setAditivoDescricao(e.target.value)} placeholder="Descreva detalhadamente as alterações..." rows={4} />
+            </div>
+            <div>
+              <Label htmlFor="aditivo-clausulas">Cláusulas alteradas (opcional)</Label>
+              <Textarea id="aditivo-clausulas" value={aditivoClausulas} onChange={e => setAditivoClausulas(e.target.value)} placeholder="Ex: Cláusula 5 - Valor e Condições de Pagamento" rows={3} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="aditivo-valor">Novo valor (opcional)</Label>
+                <Input id="aditivo-valor" type="number" step="0.01" value={aditivoNovoValor} onChange={e => setAditivoNovoValor(e.target.value)} placeholder="0,00" />
+              </div>
+              <div>
+                <Label htmlFor="aditivo-prazo">Novo prazo (opcional)</Label>
+                <Input id="aditivo-prazo" value={aditivoNovoPrazo} onChange={e => setAditivoNovoPrazo(e.target.value)} placeholder="Ex: 90 dias" />
+              </div>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAditivoDialog(false)}>Cancelar</Button>
             <Button onClick={handleAddAditivo} disabled={savingAditivo || !aditivoTitulo.trim() || !aditivoDescricao.trim()}>
-              {savingAditivo ? "Salvando..." : "Adicionar"}
+              {savingAditivo ? "Criando..." : "Criar e Copiar Link"}
             </Button>
           </DialogFooter>
         </DialogContent>

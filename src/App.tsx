@@ -10,6 +10,7 @@ import Historico from "./pages/Historico";
 import CRM from "./pages/CRM";
 import ContratoView from "./pages/ContratoView";
 import VerificarContrato from "./pages/VerificarContrato";
+import AditivoView from "./pages/AditivoView";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -24,6 +25,7 @@ const App = () => (
         <Routes>
           {/* Public */}
           <Route path="/contrato/:id" element={<ContratoView />} />
+          <Route path="/aditivo/:id" element={<AditivoView />} />
           <Route path="/verificar-contrato" element={<VerificarContrato />} />
           <Route path="/login" element={<Login />} />
 
