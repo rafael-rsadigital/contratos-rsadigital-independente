@@ -34,7 +34,7 @@ export function PaymentScreen({
   const [parcelasSelecionadas, setParcelasSelecionadas] = useState(numeroParcelas);
   const [copied, setCopied] = useState(false);
 
-  const valorEntrada = parseFloat(valorEntradaStr) || 0;
+  const valorEntrada = parseFloat(valorEntradaStr.replace(/\./g, '').replace(',', '.')) || 0;
 
   const resumo = useMemo(() => {
     const restante = valorTotal - valorEntrada;
