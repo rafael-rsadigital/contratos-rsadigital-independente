@@ -151,7 +151,7 @@ export function PermutaControl({ contractId, permutaValor, clienteNome }: Props)
                       })}
                     </p>
                   </div>
-                  <span className="font-mono text-destructive">-R$ {u.valor_utilizado.toFixed(2)}</span>
+                  <span className="font-mono text-destructive">-R$ {formatBRL(u.valor_utilizado)}</span>
                 </div>
               ))}
             </div>
