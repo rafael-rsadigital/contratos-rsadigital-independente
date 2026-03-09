@@ -117,6 +117,9 @@ export default function ContratoView() {
         setNomeConfirmacao((data as any).nome_confirmacao || '');
         setIpConfirmacao((data as any).ip_confirmacao || '');
         setNavegadorConfirmacao((data as any).navegador_confirmacao || '');
+        setTimezoneConfirmacao((data as any).timezone_confirmacao || '');
+        setIdiomaConfirmacao((data as any).idioma_confirmacao || '');
+        setResolucaoConfirmacao((data as any).resolucao_confirmacao || '');
         setEmailConfirmacao(data.email_confirmacao || '');
         if (data.data_confirmacao) {
           setConfirmDate(new Date(data.data_confirmacao).toLocaleDateString('pt-BR', {
