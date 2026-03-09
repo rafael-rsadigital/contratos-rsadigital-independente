@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { FilePlus, History, FileText, LogOut } from "lucide-react";
+import { FilePlus, History, FileText, LogOut, LayoutDashboard } from "lucide-react";
 
 interface ContractSummary {
   id: string;
