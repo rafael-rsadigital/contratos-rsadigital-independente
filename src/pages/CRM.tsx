@@ -256,7 +256,7 @@ export default function CRM() {
                           <TableCell className="text-sm">{c.celular || '—'}</TableCell>
                           <TableCell className="text-sm">{c.municipio}/{c.estado}</TableCell>
                           <TableCell className="text-center">{c.contract_count}</TableCell>
-                          <TableCell className="text-sm font-medium">R$ {c.total_value.toFixed(2)}</TableCell>
+                          <TableCell className="text-sm font-medium">R$ {formatBRL(c.total_value)}</TableCell>
                           <TableCell className="text-xs text-muted-foreground">
                             {new Date(c.created_at).toLocaleDateString('pt-BR')}
                           </TableCell>
