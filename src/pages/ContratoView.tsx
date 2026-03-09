@@ -268,6 +268,11 @@ export default function ContratoView() {
             <Button onClick={handleDownloadPDF} variant="outline" size="sm" className="gap-2">
               <Download className="w-4 h-4" /> PDF
             </Button>
+            {user && contractStatus === 'a_confirmar' && (
+              <Button onClick={handleAdminConfirm} size="sm" variant="default" className="gap-2">
+                <CheckCircle className="w-4 h-4" /> Confirmar Pagamento
+              </Button>
+            )}
             {!confirmed && contractStatus !== 'cancelado' && (
               <Button onClick={handleStartConfirmation} size="sm" className="gap-2">
                 <Check className="w-4 h-4" /> Confirmar Contratação
