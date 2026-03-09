@@ -55,8 +55,8 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
 
   const valorLiquido = data.valor_total - data.valor_entrada;
   const valorParcela = data.numero_parcelas > 1
-    ? (valorLiquido / data.numero_parcelas).toFixed(2)
-    : valorLiquido.toFixed(2);
+    ? formatBRL(valorLiquido / data.numero_parcelas)
+    : formatBRL(valorLiquido);
 
   const vencimentos = formatVencimentos(data.data_primeiro_vencimento, data.numero_parcelas);
 
