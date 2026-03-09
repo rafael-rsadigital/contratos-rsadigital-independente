@@ -313,7 +313,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
                 )}
                 {temPermuta && permutaValor > 0 && (
                   <p className="text-sm text-muted-foreground">
-                    Permuta: <strong>R$ {Number(permutaValor).toFixed(2)}</strong>
+                    Permuta: <strong>R$ {formatBRL(Number(permutaValor))}</strong>
                   </p>
                 )}
                 {showParcelas && numeroParcelas > 0 ? (
