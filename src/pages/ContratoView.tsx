@@ -28,6 +28,9 @@ export default function ContratoView() {
   const [contractStatus, setContractStatus] = useState("");
   const [ipConfirmacao, setIpConfirmacao] = useState("");
   const [navegadorConfirmacao, setNavegadorConfirmacao] = useState("");
+  const [timezoneConfirmacao, setTimezoneConfirmacao] = useState("");
+  const [idiomaConfirmacao, setIdiomaConfirmacao] = useState("");
+  const [resolucaoConfirmacao, setResolucaoConfirmacao] = useState("");
 
   // Confirmation dialog
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
