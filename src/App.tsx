@@ -9,6 +9,7 @@ import NovoContrato from "./pages/NovoContrato";
 import Historico from "./pages/Historico";
 import CRM from "./pages/CRM";
 import ContratoView from "./pages/ContratoView";
+import VerificarContrato from "./pages/VerificarContrato";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -21,8 +22,9 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* Public: client views contract */}
+          {/* Public */}
           <Route path="/contrato/:id" element={<ContratoView />} />
+          <Route path="/verificar-contrato" element={<VerificarContrato />} />
           <Route path="/login" element={<Login />} />
 
           {/* Protected: admin only */}

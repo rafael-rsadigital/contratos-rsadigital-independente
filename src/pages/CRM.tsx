@@ -240,7 +240,16 @@ export default function CRM() {
                     </TableHeader>
                     <TableBody>
                       {filteredClients.map(c => (
-                        <TableRow key={c.id}>
+                        <TableRow key={c.id} className="cursor-pointer hover:bg-muted/50" onClick={() => {
+                          const clientContracts = contracts.filter(ct => ct.client_nome === c.nome);
+                          if (clientContracts.length === 1) {
+                            window.location.href = `/contrato/${clientContracts[0].id}`;
+                          } else if (clientContracts.length > 1) {
+                            setSearchContracts(c.nome);
+                            const tabEl = document.querySelector('[data-value="contratos"]') as HTMLElement;
+                            tabEl?.click();
+                          }
+                        }}>
                           <TableCell className="font-medium">{c.nome}</TableCell>
                           <TableCell className="text-xs font-mono">{c.cpf_cnpj}</TableCell>
                           <TableCell className="text-sm">{c.email || '—'}</TableCell>
