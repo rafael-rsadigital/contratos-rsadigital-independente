@@ -16,6 +16,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function ContratoView() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [contractData, setContractData] = useState<ContractFormData | null>(null);
   const [confirmed, setConfirmed] = useState(false);
