@@ -271,13 +271,20 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
     <>
       <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum}. VALOR E CONDIÇÕES DE PAGAMENTO</h2>
       <p>Pela execução dos serviços descritos neste contrato, o CONTRATANTE pagará ao CONTRATADO o valor total de:</p>
-      <p className="ml-4 font-bold text-base">R$ {formatBRL(Number(data.valor_total)sName="list-disc ml-8 my-2 space-y-1">
+      <p className="ml-4 font-bold text-base">R$ {formatBRL(data.valor_total)}</p>
+
+      <p className="mt-4 font-semibold">Forma de pagamento:</p>
+      <ul className="list-disc ml-8 my-2 space-y-1">
         {hasEntrada && (
-          <li>Entrada: <strong>R$ {Number(data.valor_entrada).toLocaleString('formatBRL(Number(data.valor_entrada)orma_paformatBRL(Number(data.valor_entrada)ta: <strong>R$ {Number(data.permuta_valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strformatBRL(Number(data.permuta_valor)    )}
+          <li>Entrada: <strong>R$ {formatBRL(data.valor_entrada)}</strong> via {entradaPaymentLabel[data.forma_pagamento_entrada]}.</li>
+        )}
+        {hasPermuta && (
+          <li>Permuta: <strong>R$ {formatBRL(data.permuta_valor)}</strong> em produtos/serviços, conforme Anexo de Permuta deste contrato.</li>
+        )}
         <li>
-          Saldo restante: <strong>R$ {formatBRL(Number(saldoRestante))}</strong>
+          Saldo restante: <strong>R$ {formatBRL(saldoRestante)}</strong>
           {isPB && data.numero_parcelas > 1 ? (
-            <>, parcelado em <strong>{data.numero_parcelas}x de R$ {formatBRL(Number(valorParcelaReal))}</strong> via {paymentLabel[data.forma_pagamento]}.</>
+            <>, parcelado em <strong>{data.numero_parcelas}x de R$ {valorParcelaReal}</strong> via {paymentLabel[data.forma_pagamento]}.</>
           ) : isCard ? (
             <>, pago via cartão de crédito no ato da contratação.</>
           ) : isCash ? (
