@@ -556,12 +556,12 @@ export default function ContratoView() {
 
           {confirmStep !== 3 && (
             <DialogFooter>
-              {confirmStep === 1 ? (
+            {confirmStep === 1 ? (
                 <>
                   <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>Cancelar</Button>
                   <Button
                     onClick={() => setConfirmStep(2)}
-                    disabled={!confirmNome.trim() || !confirmEmail.trim()}
+                    disabled={!confirmNome.trim() || !confirmEmail.trim() || !acceptData}
                   >
                     Próximo
                   </Button>
