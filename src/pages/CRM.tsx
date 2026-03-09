@@ -52,7 +52,7 @@ export default function CRM() {
   
   const [searchClients, setSearchClients] = useState("");
   const [searchContracts, setSearchContracts] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("todos");
+  const [activeTab, setActiveTab] = useState("clientes");
 
   const [stats, setStats] = useState({
     totalClients: 0,
