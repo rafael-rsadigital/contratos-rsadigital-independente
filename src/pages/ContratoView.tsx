@@ -290,6 +290,17 @@ export default function ContratoView() {
           />
         </div>
 
+        {/* Permuta Control - only for authenticated admin users */}
+        {user && contractData.forma_pagamento === 'permuta' && contractData.permuta_valor > 0 && id && (
+          <div className="mt-6 no-print">
+            <PermutaControl
+              contractId={id}
+              permutaValor={contractData.permuta_valor}
+              clienteNome={contractData.client.nome}
+            />
+          </div>
+        )}
+
         {/* Bottom confirm button */}
         {!confirmed && contractStatus !== 'cancelado' && (
           <div className="mt-6 text-center no-print">
