@@ -13,6 +13,7 @@ interface Props {
   numeroContrato?: string;
   ipConfirmacao?: string;
   navegadorConfirmacao?: string;
+  isAdmin?: boolean;
 }
 
 const paymentLabel: Record<string, string> = {
