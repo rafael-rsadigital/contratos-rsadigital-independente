@@ -176,7 +176,7 @@ export function PaymentScreen({
 
         <div className="text-center">
           <p className="text-xs text-muted-foreground">Valor a transferir</p>
-          <p className="text-2xl font-bold text-primary">R$ {valorEntrada.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-primary">R$ {formatBRL(valorEntrada)}</p>
         </div>
 
         <Button onClick={handleCopyPix} variant="outline" className="w-full gap-2">
