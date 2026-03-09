@@ -11,7 +11,7 @@ export interface ClientData {
   email: string;
 }
 
-export type PaymentMethod = 'pix_boleto' | 'cartao' | 'dinheiro' | 'permuta';
+export type PaymentMethod = 'pix_boleto' | 'cartao' | 'dinheiro';
 export type EntradaPaymentMethod = 'pix' | 'cartao' | 'dinheiro';
 
 export const WEBSITE_SERVICES = [
@@ -49,6 +49,7 @@ export interface ContractFormData {
   valor_entrada: number;
   forma_pagamento_entrada: EntradaPaymentMethod;
   numero_paginas: number;
+  tem_permuta: boolean;
   permuta_valor: number;
   permuta_descricao: string;
   permuta_condicoes: string;

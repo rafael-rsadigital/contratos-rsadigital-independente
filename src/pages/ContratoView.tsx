@@ -100,6 +100,7 @@ export default function ContratoView() {
           permuta_valor: Number((data as any).permuta_valor) || 0,
           permuta_descricao: (data as any).permuta_descricao || '',
           permuta_condicoes: (data as any).permuta_condicoes || '',
+          tem_permuta: Number((data as any).permuta_valor) > 0,
           anexos: (anexos || []).map((a: any): AnexoData => ({ id: a.id, titulo: a.titulo, descricao: a.descricao, data: a.data })),
           aditivos: (aditivos || []).map((a: any): AditivoData => ({ id: a.id, titulo: a.titulo, descricao: a.descricao, data: a.data })),
         });
@@ -291,7 +292,7 @@ export default function ContratoView() {
         </div>
 
         {/* Permuta Control - only for authenticated admin users */}
-        {user && contractData.forma_pagamento === 'permuta' && contractData.permuta_valor > 0 && id && (
+        {user && contractData.permuta_valor > 0 && id && (
           <div className="mt-6 no-print">
             <PermutaControl
               contractId={id}

@@ -97,7 +97,7 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
         </>
       )}
 
-      {data.forma_pagamento === 'permuta' && data.permuta_valor > 0 && (
+      {data.permuta_valor > 0 && (
         <>
           <div className="border-t-4 border-primary/20 my-12" />
           <PermutaAnexo data={data} />
@@ -186,7 +186,7 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
   const isPB = data.forma_pagamento === 'pix_boleto';
   const isCash = data.forma_pagamento === 'dinheiro';
   const isCard = data.forma_pagamento === 'cartao';
-  const isPermuta = data.forma_pagamento === 'permuta';
+  const hasPermuta = data.permuta_valor > 0;
 
   return (
     <>
@@ -196,6 +196,10 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
 
       {data.valor_entrada > 0 && (
         <p className="mt-2">Entrada: <strong>R$ {Number(data.valor_entrada).toFixed(2)}</strong> via {entradaPaymentLabel[data.forma_pagamento_entrada]}.</p>
+      )}
+
+      {hasPermuta && (
+        <p className="mt-2">Permuta: <strong>R$ {Number(data.permuta_valor).toFixed(2)}</strong> em produtos/serviços, conforme Anexo de Permuta.</p>
       )}
 
       <p className="mt-2">Forma de pagamento: <strong>{paymentLabel[data.forma_pagamento]}</strong></p>
@@ -216,8 +220,6 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
         </>
       ) : isCard ? (
         <p className="mt-2">Pagamento realizado no ato da contratação via cartão.</p>
-      ) : isPermuta ? (
-        <p className="mt-2">Pagamento realizado por meio de <strong>permuta de produtos/serviços</strong>, conforme detalhado no Anexo de Permuta deste contrato.</p>
       ) : isCash ? (
         <p className="mt-2">Pagamento à vista em dinheiro no ato da contratação.</p>
       ) : (
