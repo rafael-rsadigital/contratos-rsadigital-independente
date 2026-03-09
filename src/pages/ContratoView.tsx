@@ -225,11 +225,11 @@ export default function ContratoView() {
         : 0;
       
       const parcelasInfo = parcFinal > 0 
-        ? `\nParcelas: ${parcFinal}x de R$ ${valorParcela.toFixed(2)}` 
+        ? `\nParcelas: ${parcFinal}x de R$ ${formatBRL(valorParcela)}` 
         : '';
       
       const message = encodeURIComponent(
-        `Olá Rafael, informei o pagamento da entrada do contrato.\n\nCliente: ${confirmNome}\nServiço: ${servicos}\nValor total: R$ ${Number(contractData?.valor_total || 0).toFixed(2)}\nEntrada paga: R$ ${Number(entradaFinal).toFixed(2)}${parcelasInfo}\n\nLink do contrato:\n${link}`
+        `Olá Rafael, informei o pagamento da entrada do contrato.\n\nCliente: ${confirmNome}\nServiço: ${servicos}\nValor total: R$ ${formatBRL(Number(contractData?.valor_total || 0))}\nEntrada paga: R$ ${formatBRL(Number(entradaFinal))}${parcelasInfo}\n\nLink do contrato:\n${link}`
       );
       window.open(`https://wa.me/${CONTRATADO.whatsapp}?text=${message}`, '_blank');
     } catch (err) {
