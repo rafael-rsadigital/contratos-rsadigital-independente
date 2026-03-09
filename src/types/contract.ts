@@ -49,6 +49,7 @@ export interface ContractFormData {
   valor_entrada: number;
   forma_pagamento_entrada: EntradaPaymentMethod;
   numero_paginas: number;
+  tem_permuta: boolean;
   permuta_valor: number;
   permuta_descricao: string;
   permuta_condicoes: string;
