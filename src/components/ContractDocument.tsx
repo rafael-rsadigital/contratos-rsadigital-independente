@@ -489,12 +489,12 @@ function PermutaAnexo({ data }: { data: ContractFormData }) {
     <div className="contract-document max-w-3xl mx-auto text-[15px] leading-relaxed">
       <h1 className="text-center text-lg mb-4 tracking-widest font-bold">ANEXO DE PERMUTA</h1>
       <p className="text-center text-sm text-muted-foreground mb-6">
-        Este anexo é parte integrante do contrato de prestação de serviços acima.
+        Este anexo complementa o contrato principal, possuindo o mesmo valor jurídico e devendo ser interpretado em conjunto com as demais cláusulas contratuais.
       </p>
 
       <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. VALOR DA PERMUTA</h2>
       <p>O CONTRATANTE concorda em disponibilizar ao CONTRATADO créditos em produtos e/ou serviços no valor de:</p>
-      <p className="ml-4 font-bold text-base">R$ {Number(data.permuta_valor).toFixed(2)}</p>
+      <p className="ml-4 font-bold text-base">R$ {Number(data.permuta_valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
 
       {data.permuta_descricao && (
         <>
@@ -542,13 +542,13 @@ function PermutaAnexo({ data }: { data: ContractFormData }) {
       <p className="mt-2">Caso o CONTRATADO não utilize o crédito dentro desse prazo, o saldo remanescente será considerado expirado, não sendo possível posterior cobrança financeira relacionada à permuta.</p>
 
       <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. SOLICITAÇÃO DE UTILIZAÇÃO</h2>
-      <p>Sempre que desejar utilizar a permuta, o CONTRATADO poderá registrar solicitação de utilização do crédito.</p>
-      <p className="mt-2">A solicitação poderá ser realizada por meio eletrônico, mensagem, sistema ou outro meio de comunicação entre as partes.</p>
+      <p>O CONTRATADO poderá solicitar a utilização da permuta por qualquer meio de comunicação entre as partes, incluindo sistema eletrônico, mensagem escrita ou outro meio que permita comprovação da solicitação.</p>
 
       <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. DESCUMPRIMENTO DA PERMUTA</h2>
-      <p>Caso o CONTRATANTE impeça, recuse, dificulte ou deixe de disponibilizar os produtos ou serviços previstos na permuta, o CONTRATADO poderá registrar solicitação de utilização do crédito.</p>
+      <p>Caso o CONTRATANTE impeça, recuse, dificulte ou deixe de disponibilizar os produtos ou serviços previstos na permuta, o CONTRATADO poderá registrar solicitação formal de utilização do crédito.</p>
       <p className="mt-2">Não sendo possível a utilização no prazo de até <strong>10 (dez) dias corridos</strong> após a solicitação formal, a permuta será considerada não cumprida.</p>
       <p className="mt-2">Nessa hipótese, o valor correspondente ao saldo da permuta será automaticamente convertido em obrigação financeira em moeda corrente.</p>
+      <p className="mt-2">A partir do término do prazo de 10 (dez) dias mencionado nesta cláusula, o saldo da permuta passará a ser considerado dívida vencida, sujeita aos encargos previstos neste contrato.</p>
 
       <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. ENCARGOS POR INADIMPLEMENTO</h2>
       <p>Após a conversão da permuta em obrigação financeira, o valor devido ficará sujeito às seguintes condições:</p>
@@ -567,6 +567,10 @@ function PermutaAnexo({ data }: { data: ContractFormData }) {
       <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. EQUILÍBRIO CONTRATUAL</h2>
       <p>As regras previstas neste anexo têm como objetivo garantir equilíbrio entre as partes, assegurando que tanto o CONTRATANTE quanto o CONTRATADO possam cumprir suas obrigações de forma justa, transparente e proporcional.</p>
       <p className="mt-2">Nenhuma das partes poderá utilizar as disposições da permuta para impor vantagens indevidas ou prejudicar a outra parte.</p>
+
+      <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. BOA-FÉ NA UTILIZAÇÃO DA PERMUTA</h2>
+      <p>O CONTRATADO compromete-se a exercer o direito de utilização da permuta de forma razoável e dentro do prazo estabelecido neste contrato.</p>
+      <p className="mt-2">A ausência de solicitação de utilização do crédito durante o prazo de validade da permuta não poderá ser utilizada como fundamento para cobrança financeira posterior, salvo nas hipóteses expressamente previstas de descumprimento por parte do CONTRATANTE.</p>
     </div>
   );
 }
