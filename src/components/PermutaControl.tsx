@@ -165,7 +165,7 @@ export function PermutaControl({ contractId, permutaValor, clienteNome }: Props)
           <DialogHeader>
             <DialogTitle>Registrar Utilização de Permuta</DialogTitle>
             <DialogDescription>
-              Saldo disponível: R$ {saldoRestante.toFixed(2)}
+              Saldo disponível: R$ {formatBRL(saldoRestante)}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
