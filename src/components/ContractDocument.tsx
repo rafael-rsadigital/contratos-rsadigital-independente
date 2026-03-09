@@ -17,9 +17,8 @@ interface Props {
 
 const paymentLabel: Record<string, string> = {
   pix_boleto: "PIX / Boleto",
-  cartao: "Cartão",
+  cartao: "Cartão de Crédito",
   dinheiro: "Dinheiro",
-  permuta: "Permuta",
 };
 
 const entradaPaymentLabel: Record<string, string> = {
