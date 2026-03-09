@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Stepper } from "@/components/Stepper";
 import { Step1ClientData } from "@/components/steps/Step1ClientData";
 import { Step2ContractType } from "@/components/steps/Step2ContractType";
@@ -9,6 +9,7 @@ import { ClientData, ContractFormData } from "@/types/contract";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const STEPS = ["Cliente", "Serviços", "Pagamento", "Geração"];
 
@@ -20,7 +21,9 @@ const emptyClient: ClientData = {
 export default function NovoContrato() {
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const [searchParams] = useSearchParams();
   const [step, setStep] = useState(0);
+  const [existingClientId, setExistingClientId] = useState<string | undefined>();
   const [formData, setFormData] = useState<ContractFormData>({
     client: emptyClient,
     servicos: [],
@@ -42,6 +45,35 @@ export default function NovoContrato() {
     anexos: [],
     aditivos: [],
   });
+
+  // Pre-load client if client_id is in URL
+  useEffect(() => {
+    const clientId = searchParams.get('client_id');
+    if (!clientId) return;
+    const load = async () => {
+      const { data } = await supabase.from('clients').select('*').eq('id', clientId).single();
+      if (data) {
+        setExistingClientId(data.id);
+        setFormData(d => ({
+          ...d,
+          client: {
+            nome: data.nome,
+            cpf_cnpj: data.cpf_cnpj,
+            celular: data.celular,
+            email: data.email || '',
+            logradouro: data.logradouro,
+            numero: data.numero,
+            bairro: data.bairro,
+            cep: data.cep,
+            municipio: data.municipio,
+            estado: data.estado,
+          },
+        }));
+        setStep(1); // Skip to step 2
+      }
+    };
+    load();
+  }, [searchParams]);
 
   const isInstitucional = formData.servico_website.includes('Institucional');
 
@@ -67,7 +99,11 @@ export default function NovoContrato() {
         {step === 0 && (
           <Step1ClientData
             data={formData.client}
-            onNext={(client) => { setFormData(d => ({ ...d, client })); setStep(1); }}
+            onNext={(client, clientId) => {
+              setFormData(d => ({ ...d, client }));
+              if (clientId) setExistingClientId(clientId);
+              setStep(1);
+            }}
           />
         )}
 
@@ -116,6 +152,7 @@ export default function NovoContrato() {
         {step === 3 && (
           <Step4Contract
             data={formData}
+            existingClientId={existingClientId}
             onBack={() => setStep(2)}
             onConfirmed={(id) => {/* stay on page, share buttons shown */}}
           />
