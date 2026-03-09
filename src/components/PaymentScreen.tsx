@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CONTRATADO } from "@/types/contract";
+import { formatBRL } from "@/lib/utils";
 import { Copy, Check, ArrowLeft } from "lucide-react";
 import logoRsa from "@/assets/logo-rsa-digital.png";
 import { toast } from "sonner";
