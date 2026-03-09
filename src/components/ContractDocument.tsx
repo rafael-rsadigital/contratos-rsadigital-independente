@@ -472,6 +472,63 @@ function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailCo
   );
 }
 
+/* ═══ ANEXO DE PERMUTA ═══ */
+function PermutaAnexo({ data }: { data: ContractFormData }) {
+  return (
+    <div className="contract-document max-w-3xl mx-auto text-[15px] leading-relaxed">
+      <h1 className="text-center text-lg mb-4 tracking-widest font-bold">ANEXO DE PERMUTA</h1>
+      <p className="text-center text-sm text-muted-foreground mb-6">
+        Este anexo faz parte integrante do contrato e estabelece as condições da permuta.
+      </p>
+
+      <h2 className="text-sm font-bold mt-6 mb-2">1. OBJETO DA PERMUTA</h2>
+      <p>As partes acordam que o pagamento do contrato principal será realizado, total ou parcialmente, por meio de permuta de produtos e/ou serviços.</p>
+
+      <h2 className="text-sm font-bold mt-6 mb-2">2. VALOR EM CRÉDITO</h2>
+      <p>Valor total em crédito de permuta: <strong>R$ {Number(data.permuta_valor).toFixed(2)}</strong></p>
+
+      {data.permuta_descricao && (
+        <>
+          <h2 className="text-sm font-bold mt-6 mb-2">3. PRODUTOS/SERVIÇOS</h2>
+          <p>Os produtos e/ou serviços a serem fornecidos pelo CONTRATANTE como forma de pagamento são:</p>
+          <div className="ml-4 mt-2 p-3 bg-muted/30 rounded border">
+            <p className="whitespace-pre-wrap">{data.permuta_descricao}</p>
+          </div>
+        </>
+      )}
+
+      {data.permuta_condicoes && (
+        <>
+          <h2 className="text-sm font-bold mt-6 mb-2">{data.permuta_descricao ? '4' : '3'}. CONDIÇÕES DE UTILIZAÇÃO</h2>
+          <div className="ml-4 mt-2 p-3 bg-muted/30 rounded border">
+            <p className="whitespace-pre-wrap">{data.permuta_condicoes}</p>
+          </div>
+        </>
+      )}
+
+      <h2 className="text-sm font-bold mt-6 mb-2">{data.permuta_descricao && data.permuta_condicoes ? '5' : data.permuta_descricao || data.permuta_condicoes ? '4' : '3'}. REGRAS GERAIS</h2>
+      <ul className="list-disc ml-8 my-2">
+        <li>O crédito de permuta é pessoal e intransferível, salvo acordo expresso entre as partes.</li>
+        <li>A utilização do crédito deverá ser solicitada com antecedência mínima de 48 horas, salvo disposição específica em contrário.</li>
+        <li>O crédito não utilizado não poderá ser convertido em dinheiro.</li>
+        <li>O CONTRATADO manterá controle de saldo e fornecerá extrato sempre que solicitado.</li>
+      </ul>
+
+      <h2 className="text-sm font-bold mt-6 mb-2">{data.permuta_descricao && data.permuta_condicoes ? '6' : data.permuta_descricao || data.permuta_condicoes ? '5' : '4'}. PRAZO DE VALIDADE</h2>
+      <p>O crédito de permuta terá validade de <strong>24 (vinte e quatro) meses</strong> a partir da data de confirmação do contrato.</p>
+      <p className="mt-2">Após este prazo, o saldo não utilizado será considerado expirado, sem direito a restituição ou compensação.</p>
+
+      <h2 className="text-sm font-bold mt-6 mb-2">{data.permuta_descricao && data.permuta_condicoes ? '7' : data.permuta_descricao || data.permuta_condicoes ? '6' : '5'}. DESCUMPRIMENTO</h2>
+      <p>O não cumprimento das obrigações de fornecimento de produtos/serviços por parte do CONTRATANTE dentro do prazo acordado poderá resultar em:</p>
+      <ul className="list-disc ml-8 my-2">
+        <li>Suspensão dos serviços contratados até regularização;</li>
+        <li>Cobrança do valor equivalente em moeda corrente;</li>
+        <li>Rescisão do contrato, sem prejuízo de perdas e danos.</li>
+      </ul>
+    </div>
+  );
+}
+
 /* ═══ ANEXOS ═══ */
 function AnexosSection({ anexos }: { anexos: AnexoData[] }) {
   return (
