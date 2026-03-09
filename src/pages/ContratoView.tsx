@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { ContractDocument } from "@/components/ContractDocument";
 import { ContractFormData, PaymentMethod, EntradaPaymentMethod, CONTRATADO, AnexoData, AditivoData } from "@/types/contract";
-import { Download, Check } from "lucide-react";
+import { Download, Check, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { PaymentScreen } from "@/components/PaymentScreen";
 import { PermutaControl } from "@/components/PermutaControl";
