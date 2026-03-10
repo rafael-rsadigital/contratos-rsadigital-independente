@@ -135,6 +135,7 @@ export function Step4Contract({ data: initialData, existingClientId, onBack, onC
           permuta_valor: data.permuta_valor || 0,
           permuta_descricao: data.permuta_descricao || null,
           permuta_condicoes: data.permuta_condicoes || null,
+          valor_a_vista: data.valor_a_vista || null,
         } as any)
         .select()
         .single();

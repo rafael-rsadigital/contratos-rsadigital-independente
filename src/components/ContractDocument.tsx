@@ -268,6 +268,7 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
   const isCard = data.forma_pagamento === 'cartao';
   const hasPermuta = data.permuta_valor > 0;
   const hasEntrada = data.valor_entrada > 0;
+  const hasDescontoAVista = data.valor_a_vista != null && data.valor_a_vista > 0;
 
   const saldoRestante = data.valor_total - (hasEntrada ? data.valor_entrada : 0) - (hasPermuta ? data.permuta_valor : 0);
   const valorParcelaReal = data.numero_parcelas > 1
@@ -280,7 +281,20 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
       <p>Pela execução dos serviços descritos neste contrato, o CONTRATANTE pagará ao CONTRATADO o valor total de:</p>
       <p className="ml-4 font-bold text-base">R$ {formatBRL(data.valor_total)}</p>
 
-      <p className="mt-4 font-semibold">Forma de pagamento:</p>
+      {hasDescontoAVista && isPB && data.numero_parcelas > 1 && (
+        <>
+          <p className="mt-4 font-semibold">Opção de pagamento à vista com desconto:</p>
+          <p className="ml-4">
+            O CONTRATANTE poderá optar pelo pagamento à vista, no valor de <strong>R$ {formatBRL(data.valor_a_vista!)}</strong>, 
+            obtendo desconto de <strong>R$ {formatBRL(data.valor_total - data.valor_a_vista!)}</strong> sobre o valor parcelado.
+          </p>
+          <p className="ml-4 mt-1 text-sm text-muted-foreground">
+            Caso o CONTRATANTE opte pelo pagamento à vista, as condições de parcelamento descritas abaixo não se aplicam.
+          </p>
+        </>
+      )}
+
+      <p className="mt-4 font-semibold">Forma de pagamento (parcelado):</p>
       <ul className="list-disc ml-8 my-2 space-y-1">
         {hasEntrada && (
           <li>Entrada: <strong>R$ {formatBRL(data.valor_entrada)}</strong> via {entradaPaymentLabel[data.forma_pagamento_entrada]}.</li>

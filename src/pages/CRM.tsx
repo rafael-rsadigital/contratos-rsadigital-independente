@@ -10,8 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { ArrowLeft, LogOut, Search, Users, FileText, TrendingUp, DollarSign, Eye } from "lucide-react";
+import { ArrowLeft, LogOut, Search, Users, FileText, TrendingUp, DollarSign, Eye, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 interface Client {
   id: string;
@@ -65,6 +66,9 @@ export default function CRM() {
   const [statusFilter, setStatusFilter] = useState<string>("todos");
   const [clientStatusFilter, setClientStatusFilter] = useState<string>("todos");
   const [activeTab, setActiveTab] = useState("clientes");
+  const [deleteClientId, setDeleteClientId] = useState<string | null>(null);
+  const [deleteClientName, setDeleteClientName] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   const [stats, setStats] = useState({
     totalClients: 0,
@@ -130,6 +134,44 @@ export default function CRM() {
   useEffect(() => {
     loadData();
   }, []);
+
+  const handleDeleteClient = async () => {
+    if (!deleteClientId) return;
+    setDeleting(true);
+    try {
+      // Get contracts for this client
+      const { data: clientContracts } = await supabase
+        .from('contracts')
+        .select('id')
+        .eq('client_id', deleteClientId);
+
+      const contractIds = (clientContracts || []).map(c => c.id);
+
+      if (contractIds.length > 0) {
+        // Delete related records
+        await Promise.all([
+          supabase.from('contract_anexos').delete().in('contract_id', contractIds),
+          supabase.from('contract_aditivos').delete().in('contract_id', contractIds),
+          supabase.from('contract_views').delete().in('contract_id', contractIds),
+          supabase.from('permuta_utilizacoes').delete().in('contract_id', contractIds),
+        ]);
+        // Delete contracts
+        await supabase.from('contracts').delete().eq('client_id', deleteClientId);
+      }
+
+      // Delete client
+      await supabase.from('clients').delete().eq('id', deleteClientId);
+
+      toast.success("Cliente e contratos excluídos com sucesso.");
+      setDeleteClientId(null);
+      loadData();
+    } catch (error) {
+      console.error('Error deleting client:', error);
+      toast.error('Erro ao excluir cliente.');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const filteredClients = clients.filter(c => {
     const matchesSearch = c.nome.toLowerCase().includes(searchClients.toLowerCase()) ||
@@ -311,11 +353,21 @@ export default function CRM() {
                             <TableCell className="text-center">{c.contract_count}</TableCell>
                             <TableCell className="text-sm font-medium">R$ {formatBRL(c.total_value)}</TableCell>
                             <TableCell>
-                              <Link to={`/cliente/${c.id}`}>
-                                <Button variant="ghost" size="sm" className="gap-1">
-                                  <Eye className="w-3 h-3" /> Ver
+                              <div className="flex gap-1">
+                                <Link to={`/cliente/${c.id}`}>
+                                  <Button variant="ghost" size="sm" className="gap-1">
+                                    <Eye className="w-3 h-3" /> Ver
+                                  </Button>
+                                </Link>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="gap-1 text-destructive hover:text-destructive"
+                                  onClick={() => { setDeleteClientId(c.id); setDeleteClientName(c.nome); }}
+                                >
+                                  <Trash2 className="w-3 h-3" />
                                 </Button>
-                              </Link>
+                              </div>
                             </TableCell>
                           </TableRow>
                         );
@@ -406,6 +458,24 @@ export default function CRM() {
           </Tabs>
         </Card>
       </main>
+
+      {/* Delete Client Dialog */}
+      <Dialog open={!!deleteClientId} onOpenChange={(open) => { if (!open) setDeleteClientId(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Excluir cliente</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir <strong>{deleteClientName}</strong> e todos os contratos associados? Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteClientId(null)} disabled={deleting}>Cancelar</Button>
+            <Button variant="destructive" onClick={handleDeleteClient} disabled={deleting}>
+              {deleting ? "Excluindo..." : "Excluir"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

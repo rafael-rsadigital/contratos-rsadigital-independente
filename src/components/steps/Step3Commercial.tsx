@@ -26,6 +26,8 @@ const schema = z.object({
   permuta_valor: z.coerce.number().min(0).optional(),
   permuta_descricao: z.string().optional(),
   permuta_condicoes: z.string().optional(),
+  oferecer_desconto_avista: z.boolean(),
+  valor_a_vista: z.coerce.number().min(0).optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -59,6 +61,7 @@ interface Props {
     permuta_valor: number;
     permuta_descricao: string;
     permuta_condicoes: string;
+    valor_a_vista: number | null;
   }) => void;
   onBack: () => void;
 }
@@ -79,6 +82,8 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
       permuta_valor: data.permuta_valor || 0,
       permuta_descricao: data.permuta_descricao || '',
       permuta_condicoes: data.permuta_condicoes || '',
+      oferecer_desconto_avista: (data as any).valor_a_vista != null && (data as any).valor_a_vista > 0,
+      valor_a_vista: (data as any).valor_a_vista || 0,
     },
   });
 
@@ -87,6 +92,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
   const valorTotal = form.watch("valor_total");
   const temEntrada = form.watch("tem_entrada");
   const temPermuta = form.watch("tem_permuta");
+  const oferecerDescontoAVista = form.watch("oferecer_desconto_avista");
   const valorEntrada = form.watch("valor_entrada") || 0;
   const permutaValor = form.watch("permuta_valor") || 0;
 
@@ -128,6 +134,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
       permuta_valor: values.tem_permuta ? (values.permuta_valor || 0) : 0,
       permuta_descricao: values.tem_permuta ? (values.permuta_descricao || '') : '',
       permuta_condicoes: values.tem_permuta ? (values.permuta_condicoes || '') : '',
+      valor_a_vista: values.oferecer_desconto_avista && values.valor_a_vista && values.valor_a_vista > 0 ? values.valor_a_vista : null,
     });
   };
 
@@ -298,6 +305,38 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
                   <FormMessage />
                 </FormItem>
               )} />
+            )}
+
+            {/* Desconto à Vista */}
+            {showParcelas && numeroParcelas > 1 && (
+              <div className="border rounded-lg p-4 space-y-4 bg-primary/5 border-primary/20">
+                <FormField control={form.control} name="oferecer_desconto_avista" render={({ field }) => (
+                  <FormItem className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="w-4 h-4 text-primary" />
+                      <FormLabel className="font-semibold">Oferecer desconto à vista?</FormLabel>
+                    </div>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+
+                {oferecerDescontoAVista && (
+                  <FormField control={form.control} name="valor_a_vista" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Valor à vista com desconto (R$)</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" min="0" placeholder="1500.00" {...field} />
+                      </FormControl>
+                      <p className="text-xs text-muted-foreground">
+                        O cliente poderá optar por pagar à vista com este valor ao invés do parcelamento.
+                      </p>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                )}
+              </div>
             )}
 
             {/* Resumo */}
