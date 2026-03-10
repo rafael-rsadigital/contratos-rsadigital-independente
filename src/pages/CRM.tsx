@@ -353,11 +353,21 @@ export default function CRM() {
                             <TableCell className="text-center">{c.contract_count}</TableCell>
                             <TableCell className="text-sm font-medium">R$ {formatBRL(c.total_value)}</TableCell>
                             <TableCell>
-                              <Link to={`/cliente/${c.id}`}>
-                                <Button variant="ghost" size="sm" className="gap-1">
-                                  <Eye className="w-3 h-3" /> Ver
+                              <div className="flex gap-1">
+                                <Link to={`/cliente/${c.id}`}>
+                                  <Button variant="ghost" size="sm" className="gap-1">
+                                    <Eye className="w-3 h-3" /> Ver
+                                  </Button>
+                                </Link>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="gap-1 text-destructive hover:text-destructive"
+                                  onClick={() => { setDeleteClientId(c.id); setDeleteClientName(c.nome); }}
+                                >
+                                  <Trash2 className="w-3 h-3" />
                                 </Button>
-                              </Link>
+                              </div>
                             </TableCell>
                           </TableRow>
                         );
