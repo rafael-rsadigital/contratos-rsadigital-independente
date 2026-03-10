@@ -92,6 +92,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
   const valorTotal = form.watch("valor_total");
   const temEntrada = form.watch("tem_entrada");
   const temPermuta = form.watch("tem_permuta");
+  const oferecerDescontoAVista = form.watch("oferecer_desconto_avista");
   const valorEntrada = form.watch("valor_entrada") || 0;
   const permutaValor = form.watch("permuta_valor") || 0;
 
