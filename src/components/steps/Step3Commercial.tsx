@@ -307,6 +307,38 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
               )} />
             )}
 
+            {/* Desconto à Vista */}
+            {showParcelas && numeroParcelas > 1 && (
+              <div className="border rounded-lg p-4 space-y-4 bg-primary/5 border-primary/20">
+                <FormField control={form.control} name="oferecer_desconto_avista" render={({ field }) => (
+                  <FormItem className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="w-4 h-4 text-primary" />
+                      <FormLabel className="font-semibold">Oferecer desconto à vista?</FormLabel>
+                    </div>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+
+                {oferecerDescontoAVista && (
+                  <FormField control={form.control} name="valor_a_vista" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Valor à vista com desconto (R$)</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" min="0" placeholder="1500.00" {...field} />
+                      </FormControl>
+                      <p className="text-xs text-muted-foreground">
+                        O cliente poderá optar por pagar à vista com este valor ao invés do parcelamento.
+                      </p>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                )}
+              </div>
+            )}
+
             {/* Resumo */}
             {valorBase > 0 && (
               <div className="p-4 rounded-lg bg-muted/50 border space-y-1">
