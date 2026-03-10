@@ -53,6 +53,7 @@ export interface ContractFormData {
   permuta_valor: number;
   permuta_descricao: string;
   permuta_condicoes: string;
+  valor_a_vista: number | null;
   anexos: AnexoData[];
   aditivos: AditivoData[];
 }

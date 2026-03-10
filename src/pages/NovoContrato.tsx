@@ -42,6 +42,7 @@ export default function NovoContrato() {
     permuta_valor: 0,
     permuta_descricao: "",
     permuta_condicoes: "",
+    valor_a_vista: null,
     anexos: [],
     aditivos: [],
   });
