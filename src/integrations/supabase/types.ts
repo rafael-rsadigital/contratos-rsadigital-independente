@@ -252,6 +252,7 @@ export type Database = {
           timezone_confirmacao: string | null
           tipo: string
           updated_at: string
+          valor_a_vista: number | null
           valor_entrada: number
           valor_total: number
         }
@@ -285,6 +286,7 @@ export type Database = {
           timezone_confirmacao?: string | null
           tipo: string
           updated_at?: string
+          valor_a_vista?: number | null
           valor_entrada?: number
           valor_total: number
         }
@@ -318,6 +320,7 @@ export type Database = {
           timezone_confirmacao?: string | null
           tipo?: string
           updated_at?: string
+          valor_a_vista?: number | null
           valor_entrada?: number
           valor_total?: number
         }

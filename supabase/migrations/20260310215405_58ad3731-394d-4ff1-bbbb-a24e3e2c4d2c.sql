@@ -1,0 +1,1 @@
+ALTER TABLE public.contracts ADD COLUMN IF NOT EXISTS valor_a_vista numeric DEFAULT NULL;
