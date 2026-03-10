@@ -135,6 +135,44 @@ export default function CRM() {
     loadData();
   }, []);
 
+  const handleDeleteClient = async () => {
+    if (!deleteClientId) return;
+    setDeleting(true);
+    try {
+      // Get contracts for this client
+      const { data: clientContracts } = await supabase
+        .from('contracts')
+        .select('id')
+        .eq('client_id', deleteClientId);
+
+      const contractIds = (clientContracts || []).map(c => c.id);
+
+      if (contractIds.length > 0) {
+        // Delete related records
+        await Promise.all([
+          supabase.from('contract_anexos').delete().in('contract_id', contractIds),
+          supabase.from('contract_aditivos').delete().in('contract_id', contractIds),
+          supabase.from('contract_views').delete().in('contract_id', contractIds),
+          supabase.from('permuta_utilizacoes').delete().in('contract_id', contractIds),
+        ]);
+        // Delete contracts
+        await supabase.from('contracts').delete().eq('client_id', deleteClientId);
+      }
+
+      // Delete client
+      await supabase.from('clients').delete().eq('id', deleteClientId);
+
+      toast.success("Cliente e contratos excluídos com sucesso.");
+      setDeleteClientId(null);
+      loadData();
+    } catch (error) {
+      console.error('Error deleting client:', error);
+      toast.error('Erro ao excluir cliente.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const filteredClients = clients.filter(c => {
     const matchesSearch = c.nome.toLowerCase().includes(searchClients.toLowerCase()) ||
       c.cpf_cnpj.includes(searchClients) ||
