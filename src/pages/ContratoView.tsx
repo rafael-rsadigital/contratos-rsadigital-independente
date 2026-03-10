@@ -179,7 +179,7 @@ export default function ContratoView() {
     }
   };
 
-  const handleConfirmContract = async (valorEntradaFinal?: number, parcelasFinal?: number) => {
+  const handleConfirmContract = async (valorEntradaFinal?: number, parcelasFinal?: number, pagouAvista?: boolean) => {
     if (!id || !contractData) return;
     setSaving(true);
     try {
@@ -208,11 +208,16 @@ export default function ContratoView() {
         resolucao_confirmacao: resolucao,
       };
 
-      if (valorEntradaFinal !== undefined) {
-        updateData.valor_entrada = valorEntradaFinal;
-      }
-      if (parcelasFinal !== undefined) {
-        updateData.numero_parcelas = parcelasFinal;
+      if (pagouAvista && contractData.valor_a_vista) {
+        updateData.valor_entrada = contractData.valor_a_vista;
+        updateData.numero_parcelas = 0;
+      } else {
+        if (valorEntradaFinal !== undefined) {
+          updateData.valor_entrada = valorEntradaFinal;
+        }
+        if (parcelasFinal !== undefined) {
+          updateData.numero_parcelas = parcelasFinal;
+        }
       }
 
       await supabase.from('contracts').update(updateData).eq('id', id);
@@ -220,11 +225,20 @@ export default function ContratoView() {
       // Create anexo if client changed entry value or installments
       const entradaOriginal = contractData.valor_entrada;
       const parcelasOriginal = contractData.numero_parcelas;
-      const entradaFinal = valorEntradaFinal ?? entradaOriginal;
-      const parcFinal = parcelasFinal ?? parcelasOriginal;
+      const entradaFinal = pagouAvista ? (contractData.valor_a_vista || 0) : (valorEntradaFinal ?? entradaOriginal);
+      const parcFinal = pagouAvista ? 0 : (parcelasFinal ?? parcelasOriginal);
 
       // Create anexo for payment changes
-      if (entradaFinal !== entradaOriginal || parcFinal !== parcelasOriginal) {
+      if (pagouAvista) {
+        const hoje = new Date().toLocaleDateString('pt-BR');
+        const descricao = `O cliente ${confirmNome} optou pelo pagamento à vista com desconto em ${hoje}.\n\nValor original (parcelado): R$ ${formatBRL(contractData.valor_total)}\nValor à vista: R$ ${formatBRL(contractData.valor_a_vista || 0)}\nDesconto: R$ ${formatBRL(contractData.valor_total - (contractData.valor_a_vista || 0))}`;
+        await (supabase.from('contract_anexos') as any).insert({
+          contract_id: id,
+          titulo: 'Pagamento à Vista com Desconto',
+          descricao,
+          data: hoje,
+        });
+      } else if (entradaFinal !== entradaOriginal || parcFinal !== parcelasOriginal) {
         const hoje = new Date().toLocaleDateString('pt-BR');
         let descricao = `Alteração na forma de pagamento solicitada pelo cliente ${confirmNome} em ${hoje}.\n\n`;
         
@@ -277,27 +291,114 @@ export default function ContratoView() {
         hour: '2-digit', minute: '2-digit',
       }));
       setShowConfirmDialog(false);
-      toast.success("Pagamento informado! Aguarde a confirmação.");
+      toast.success("Contrato confirmado! Aguarde a validação.");
+
+      // Auto-download PDF
+      setTimeout(async () => {
+        await handleDownloadPDF();
+      }, 1000);
 
       // Open WhatsApp to admin
       const link = window.location.href;
       const servicos = [contractData?.servico_website, contractData?.servico_google].filter(Boolean).join(' + ');
       
-      const valorParcela = parcFinal > 0 
-        ? (contractData.valor_total - entradaFinal) / parcFinal 
-        : 0;
-      
-      const parcelasInfo = parcFinal > 0 
-        ? `\nParcelas: ${parcFinal}x de R$ ${formatBRL(valorParcela)}` 
-        : '';
+      let paymentInfo = '';
+      if (pagouAvista) {
+        paymentInfo = `\nPagamento à vista: R$ ${formatBRL(contractData.valor_a_vista || 0)}`;
+      } else {
+        const valorParcela = parcFinal > 0 
+          ? (contractData.valor_total - entradaFinal) / parcFinal 
+          : 0;
+        paymentInfo = parcFinal > 0 
+          ? `\nEntrada: R$ ${formatBRL(Number(entradaFinal))}\nParcelas: ${parcFinal}x de R$ ${formatBRL(valorParcela)}` 
+          : `\nEntrada paga: R$ ${formatBRL(Number(entradaFinal))}`;
+      }
       
       const message = encodeURIComponent(
-        `Olá Rafael, informei o pagamento da entrada do contrato.\n\nCliente: ${confirmNome}\nServiço: ${servicos}\nValor total: R$ ${formatBRL(Number(contractData?.valor_total || 0))}\nEntrada paga: R$ ${formatBRL(Number(entradaFinal))}${parcelasInfo}\n\nLink do contrato:\n${link}`
+        `Olá Rafael, confirmei o contrato.\n\nCliente: ${confirmNome}\nServiço: ${servicos}\nValor total: R$ ${formatBRL(Number(contractData?.valor_total || 0))}${paymentInfo}\n\nLink do contrato:\n${link}`
       );
       window.open(`https://wa.me/${CONTRATADO.whatsapp}?text=${message}`, '_blank');
     } catch (err) {
       console.error(err);
       toast.error("Erro ao confirmar contrato.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleFinalizeWithoutPayment = async () => {
+    if (!id || !contractData) return;
+    setSaving(true);
+    try {
+      let ip = 'desconhecido';
+      try {
+        const resp = await fetch('https://api.ipify.org?format=json');
+        const ipData = await resp.json();
+        ip = ipData.ip;
+      } catch {}
+
+      const navegador = navigator.userAgent;
+      const now = new Date().toISOString();
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+      const idioma = navigator.language || '';
+      const resolucao = `${window.screen.width}x${window.screen.height}`;
+
+      await supabase.from('contracts').update({
+        status: 'a_confirmar',
+        data_confirmacao: now,
+        nome_confirmacao: confirmNome,
+        email_confirmacao: confirmEmail,
+        ip_confirmacao: ip,
+        navegador_confirmacao: navegador,
+        timezone_confirmacao: timezone,
+        idioma_confirmacao: idioma,
+        resolucao_confirmacao: resolucao,
+      }).eq('id', id);
+
+      // Create anexo for client data changes
+      if (nomeEditado || emailEditado) {
+        const hoje = new Date().toLocaleDateString('pt-BR');
+        let descricao = `Alteração de dados cadastrais realizada pelo cliente durante a confirmação do contrato em ${hoje}.\n\n`;
+        if (nomeEditado) {
+          descricao += `Nome original: ${nomeOriginal}\nNome final: ${confirmNome}\n\n`;
+        }
+        if (emailEditado) {
+          descricao += `Email original: ${emailOriginal}\nEmail final: ${confirmEmail}\n`;
+        }
+        await (supabase.from('contract_anexos') as any).insert({
+          contract_id: id,
+          titulo: 'Alteração de Dados pelo Cliente',
+          descricao,
+          data: hoje,
+        });
+      }
+
+      setConfirmed(true);
+      setContractStatus('a_confirmar');
+      setNomeConfirmacao(confirmNome);
+      setEmailConfirmacao(confirmEmail);
+      setConfirmDate(new Date(now).toLocaleDateString('pt-BR', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+      }));
+      setShowConfirmDialog(false);
+      toast.success("Contrato finalizado! Aguarde a confirmação.");
+
+      // Auto-download PDF
+      setTimeout(async () => {
+        await handleDownloadPDF();
+      }, 1000);
+
+      // Open WhatsApp to admin
+      const link = window.location.href;
+      const servicos = [contractData?.servico_website, contractData?.servico_google].filter(Boolean).join(' + ');
+      const message = encodeURIComponent(
+        `Olá Rafael, finalizei o contrato (sem pagamento imediato).\n\nCliente: ${confirmNome}\nServiço: ${servicos}\nValor total: R$ ${formatBRL(Number(contractData?.valor_total || 0))}\n\nLink do contrato:\n${link}`
+      );
+      window.open(`https://wa.me/${CONTRATADO.whatsapp}?text=${message}`, '_blank');
+    } catch (err) {
+      console.error(err);
+      toast.error("Erro ao finalizar contrato.");
     } finally {
       setSaving(false);
     }
