@@ -66,6 +66,9 @@ export default function CRM() {
   const [statusFilter, setStatusFilter] = useState<string>("todos");
   const [clientStatusFilter, setClientStatusFilter] = useState<string>("todos");
   const [activeTab, setActiveTab] = useState("clientes");
+  const [deleteClientId, setDeleteClientId] = useState<string | null>(null);
+  const [deleteClientName, setDeleteClientName] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   const [stats, setStats] = useState({
     totalClients: 0,
