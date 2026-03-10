@@ -50,6 +50,9 @@ export function Step1ClientData({ data, onNext }: Props) {
   const [searching, setSearching] = useState(false);
   const [selectedClient, setSelectedClient] = useState<ExistingClient | null>(null);
   const [duplicateWarning, setDuplicateWarning] = useState<ExistingClient | null>(null);
+  const [fetchingCep, setFetchingCep] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<ExistingClient | null>(null);
+  const [duplicateWarning, setDuplicateWarning] = useState<ExistingClient | null>(null);
 
   const form = useForm<ClientData>({
     resolver: zodResolver(clientSchema),
