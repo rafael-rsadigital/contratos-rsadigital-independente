@@ -122,6 +122,7 @@ export default function ContratoView() {
           permuta_descricao: (data as any).permuta_descricao || '',
           permuta_condicoes: (data as any).permuta_condicoes || '',
           tem_permuta: Number((data as any).permuta_valor) > 0,
+          valor_a_vista: (data as any).valor_a_vista != null ? Number((data as any).valor_a_vista) : null,
           anexos: (anexos || []).map((a: any): AnexoData => ({ id: a.id, titulo: a.titulo, descricao: a.descricao, data: a.data })),
           aditivos: (aditivos || []).map((a: any): AditivoData => ({ id: a.id, numero: a.numero || 1, titulo: a.titulo, descricao: a.descricao, data: a.data, status: a.status || 'pendente', data_aceite: a.data_aceite, nome_aceite: a.nome_aceite, email_aceite: a.email_aceite, ip_aceite: a.ip_aceite, navegador_aceite: a.navegador_aceite, timezone_aceite: a.timezone_aceite, idioma_aceite: a.idioma_aceite, resolucao_aceite: a.resolucao_aceite, codigo_verificacao: a.codigo_verificacao, clausulas_alteradas: a.clausulas_alteradas, novo_valor: a.novo_valor, novo_prazo: a.novo_prazo })),
         });
