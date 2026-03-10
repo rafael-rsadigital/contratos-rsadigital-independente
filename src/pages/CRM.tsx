@@ -458,6 +458,24 @@ export default function CRM() {
           </Tabs>
         </Card>
       </main>
+
+      {/* Delete Client Dialog */}
+      <Dialog open={!!deleteClientId} onOpenChange={(open) => { if (!open) setDeleteClientId(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Excluir cliente</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir <strong>{deleteClientName}</strong> e todos os contratos associados? Esta ação não pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteClientId(null)} disabled={deleting}>Cancelar</Button>
+            <Button variant="destructive" onClick={handleDeleteClient} disabled={deleting}>
+              {deleting ? "Excluindo..." : "Excluir"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
