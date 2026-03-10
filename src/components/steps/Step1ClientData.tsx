@@ -79,7 +79,40 @@ export function Step1ClientData({ data, onNext }: Props) {
     }
   };
 
-  // Check for duplicates when typing CPF/CNPJ or email
+  // CEP auto-fill
+  const watchedCep = form.watch('cep');
+
+  const fetchAddressByCep = useCallback(async (cep: string) => {
+    const cleanCep = cep.replace(/\D/g, '');
+    if (cleanCep.length !== 8) return;
+    setFetchingCep(true);
+    try {
+      const resp = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+      const data = await resp.json();
+      if (data.erro) {
+        toast.error("CEP não encontrado.");
+        return;
+      }
+      form.setValue('logradouro', data.logradouro || '', { shouldValidate: true });
+      form.setValue('bairro', data.bairro || '', { shouldValidate: true });
+      form.setValue('municipio', data.localidade || '', { shouldValidate: true });
+      form.setValue('estado', data.uf || '', { shouldValidate: true });
+      toast.success("Endereço preenchido automaticamente!");
+    } catch {
+      toast.error("Erro ao buscar CEP.");
+    } finally {
+      setFetchingCep(false);
+    }
+  }, [form]);
+
+  useEffect(() => {
+    const cleanCep = (watchedCep || '').replace(/\D/g, '');
+    if (mode !== 'form' || cleanCep.length !== 8) return;
+    const timer = setTimeout(() => fetchAddressByCep(watchedCep), 600);
+    return () => clearTimeout(timer);
+  }, [watchedCep, mode, fetchAddressByCep]);
+
+  // Check for duplicates when typing CPF/CNPJ
   const watchedCpf = form.watch('cpf_cnpj');
   const watchedEmail = form.watch('email');
 
