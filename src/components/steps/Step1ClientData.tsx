@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClientData } from "@/types/contract";
-import { User, Search, UserPlus, Check } from "lucide-react";
+import { User, Search, UserPlus, Check, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -50,6 +50,7 @@ export function Step1ClientData({ data, onNext }: Props) {
   const [searching, setSearching] = useState(false);
   const [selectedClient, setSelectedClient] = useState<ExistingClient | null>(null);
   const [duplicateWarning, setDuplicateWarning] = useState<ExistingClient | null>(null);
+  const [fetchingCep, setFetchingCep] = useState(false);
 
   const form = useForm<ClientData>({
     resolver: zodResolver(clientSchema),
@@ -76,7 +77,40 @@ export function Step1ClientData({ data, onNext }: Props) {
     }
   };
 
-  // Check for duplicates when typing CPF/CNPJ or email
+  // CEP auto-fill
+  const watchedCep = form.watch('cep');
+
+  const fetchAddressByCep = useCallback(async (cep: string) => {
+    const cleanCep = cep.replace(/\D/g, '');
+    if (cleanCep.length !== 8) return;
+    setFetchingCep(true);
+    try {
+      const resp = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+      const data = await resp.json();
+      if (data.erro) {
+        toast.error("CEP não encontrado.");
+        return;
+      }
+      form.setValue('logradouro', data.logradouro || '', { shouldValidate: true });
+      form.setValue('bairro', data.bairro || '', { shouldValidate: true });
+      form.setValue('municipio', data.localidade || '', { shouldValidate: true });
+      form.setValue('estado', data.uf || '', { shouldValidate: true });
+      toast.success("Endereço preenchido automaticamente!");
+    } catch {
+      toast.error("Erro ao buscar CEP.");
+    } finally {
+      setFetchingCep(false);
+    }
+  }, [form]);
+
+  useEffect(() => {
+    const cleanCep = (watchedCep || '').replace(/\D/g, '');
+    if (mode !== 'form' || cleanCep.length !== 8) return;
+    const timer = setTimeout(() => fetchAddressByCep(watchedCep), 600);
+    return () => clearTimeout(timer);
+  }, [watchedCep, mode, fetchAddressByCep]);
+
+  // Check for duplicates when typing CPF/CNPJ
   const watchedCpf = form.watch('cpf_cnpj');
   const watchedEmail = form.watch('email');
 
@@ -324,8 +358,12 @@ export function Step1ClientData({ data, onNext }: Props) {
                   )} />
                   <FormField control={form.control} name="cep" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>CEP</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        CEP
+                        {fetchingCep && <Loader2 className="w-3 h-3 animate-spin text-primary" />}
+                      </FormLabel>
                       <FormControl><Input placeholder="12345-678" {...field} /></FormControl>
+                      <p className="text-xs text-muted-foreground">Digite o CEP para preencher o endereço automaticamente</p>
                       <FormMessage />
                     </FormItem>
                   )} />
