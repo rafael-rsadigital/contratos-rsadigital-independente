@@ -26,6 +26,8 @@ const schema = z.object({
   permuta_valor: z.coerce.number().min(0).optional(),
   permuta_descricao: z.string().optional(),
   permuta_condicoes: z.string().optional(),
+  oferecer_desconto_avista: z.boolean(),
+  valor_a_vista: z.coerce.number().min(0).optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
