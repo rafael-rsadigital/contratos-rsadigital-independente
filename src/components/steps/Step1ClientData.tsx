@@ -360,8 +360,12 @@ export function Step1ClientData({ data, onNext }: Props) {
                   )} />
                   <FormField control={form.control} name="cep" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>CEP</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        CEP
+                        {fetchingCep && <Loader2 className="w-3 h-3 animate-spin text-primary" />}
+                      </FormLabel>
                       <FormControl><Input placeholder="12345-678" {...field} /></FormControl>
+                      <p className="text-xs text-muted-foreground">Digite o CEP para preencher o endereço automaticamente</p>
                       <FormMessage />
                     </FormItem>
                   )} />
