@@ -312,8 +312,26 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
               )} />
             )}
 
+            {/* Link de pagamento para cartão */}
+            {isCartao && (
+              <div className="border rounded-lg p-4 space-y-4 bg-muted/5">
+                <FormField control={form.control} name="link_pagamento" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Link de pagamento (cartão de crédito)</FormLabel>
+                    <FormControl>
+                      <Input type="url" placeholder="https://..." {...field} />
+                    </FormControl>
+                    <p className="text-xs text-muted-foreground">
+                      Cole o link de pagamento que será exibido ao cliente na etapa de confirmação.
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
+            )}
+
             {/* Desconto à Vista */}
-            {showParcelas && numeroParcelas > 1 && (
+            {((showParcelas && numeroParcelas > 1) || isCartao) && (
               <div className="border rounded-lg p-4 space-y-4 bg-primary/5 border-primary/20">
                 <FormField control={form.control} name="oferecer_desconto_avista" render={({ field }) => (
                   <FormItem className="flex items-center justify-between">

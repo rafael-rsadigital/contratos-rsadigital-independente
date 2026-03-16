@@ -547,7 +547,7 @@ function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailCo
       )}
 
       <h2 className="text-sm font-bold mt-6 mb-2">8. ATRASO E INADIMPLÊNCIA</h2>
-      <p>Multa de 2% e juros de 1% ao mês. Inadimplência superior a 15 dias permite suspensão dos serviços.</p>
+      <p>Multa de 2% e juros de 1% ao mês. Inadimplência superior a 15 dias permite a suspensão dos serviços, protesto do título e negativação do débito nos órgãos de proteção ao crédito.</p>
 
       <h2 className="text-sm font-bold mt-6 mb-2">9. RESCISÃO</h2>
       <p>Mediante aviso prévio de 30 dias. Rescisão antecipada pode resultar em cobrança proporcional.</p>
