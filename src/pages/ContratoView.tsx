@@ -675,6 +675,7 @@ export default function ContratoView() {
               descontoRegressivo={contractData.desconto_regressivo}
               formaPagamento={contractData.forma_pagamento}
               valorAVista={contractData.valor_a_vista}
+              linkPagamento={contractData.link_pagamento}
               onConfirm={(valorEntrada, parcelas, pagouAvista) => handleConfirmContract(valorEntrada, parcelas, pagouAvista)}
               onFinalize={handleFinalizeWithoutPayment}
               onBack={() => setConfirmStep(2)}

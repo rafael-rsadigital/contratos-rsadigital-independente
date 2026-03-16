@@ -30,6 +30,7 @@ export function PaymentScreen({
   descontoRegressivo,
   formaPagamento,
   valorAVista,
+  linkPagamento,
   onConfirm,
   onFinalize,
   onBack,
