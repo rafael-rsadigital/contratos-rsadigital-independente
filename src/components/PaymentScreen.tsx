@@ -218,32 +218,58 @@ export function PaymentScreen({
         </div>
       )}
 
-      {/* Pix payment area */}
-      <div className="rounded-lg border bg-card p-5 space-y-4">
-        <h3 className="font-semibold text-center">Pague via Pix</h3>
-        
-        <div className="text-center space-y-1">
-          <p className="text-xs text-muted-foreground">Chave Pix (CNPJ)</p>
-          <p className="font-mono text-lg font-bold tracking-wide">{CONTRATADO.cnpj}</p>
+      {/* Payment area */}
+      {isCartao && linkPagamento ? (
+        <div className="rounded-lg border bg-card p-5 space-y-4">
+          <h3 className="font-semibold text-center">Pague via Cartão de Crédito</h3>
+          <div className="text-center">
+            <p className="text-xs text-muted-foreground">Valor a pagar</p>
+            <p className="text-2xl font-bold text-primary">R$ {formatBRL(modoAvista && valorAVista ? valorAVista : valorTotal)}</p>
+          </div>
+          <Button asChild className="w-full gap-2" size="lg">
+            <a href={linkPagamento} target="_blank" rel="noopener noreferrer">
+              Pagar com Cartão de Crédito
+            </a>
+          </Button>
         </div>
-
-        <div className="text-center space-y-1">
-          <p className="text-xs text-muted-foreground">Beneficiário</p>
-          <p className="font-medium text-sm">{CONTRATADO.nome}</p>
-          <p className="text-xs text-muted-foreground">{CONTRATADO.nomeFantasia}</p>
-          <p className="text-xs text-muted-foreground">Banco: ASAAS IP S.A.</p>
+      ) : isCartao ? (
+        <div className="rounded-lg border bg-card p-5 space-y-4">
+          <h3 className="font-semibold text-center">Pagamento via Cartão de Crédito</h3>
+          <div className="text-center">
+            <p className="text-xs text-muted-foreground">Valor a pagar</p>
+            <p className="text-2xl font-bold text-primary">R$ {formatBRL(modoAvista && valorAVista ? valorAVista : valorTotal)}</p>
+          </div>
+          <p className="text-sm text-muted-foreground text-center">
+            O link de pagamento será enviado pelo contratado.
+          </p>
         </div>
+      ) : (
+        <div className="rounded-lg border bg-card p-5 space-y-4">
+          <h3 className="font-semibold text-center">Pague via Pix</h3>
+          
+          <div className="text-center space-y-1">
+            <p className="text-xs text-muted-foreground">Chave Pix (CNPJ)</p>
+            <p className="font-mono text-lg font-bold tracking-wide">{CONTRATADO.cnpj}</p>
+          </div>
 
-        <div className="text-center">
-          <p className="text-xs text-muted-foreground">Valor a transferir</p>
-          <p className="text-2xl font-bold text-primary">R$ {formatBRL(valorPagamento)}</p>
+          <div className="text-center space-y-1">
+            <p className="text-xs text-muted-foreground">Beneficiário</p>
+            <p className="font-medium text-sm">{CONTRATADO.nome}</p>
+            <p className="text-xs text-muted-foreground">{CONTRATADO.nomeFantasia}</p>
+            <p className="text-xs text-muted-foreground">Banco: ASAAS IP S.A.</p>
+          </div>
+
+          <div className="text-center">
+            <p className="text-xs text-muted-foreground">Valor a transferir</p>
+            <p className="text-2xl font-bold text-primary">R$ {formatBRL(valorPagamento)}</p>
+          </div>
+
+          <Button onClick={handleCopyPix} variant="outline" className="w-full gap-2">
+            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            {copied ? "Copiado!" : "Copiar Chave Pix"}
+          </Button>
         </div>
-
-        <Button onClick={handleCopyPix} variant="outline" className="w-full gap-2">
-          {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-          {copied ? "Copiado!" : "Copiar Chave Pix"}
-        </Button>
-      </div>
+      )}
 
       {/* Actions */}
       <div className="flex flex-col gap-2">
