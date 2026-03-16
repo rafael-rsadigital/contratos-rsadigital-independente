@@ -16,6 +16,7 @@ interface PaymentScreenProps {
   descontoRegressivo: boolean;
   formaPagamento: string;
   valorAVista: number | null;
+  linkPagamento?: string;
   onConfirm: (valorEntrada: number, parcelas: number, pagouAvista?: boolean) => void;
   onFinalize: () => void;
   onBack: () => void;
