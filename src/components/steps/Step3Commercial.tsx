@@ -138,6 +138,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
       permuta_descricao: values.tem_permuta ? (values.permuta_descricao || '') : '',
       permuta_condicoes: values.tem_permuta ? (values.permuta_condicoes || '') : '',
       valor_a_vista: values.oferecer_desconto_avista && values.valor_a_vista && values.valor_a_vista > 0 ? values.valor_a_vista : null,
+      link_pagamento: values.link_pagamento || '',
     });
   };
 
