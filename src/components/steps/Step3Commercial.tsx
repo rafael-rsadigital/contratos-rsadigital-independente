@@ -99,6 +99,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
   const valorEntrada = form.watch("valor_entrada") || 0;
   const permutaValor = form.watch("permuta_valor") || 0;
 
+  const isCartao = formaPagamento === "cartao";
   const showParcelas = formaPagamento === "pix_boleto";
   const showVencimento = formaPagamento === "pix_boleto";
 
