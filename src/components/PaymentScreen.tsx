@@ -75,6 +75,7 @@ export function PaymentScreen({
   const opçõesParcelas = Array.from({ length: numeroParcelas }, (_, i) => i + 1);
 
   const valorPagamento = modoAvista && valorAVista ? valorAVista : valorEntrada;
+  const isCartao = formaPagamento === 'cartao';
 
   return (
     <div className="max-w-full overflow-x-hidden px-1 sm:px-0 space-y-6">
