@@ -430,12 +430,7 @@ function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailC
         return (
           <>
             <h2 className="text-sm font-bold mt-6 mb-2">{n}. ATRASO E INADIMPLÊNCIA</h2>
-            <p>Em caso de atraso no pagamento de qualquer parcela, incidirão:</p>
-            <ul className="list-disc ml-8 my-2">
-              <li>multa de 2% sobre o valor da parcela</li>
-              <li>juros de mora de 1% ao mês</li>
-            </ul>
-            <p>Em caso de inadimplência superior a 15 dias, o CONTRATADO poderá suspender temporariamente o website até regularização do pagamento.</p>
+            <p>Multa de 2% e juros de 1% ao mês. Inadimplência superior a 15 dias permite a suspensão dos serviços, protesto do título e negativação do débito nos órgãos de proteção ao crédito.</p>
 
             <h2 className="text-sm font-bold mt-6 mb-2">{n + 1}. HOSPEDAGEM DURANTE O PARCELAMENTO</h2>
             <p>Durante o período de parcelamento, o website poderá permanecer hospedado em infraestrutura administrada pelo CONTRATADO.</p>
