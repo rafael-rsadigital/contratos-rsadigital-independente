@@ -63,6 +63,7 @@ interface Props {
     permuta_descricao: string;
     permuta_condicoes: string;
     valor_a_vista: number | null;
+    link_pagamento: string;
   }) => void;
   onBack: () => void;
 }
