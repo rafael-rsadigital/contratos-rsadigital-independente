@@ -95,7 +95,7 @@ export function PaymentScreen({
       </div>
 
       {/* Opção à vista com desconto */}
-      {valorAVista && valorAVista > 0 && numeroParcelas > 1 && (
+      {valorAVista && valorAVista > 0 && (numeroParcelas > 1 || isCartao) && (
         <div className="rounded-lg border-2 border-primary/40 bg-primary/5 p-4 space-y-3">
           <div className="flex items-center gap-2">
             <Tag className="w-4 h-4 text-primary" />
