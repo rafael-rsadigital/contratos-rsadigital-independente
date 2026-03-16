@@ -236,6 +236,7 @@ export type Database = {
           id: string
           idioma_confirmacao: string | null
           ip_confirmacao: string | null
+          link_pagamento: string | null
           navegador_confirmacao: string | null
           nome_confirmacao: string | null
           numero_contrato: string | null
@@ -270,6 +271,7 @@ export type Database = {
           id?: string
           idioma_confirmacao?: string | null
           ip_confirmacao?: string | null
+          link_pagamento?: string | null
           navegador_confirmacao?: string | null
           nome_confirmacao?: string | null
           numero_contrato?: string | null
@@ -304,6 +306,7 @@ export type Database = {
           id?: string
           idioma_confirmacao?: string | null
           ip_confirmacao?: string | null
+          link_pagamento?: string | null
           navegador_confirmacao?: string | null
           nome_confirmacao?: string | null
           numero_contrato?: string | null

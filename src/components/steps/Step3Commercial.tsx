@@ -28,6 +28,7 @@ const schema = z.object({
   permuta_condicoes: z.string().optional(),
   oferecer_desconto_avista: z.boolean(),
   valor_a_vista: z.coerce.number().min(0).optional(),
+  link_pagamento: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -62,6 +63,7 @@ interface Props {
     permuta_descricao: string;
     permuta_condicoes: string;
     valor_a_vista: number | null;
+    link_pagamento: string;
   }) => void;
   onBack: () => void;
 }
@@ -84,6 +86,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
       permuta_condicoes: data.permuta_condicoes || '',
       oferecer_desconto_avista: (data as any).valor_a_vista != null && (data as any).valor_a_vista > 0,
       valor_a_vista: (data as any).valor_a_vista || 0,
+      link_pagamento: (data as any).link_pagamento || '',
     },
   });
 
@@ -96,6 +99,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
   const valorEntrada = form.watch("valor_entrada") || 0;
   const permutaValor = form.watch("permuta_valor") || 0;
 
+  const isCartao = formaPagamento === "cartao";
   const showParcelas = formaPagamento === "pix_boleto";
   const showVencimento = formaPagamento === "pix_boleto";
 
@@ -135,6 +139,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
       permuta_descricao: values.tem_permuta ? (values.permuta_descricao || '') : '',
       permuta_condicoes: values.tem_permuta ? (values.permuta_condicoes || '') : '',
       valor_a_vista: values.oferecer_desconto_avista && values.valor_a_vista && values.valor_a_vista > 0 ? values.valor_a_vista : null,
+      link_pagamento: values.link_pagamento || '',
     });
   };
 
@@ -307,8 +312,26 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
               )} />
             )}
 
+            {/* Link de pagamento para cartão */}
+            {isCartao && (
+              <div className="border rounded-lg p-4 space-y-4 bg-muted/5">
+                <FormField control={form.control} name="link_pagamento" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Link de pagamento (cartão de crédito)</FormLabel>
+                    <FormControl>
+                      <Input type="url" placeholder="https://..." {...field} />
+                    </FormControl>
+                    <p className="text-xs text-muted-foreground">
+                      Cole o link de pagamento que será exibido ao cliente na etapa de confirmação.
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+              </div>
+            )}
+
             {/* Desconto à Vista */}
-            {showParcelas && numeroParcelas > 1 && (
+            {((showParcelas && numeroParcelas > 1) || isCartao) && (
               <div className="border rounded-lg p-4 space-y-4 bg-primary/5 border-primary/20">
                 <FormField control={form.control} name="oferecer_desconto_avista" render={({ field }) => (
                   <FormItem className="flex items-center justify-between">
