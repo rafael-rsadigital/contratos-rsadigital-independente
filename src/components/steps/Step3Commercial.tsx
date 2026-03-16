@@ -86,6 +86,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
       permuta_condicoes: data.permuta_condicoes || '',
       oferecer_desconto_avista: (data as any).valor_a_vista != null && (data as any).valor_a_vista > 0,
       valor_a_vista: (data as any).valor_a_vista || 0,
+      link_pagamento: (data as any).link_pagamento || '',
     },
   });
 
