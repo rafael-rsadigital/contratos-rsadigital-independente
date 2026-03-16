@@ -281,7 +281,7 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
       <p>Pela execução dos serviços descritos neste contrato, o CONTRATANTE pagará ao CONTRATADO o valor total de:</p>
       <p className="ml-4 font-bold text-base">R$ {formatBRL(data.valor_total)}</p>
 
-      {hasDescontoAVista && isPB && data.numero_parcelas > 1 && (
+      {hasDescontoAVista && (isPB || isCard) && data.numero_parcelas > 1 && (
         <>
           <p className="mt-4 font-semibold">Opção de pagamento à vista com desconto:</p>
           <p className="ml-4">
