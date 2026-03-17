@@ -126,7 +126,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
   };
 
   const handleSubmit = (values: FormValues) => {
-    const parcelas = values.forma_pagamento === "pix_boleto" ? values.numero_parcelas : 1;
+    const parcelas = (values.forma_pagamento === "pix_boleto" || values.forma_pagamento === "recorrencia") ? values.numero_parcelas : 1;
     onNext({
       valor_total: values.valor_total,
       forma_pagamento: values.forma_pagamento as PaymentMethod,
