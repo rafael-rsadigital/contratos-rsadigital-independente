@@ -76,6 +76,7 @@ export function PaymentScreen({
 
   const valorPagamento = modoAvista && valorAVista ? valorAVista : valorEntrada;
   const isCartao = formaPagamento === 'cartao';
+  const isRecorrencia = formaPagamento === 'recorrencia';
 
   return (
     <div className="max-w-full overflow-x-hidden px-1 sm:px-0 space-y-6">
@@ -90,6 +91,8 @@ export function PaymentScreen({
         <p className="text-sm text-muted-foreground">
           {isCartao
             ? "Realize o pagamento via cartão de crédito ou finalize para pagar depois."
+            : isRecorrencia
+            ? "Realize o pagamento da primeira mensalidade via Pix, ou finalize para pagar depois."
             : "Realize o pagamento via Pix para confirmar sua contratação, ou finalize para pagar depois."}
         </p>
       </div>

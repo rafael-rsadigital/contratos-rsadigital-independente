@@ -24,6 +24,7 @@ const paymentLabel: Record<string, string> = {
   pix_boleto: "PIX / Boleto",
   cartao: "Cartão de Crédito",
   dinheiro: "Dinheiro",
+  recorrencia: "Recorrência",
 };
 
 const entradaPaymentLabel: Record<string, string> = {
@@ -266,6 +267,7 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
   const isPB = data.forma_pagamento === 'pix_boleto';
   const isCash = data.forma_pagamento === 'dinheiro';
   const isCard = data.forma_pagamento === 'cartao';
+  const isRecorrencia = data.forma_pagamento === 'recorrencia';
   const hasPermuta = data.permuta_valor > 0;
   const hasEntrada = data.valor_entrada > 0;
   const hasDescontoAVista = data.valor_a_vista != null && data.valor_a_vista > 0;
@@ -306,6 +308,8 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
           Saldo restante: <strong>R$ {formatBRL(saldoRestante)}</strong>
           {isPB && data.numero_parcelas > 1 ? (
             <>, parcelado em <strong>{data.numero_parcelas}x de R$ {valorParcelaReal}</strong> via {paymentLabel[data.forma_pagamento]}.</>
+          ) : isRecorrencia && data.numero_parcelas > 1 ? (
+            <>, em <strong>{data.numero_parcelas} mensalidades de R$ {valorParcelaReal}</strong> via {paymentLabel[data.forma_pagamento]}.</>
           ) : isCard ? (
             <>, pago via cartão de crédito no ato da contratação.</>
           ) : isCash ? (
@@ -327,7 +331,9 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
         </>
       )}
 
-      <p className="mt-2">O parcelamento refere-se exclusivamente à forma de pagamento do serviço contratado, não caracterizando mensalidade, assinatura ou prestação de serviço recorrente.</p>
+      {!isRecorrencia && (
+        <p className="mt-2">O parcelamento refere-se exclusivamente à forma de pagamento do serviço contratado, não caracterizando mensalidade, assinatura ou prestação de serviço recorrente.</p>
+      )}
       <p className="mt-2">O valor contratado corresponde à execução dos serviços durante o prazo estabelecido neste contrato.</p>
       <p className="mt-2">Após a conclusão do período de prestação dos serviços, a continuidade do trabalho poderá ser realizada mediante novo acordo entre as partes, podendo ser formalizado por meio de novo contrato ou aditivo contratual.</p>
     </>
@@ -447,8 +453,8 @@ function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailC
               const m = data.desconto_regressivo ? n + 3 : n + 2;
               return (
                 <>
-                  <h2 className="text-sm font-bold mt-6 mb-2">{m}. CANCELAMENTO E RESCISÃO</h2>
-                  <p>O valor contratado refere-se ao desenvolvimento completo do website. Após a entrega, não será permitido cancelamento, permanecendo o CONTRATANTE responsável pelo pagamento integral.</p>
+                  <h2 className="text-sm font-bold mt-6 mb-2">{m}. RESCISÃO ANTECIPADA</h2>
+                  <p>Em caso de cancelamento do contrato por iniciativa do CONTRATANTE antes do término do prazo estabelecido, será devida multa rescisória de 20% (vinte por cento) sobre o valor total das parcelas vincendas (saldo remanescente do contrato). O reembolso do saldo credor, deduzida a multa, será realizado ao CONTRATANTE em até 10 (dez) dias úteis após a formalização do distrato.</p>
 
                   <h2 className="text-sm font-bold mt-6 mb-2">{m + 1}. LIMITAÇÃO DE RESPONSABILIDADE</h2>
                   <p>O CONTRATADO não garante resultados comerciais específicos decorrentes do website.</p>
@@ -549,8 +555,8 @@ function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailCo
       <h2 className="text-sm font-bold mt-6 mb-2">8. ATRASO E INADIMPLÊNCIA</h2>
       <p>Multa de 2% e juros de 1% ao mês. Inadimplência superior a 15 dias permite a suspensão dos serviços, protesto do título e negativação do débito nos órgãos de proteção ao crédito.</p>
 
-      <h2 className="text-sm font-bold mt-6 mb-2">9. RESCISÃO</h2>
-      <p>Mediante aviso prévio de 30 dias. Rescisão antecipada pode resultar em cobrança proporcional.</p>
+      <h2 className="text-sm font-bold mt-6 mb-2">9. RESCISÃO ANTECIPADA</h2>
+      <p>Em caso de cancelamento do contrato por iniciativa do CONTRATANTE antes do término do prazo estabelecido, será devida multa rescisória de 20% (vinte por cento) sobre o valor total das parcelas vincendas (saldo remanescente do contrato). O reembolso do saldo credor, deduzida a multa, será realizado ao CONTRATANTE em até 10 (dez) dias úteis após a formalização do distrato.</p>
 
       <h2 className="text-sm font-bold mt-6 mb-2">10. RESPONSABILIDADE SOBRE A PLATAFORMA GOOGLE</h2>
       <p>Alterações nas políticas ou algoritmos do Google podem impactar os resultados, não sendo responsabilidade do CONTRATADO.</p>

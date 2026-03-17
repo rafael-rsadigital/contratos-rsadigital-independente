@@ -15,7 +15,7 @@ import { DollarSign, Info, Repeat } from "lucide-react";
 
 const schema = z.object({
   valor_total: z.coerce.number().min(1, "Valor deve ser maior que zero"),
-  forma_pagamento: z.enum(["pix_boleto", "cartao", "dinheiro"]),
+  forma_pagamento: z.enum(["pix_boleto", "cartao", "dinheiro", "recorrencia"]),
   numero_parcelas: z.coerce.number().int().min(1).max(48),
   data_primeiro_vencimento: z.string().optional(),
   tem_entrada: z.boolean(),
@@ -100,8 +100,9 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
   const permutaValor = form.watch("permuta_valor") || 0;
 
   const isCartao = formaPagamento === "cartao";
-  const showParcelas = formaPagamento === "pix_boleto";
-  const showVencimento = formaPagamento === "pix_boleto";
+  const isRecorrencia = formaPagamento === "recorrencia";
+  const showParcelas = formaPagamento === "pix_boleto" || isRecorrencia;
+  const showVencimento = formaPagamento === "pix_boleto" || isRecorrencia;
 
   // Valor restante após entrada e permuta
   const valorBase = valorTotal || 0;
@@ -115,6 +116,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
     pix_boleto: "PIX / Boleto",
     cartao: "Cartão",
     dinheiro: "Dinheiro",
+    recorrencia: "Recorrência",
   };
 
   const entradaLabels: Record<string, string> = {
@@ -124,7 +126,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
   };
 
   const handleSubmit = (values: FormValues) => {
-    const parcelas = values.forma_pagamento === "pix_boleto" ? values.numero_parcelas : 1;
+    const parcelas = (values.forma_pagamento === "pix_boleto" || values.forma_pagamento === "recorrencia") ? values.numero_parcelas : 1;
     onNext({
       valor_total: values.valor_total,
       forma_pagamento: values.forma_pagamento as PaymentMethod,
@@ -177,6 +179,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
                       <SelectItem value="pix_boleto">PIX / Boleto</SelectItem>
                       <SelectItem value="cartao">Cartão</SelectItem>
                       <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                      <SelectItem value="recorrencia">Recorrência</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
