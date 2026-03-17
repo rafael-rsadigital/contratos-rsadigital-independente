@@ -116,6 +116,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
     pix_boleto: "PIX / Boleto",
     cartao: "Cartão",
     dinheiro: "Dinheiro",
+    recorrencia: "Recorrência",
   };
 
   const entradaLabels: Record<string, string> = {
