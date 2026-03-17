@@ -453,8 +453,8 @@ function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailC
               const m = data.desconto_regressivo ? n + 3 : n + 2;
               return (
                 <>
-                  <h2 className="text-sm font-bold mt-6 mb-2">{m}. CANCELAMENTO E RESCISÃO</h2>
-                  <p>O valor contratado refere-se ao desenvolvimento completo do website. Após a entrega, não será permitido cancelamento, permanecendo o CONTRATANTE responsável pelo pagamento integral.</p>
+                  <h2 className="text-sm font-bold mt-6 mb-2">{m}. RESCISÃO ANTECIPADA</h2>
+                  <p>Em caso de cancelamento do contrato por iniciativa do CONTRATANTE antes do término do prazo estabelecido, será devida multa rescisória de 20% (vinte por cento) sobre o valor total das parcelas vincendas (saldo remanescente do contrato). O reembolso do saldo credor, deduzida a multa, será realizado ao CONTRATANTE em até 10 (dez) dias úteis após a formalização do distrato.</p>
 
                   <h2 className="text-sm font-bold mt-6 mb-2">{m + 1}. LIMITAÇÃO DE RESPONSABILIDADE</h2>
                   <p>O CONTRATADO não garante resultados comerciais específicos decorrentes do website.</p>

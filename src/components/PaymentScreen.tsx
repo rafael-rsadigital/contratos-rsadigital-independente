@@ -91,6 +91,8 @@ export function PaymentScreen({
         <p className="text-sm text-muted-foreground">
           {isCartao
             ? "Realize o pagamento via cartão de crédito ou finalize para pagar depois."
+            : isRecorrencia
+            ? "Realize o pagamento da primeira mensalidade via Pix, ou finalize para pagar depois."
             : "Realize o pagamento via Pix para confirmar sua contratação, ou finalize para pagar depois."}
         </p>
       </div>
