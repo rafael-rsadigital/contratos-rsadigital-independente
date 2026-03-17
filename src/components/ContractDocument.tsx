@@ -308,6 +308,8 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
           Saldo restante: <strong>R$ {formatBRL(saldoRestante)}</strong>
           {isPB && data.numero_parcelas > 1 ? (
             <>, parcelado em <strong>{data.numero_parcelas}x de R$ {valorParcelaReal}</strong> via {paymentLabel[data.forma_pagamento]}.</>
+          ) : isRecorrencia && data.numero_parcelas > 1 ? (
+            <>, em <strong>{data.numero_parcelas} mensalidades de R$ {valorParcelaReal}</strong> via {paymentLabel[data.forma_pagamento]}.</>
           ) : isCard ? (
             <>, pago via cartão de crédito no ato da contratação.</>
           ) : isCash ? (
