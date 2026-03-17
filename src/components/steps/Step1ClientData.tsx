@@ -431,7 +431,18 @@ export function Step1ClientData({ data, onNext }: Props) {
                     </FormItem>
                   )} />
                 </div>
-                <div className="flex justify-end pt-4">
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="lg"
+                    onClick={handleSaveClientOnly}
+                    disabled={savingClient}
+                    className="gap-2"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    {savingClient ? "Salvando..." : "Salvar cliente"}
+                  </Button>
                   <Button type="submit" size="lg">Próximo</Button>
                 </div>
               </form>
