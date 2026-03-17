@@ -76,6 +76,7 @@ export function PaymentScreen({
 
   const valorPagamento = modoAvista && valorAVista ? valorAVista : valorEntrada;
   const isCartao = formaPagamento === 'cartao';
+  const isRecorrencia = formaPagamento === 'recorrencia';
 
   return (
     <div className="max-w-full overflow-x-hidden px-1 sm:px-0 space-y-6">
