@@ -15,7 +15,7 @@ import { DollarSign, Info, Repeat } from "lucide-react";
 
 const schema = z.object({
   valor_total: z.coerce.number().min(1, "Valor deve ser maior que zero"),
-  forma_pagamento: z.enum(["pix_boleto", "cartao", "dinheiro"]),
+  forma_pagamento: z.enum(["pix_boleto", "cartao", "dinheiro", "recorrencia"]),
   numero_parcelas: z.coerce.number().int().min(1).max(48),
   data_primeiro_vencimento: z.string().optional(),
   tem_entrada: z.boolean(),
