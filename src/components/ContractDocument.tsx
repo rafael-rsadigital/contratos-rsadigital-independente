@@ -555,8 +555,8 @@ function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailCo
       <h2 className="text-sm font-bold mt-6 mb-2">8. ATRASO E INADIMPLÊNCIA</h2>
       <p>Multa de 2% e juros de 1% ao mês. Inadimplência superior a 15 dias permite a suspensão dos serviços, protesto do título e negativação do débito nos órgãos de proteção ao crédito.</p>
 
-      <h2 className="text-sm font-bold mt-6 mb-2">9. RESCISÃO</h2>
-      <p>Mediante aviso prévio de 30 dias. Rescisão antecipada pode resultar em cobrança proporcional.</p>
+      <h2 className="text-sm font-bold mt-6 mb-2">9. RESCISÃO ANTECIPADA</h2>
+      <p>Em caso de cancelamento do contrato por iniciativa do CONTRATANTE antes do término do prazo estabelecido, será devida multa rescisória de 20% (vinte por cento) sobre o valor total das parcelas vincendas (saldo remanescente do contrato). O reembolso do saldo credor, deduzida a multa, será realizado ao CONTRATANTE em até 10 (dez) dias úteis após a formalização do distrato.</p>
 
       <h2 className="text-sm font-bold mt-6 mb-2">10. RESPONSABILIDADE SOBRE A PLATAFORMA GOOGLE</h2>
       <p>Alterações nas políticas ou algoritmos do Google podem impactar os resultados, não sendo responsabilidade do CONTRATADO.</p>

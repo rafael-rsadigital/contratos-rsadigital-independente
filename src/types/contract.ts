@@ -11,7 +11,7 @@ export interface ClientData {
   email: string;
 }
 
-export type PaymentMethod = 'pix_boleto' | 'cartao' | 'dinheiro';
+export type PaymentMethod = 'pix_boleto' | 'cartao' | 'dinheiro' | 'recorrencia';
 export type EntradaPaymentMethod = 'pix' | 'cartao' | 'dinheiro';
 
 export const WEBSITE_SERVICES = [

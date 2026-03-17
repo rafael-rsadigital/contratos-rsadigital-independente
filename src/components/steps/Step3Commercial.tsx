@@ -179,6 +179,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
                       <SelectItem value="pix_boleto">PIX / Boleto</SelectItem>
                       <SelectItem value="cartao">Cartão</SelectItem>
                       <SelectItem value="dinheiro">Dinheiro</SelectItem>
+                      <SelectItem value="recorrencia">Recorrência</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
