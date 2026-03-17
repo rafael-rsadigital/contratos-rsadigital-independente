@@ -24,6 +24,7 @@ const paymentLabel: Record<string, string> = {
   pix_boleto: "PIX / Boleto",
   cartao: "Cartão de Crédito",
   dinheiro: "Dinheiro",
+  recorrencia: "Recorrência",
 };
 
 const entradaPaymentLabel: Record<string, string> = {
