@@ -267,6 +267,7 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
   const isPB = data.forma_pagamento === 'pix_boleto';
   const isCash = data.forma_pagamento === 'dinheiro';
   const isCard = data.forma_pagamento === 'cartao';
+  const isRecorrencia = data.forma_pagamento === 'recorrencia';
   const hasPermuta = data.permuta_valor > 0;
   const hasEntrada = data.valor_entrada > 0;
   const hasDescontoAVista = data.valor_a_vista != null && data.valor_a_vista > 0;
