@@ -177,8 +177,57 @@ export function Step1ClientData({ data, onNext }: Props) {
     }
   };
 
+  const [savingClient, setSavingClient] = useState(false);
+
   const handleFormSubmit = (formData: ClientData) => {
     onNext(formData);
+  };
+
+  const handleSaveClientOnly = async () => {
+    const isValid = await form.trigger();
+    if (!isValid) return;
+    const formData = form.getValues();
+    setSavingClient(true);
+    try {
+      const { data: existing } = await supabase
+        .from('clients')
+        .select('id')
+        .eq('cpf_cnpj', formData.cpf_cnpj.trim())
+        .limit(1);
+      if (existing && existing.length > 0) {
+        // Update existing
+        await supabase.from('clients').update({
+          nome: formData.nome.trim(),
+          celular: formData.celular.trim(),
+          email: formData.email?.trim() || '',
+          logradouro: formData.logradouro.trim(),
+          numero: formData.numero.trim(),
+          bairro: formData.bairro.trim(),
+          cep: formData.cep.trim(),
+          municipio: formData.municipio.trim(),
+          estado: formData.estado.trim(),
+        }).eq('id', existing[0].id);
+        toast.success("Cliente atualizado com sucesso!");
+      } else {
+        await supabase.from('clients').insert({
+          nome: formData.nome.trim(),
+          cpf_cnpj: formData.cpf_cnpj.trim(),
+          celular: formData.celular.trim(),
+          email: formData.email?.trim() || '',
+          logradouro: formData.logradouro.trim(),
+          numero: formData.numero.trim(),
+          bairro: formData.bairro.trim(),
+          cep: formData.cep.trim(),
+          municipio: formData.municipio.trim(),
+          estado: formData.estado.trim(),
+        });
+        toast.success("Cliente salvo com sucesso! Você pode gerar o contrato quando quiser.");
+      }
+    } catch {
+      toast.error("Erro ao salvar cliente.");
+    } finally {
+      setSavingClient(false);
+    }
   };
 
   return (
@@ -382,7 +431,18 @@ export function Step1ClientData({ data, onNext }: Props) {
                     </FormItem>
                   )} />
                 </div>
-                <div className="flex justify-end pt-4">
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="lg"
+                    onClick={handleSaveClientOnly}
+                    disabled={savingClient}
+                    className="gap-2"
+                  >
+                    <UserPlus className="w-4 h-4" />
+                    {savingClient ? "Salvando..." : "Salvar cliente"}
+                  </Button>
                   <Button type="submit" size="lg">Próximo</Button>
                 </div>
               </form>
