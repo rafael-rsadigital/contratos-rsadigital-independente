@@ -54,7 +54,12 @@ export interface ContractFormData {
   permuta_descricao: string;
   permuta_condicoes: string;
   valor_a_vista: number | null;
+  mencionar_desconto_avista: boolean;
   link_pagamento: string;
+  escopo_personalizado: string;
+  servico_recorrente: boolean;
+  cronograma_personalizado: boolean;
+  vencimentos_personalizados: string[];
   anexos: AnexoData[];
   aditivos: AditivoData[];
 }

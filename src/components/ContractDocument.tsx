@@ -59,7 +59,11 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
     ? formatBRL(valorLiquido / data.numero_parcelas)
     : formatBRL(valorLiquido);
 
-  const vencimentos = formatVencimentos(data.data_primeiro_vencimento, data.numero_parcelas);
+  const vencimentos = (data.cronograma_personalizado && data.vencimentos_personalizados?.length > 0)
+    ? data.vencimentos_personalizados.map(v => {
+        try { return format(parseISO(v), "dd/MM/yyyy"); } catch { return v; }
+      })
+    : formatVencimentos(data.data_primeiro_vencimento, data.numero_parcelas);
 
   return (
     <div className="space-y-16">
@@ -270,7 +274,7 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
   const isRecorrencia = data.forma_pagamento === 'recorrencia';
   const hasPermuta = data.permuta_valor > 0;
   const hasEntrada = data.valor_entrada > 0;
-  const hasDescontoAVista = data.valor_a_vista != null && data.valor_a_vista > 0;
+  const hasDescontoAVista = data.valor_a_vista != null && data.valor_a_vista > 0 && data.mencionar_desconto_avista;
 
   const saldoRestante = data.valor_total - (hasEntrada ? data.valor_entrada : 0) - (hasPermuta ? data.permuta_valor : 0);
   const valorParcelaReal = data.numero_parcelas > 1
@@ -320,7 +324,7 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
         </li>
       </ul>
 
-      {isPB && data.numero_parcelas > 1 && vencimentos.length > 0 && (
+      {(isPB || isRecorrencia) && data.numero_parcelas > 1 && vencimentos.length > 0 && (
         <>
           <p className="mt-2">Vencimentos das parcelas:</p>
           <ul className="list-disc ml-8 my-2">
@@ -331,7 +335,7 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
         </>
       )}
 
-      {!isRecorrencia && (
+      {!isRecorrencia && !data.servico_recorrente && (
         <p className="mt-2">O parcelamento refere-se exclusivamente à forma de pagamento do serviço contratado, não caracterizando mensalidade, assinatura ou prestação de serviço recorrente.</p>
       )}
       <p className="mt-2">O valor contratado corresponde à execução dos serviços durante o prazo estabelecido neste contrato.</p>
@@ -365,7 +369,9 @@ function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailC
         <li><strong>{data.servico_website}</strong></li>
       </ul>
 
-      {optimized ? (
+      {data.escopo_personalizado?.trim() ? (
+        <p className="mt-2 whitespace-pre-line">{data.escopo_personalizado.trim()}</p>
+      ) : optimized ? (
         <>
           <p className="mt-2">O website será desenvolvido com estrutura e código otimizados para mecanismos de busca, incluindo:</p>
           <ul className="list-disc ml-8 my-2">
@@ -503,18 +509,24 @@ function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailCo
 
       <h2 className="text-sm font-bold mt-6 mb-2">1. OBJETO DO CONTRATO</h2>
       <p>O presente contrato tem por objeto a prestação de serviços de otimização e gestão da presença digital do CONTRATANTE no Google.</p>
-      <p className="mt-2">Os serviços poderão incluir, conforme necessidade do projeto:</p>
-      <ul className="list-disc ml-8 my-2">
-        <li>criação, configuração ou otimização do perfil da empresa no Google Business Profile</li>
-        <li>otimização do perfil existente</li>
-        <li>gestão contínua do perfil</li>
-        <li>organização e melhoria das informações do perfil</li>
-        <li>atualização de dados comerciais</li>
-        <li>inserção e organização de imagens institucionais</li>
-        <li>criação e publicação de conteúdos informativos</li>
-        <li>acompanhamento e orientação sobre avaliações de clientes</li>
-        <li>otimização para buscas locais</li>
-      </ul>
+      {data.escopo_personalizado?.trim() ? (
+        <p className="mt-2 whitespace-pre-line">{data.escopo_personalizado.trim()}</p>
+      ) : (
+        <>
+          <p className="mt-2">Os serviços poderão incluir, conforme necessidade do projeto:</p>
+          <ul className="list-disc ml-8 my-2">
+            <li>criação, configuração ou otimização do perfil da empresa no Google Business Profile</li>
+            <li>otimização do perfil existente</li>
+            <li>gestão contínua do perfil</li>
+            <li>organização e melhoria das informações do perfil</li>
+            <li>atualização de dados comerciais</li>
+            <li>inserção e organização de imagens institucionais</li>
+            <li>criação e publicação de conteúdos informativos</li>
+            <li>acompanhamento e orientação sobre avaliações de clientes</li>
+            <li>otimização para buscas locais</li>
+          </ul>
+        </>
+      )}
 
       <h2 className="text-sm font-bold mt-6 mb-2">2. PRAZO DA PRESTAÇÃO DE SERVIÇO</h2>
       <p>O presente contrato possui prazo inicial de <strong>{data.prazo_google || '30 dias'}</strong>, contados a partir da data de início da prestação dos serviços.</p>

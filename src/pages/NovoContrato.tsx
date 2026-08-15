@@ -43,7 +43,12 @@ export default function NovoContrato() {
     permuta_descricao: "",
     permuta_condicoes: "",
     valor_a_vista: null,
+    mencionar_desconto_avista: false,
     link_pagamento: "",
+    escopo_personalizado: "",
+    servico_recorrente: false,
+    cronograma_personalizado: false,
+    vencimentos_personalizados: [],
     anexos: [],
     aditivos: [],
   });
@@ -143,6 +148,13 @@ export default function NovoContrato() {
               permuta_valor: formData.permuta_valor,
               permuta_descricao: formData.permuta_descricao,
               permuta_condicoes: formData.permuta_condicoes,
+              valor_a_vista: formData.valor_a_vista,
+              mencionar_desconto_avista: formData.mencionar_desconto_avista,
+              link_pagamento: formData.link_pagamento,
+              escopo_personalizado: formData.escopo_personalizado,
+              servico_recorrente: formData.servico_recorrente,
+              cronograma_personalizado: formData.cronograma_personalizado,
+              vencimentos_personalizados: formData.vencimentos_personalizados,
             }}
             hasWebsite={!!formData.servico_website}
             isInstitucional={isInstitucional}

@@ -121,6 +121,8 @@ export function Step4Contract({ data: initialData, existingClientId, onBack, onC
           client_id: clientId,
           tipo: servicos[0] || 'website',
           servicos,
+          servico_website: data.servico_website || null,
+          servico_google: data.servico_google || null,
           valor_total: data.valor_total,
           forma_pagamento: data.forma_pagamento,
           numero_parcelas: data.numero_parcelas,
@@ -136,7 +138,13 @@ export function Step4Contract({ data: initialData, existingClientId, onBack, onC
           permuta_descricao: data.permuta_descricao || null,
           permuta_condicoes: data.permuta_condicoes || null,
           valor_a_vista: data.valor_a_vista || null,
+          mencionar_desconto_avista: data.mencionar_desconto_avista || false,
           link_pagamento: data.link_pagamento || null,
+          escopo_personalizado: data.escopo_personalizado || null,
+          servico_recorrente: data.servico_recorrente || false,
+          vencimentos_personalizados: data.cronograma_personalizado && data.vencimentos_personalizados?.length > 0
+            ? data.vencimentos_personalizados
+            : null,
         } as any)
         .select()
         .single();

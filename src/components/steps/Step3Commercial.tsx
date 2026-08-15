@@ -28,7 +28,11 @@ const schema = z.object({
   permuta_condicoes: z.string().optional(),
   oferecer_desconto_avista: z.boolean(),
   valor_a_vista: z.coerce.number().min(0).optional(),
+  mencionar_desconto_avista: z.boolean(),
   link_pagamento: z.string().optional(),
+  escopo_personalizado: z.string().optional(),
+  servico_recorrente: z.boolean(),
+  cronograma_personalizado: z.boolean(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -46,6 +50,13 @@ interface Props {
     permuta_valor: number;
     permuta_descricao: string;
     permuta_condicoes: string;
+    valor_a_vista: number | null;
+    mencionar_desconto_avista: boolean;
+    link_pagamento: string;
+    escopo_personalizado: string;
+    servico_recorrente: boolean;
+    cronograma_personalizado: boolean;
+    vencimentos_personalizados: string[];
   };
   hasWebsite: boolean;
   isInstitucional: boolean;
@@ -63,7 +74,12 @@ interface Props {
     permuta_descricao: string;
     permuta_condicoes: string;
     valor_a_vista: number | null;
+    mencionar_desconto_avista: boolean;
     link_pagamento: string;
+    escopo_personalizado: string;
+    servico_recorrente: boolean;
+    cronograma_personalizado: boolean;
+    vencimentos_personalizados: string[];
   }) => void;
   onBack: () => void;
 }
@@ -86,9 +102,19 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
       permuta_condicoes: data.permuta_condicoes || '',
       oferecer_desconto_avista: (data as any).valor_a_vista != null && (data as any).valor_a_vista > 0,
       valor_a_vista: (data as any).valor_a_vista || 0,
+      mencionar_desconto_avista: data.mencionar_desconto_avista || false,
       link_pagamento: (data as any).link_pagamento || '',
+      escopo_personalizado: data.escopo_personalizado || '',
+      servico_recorrente: data.servico_recorrente || false,
+      cronograma_personalizado: data.cronograma_personalizado || false,
     },
   });
+
+  const [vencimentosPersonalizados, setVencimentosPersonalizados] = useState<string[]>(
+    data.vencimentos_personalizados && data.vencimentos_personalizados.length > 0
+      ? data.vencimentos_personalizados
+      : []
+  );
 
   const formaPagamento = form.watch("forma_pagamento");
   const numeroParcelas = form.watch("numero_parcelas");
@@ -98,11 +124,20 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
   const oferecerDescontoAVista = form.watch("oferecer_desconto_avista");
   const valorEntrada = form.watch("valor_entrada") || 0;
   const permutaValor = form.watch("permuta_valor") || 0;
+  const cronogramaPersonalizado = form.watch("cronograma_personalizado");
 
   const isCartao = formaPagamento === "cartao";
   const isRecorrencia = formaPagamento === "recorrencia";
   const showParcelas = formaPagamento === "pix_boleto" || isRecorrencia;
   const showVencimento = formaPagamento === "pix_boleto" || isRecorrencia;
+
+  // Mantém a lista de datas personalizadas do mesmo tamanho do número de parcelas
+  const syncedVencimentos = Array.from({ length: numeroParcelas || 0 }, (_, i) => vencimentosPersonalizados[i] || '');
+  const setVencimentoAt = (index: number, valueStr: string) => {
+    const next = [...syncedVencimentos];
+    next[index] = valueStr;
+    setVencimentosPersonalizados(next);
+  };
 
   // Valor restante após entrada e permuta
   const valorBase = valorTotal || 0;
@@ -141,7 +176,14 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
       permuta_descricao: values.tem_permuta ? (values.permuta_descricao || '') : '',
       permuta_condicoes: values.tem_permuta ? (values.permuta_condicoes || '') : '',
       valor_a_vista: values.oferecer_desconto_avista && values.valor_a_vista && values.valor_a_vista > 0 ? values.valor_a_vista : null,
+      mencionar_desconto_avista: values.oferecer_desconto_avista ? values.mencionar_desconto_avista : false,
       link_pagamento: values.link_pagamento || '',
+      escopo_personalizado: values.escopo_personalizado || '',
+      servico_recorrente: values.servico_recorrente,
+      cronograma_personalizado: values.cronograma_personalizado && parcelas > 1,
+      vencimentos_personalizados: values.cronograma_personalizado && parcelas > 1
+        ? syncedVencimentos.slice(0, parcelas)
+        : [],
     });
   };
 
@@ -255,6 +297,74 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
               )}
             </div>
 
+            {/* Serviço recorrente (independente da forma de pagamento) */}
+            {!isRecorrencia && (
+              <FormField control={form.control} name="servico_recorrente" render={({ field }) => (
+                <FormItem className="flex items-center justify-between border rounded-lg p-4">
+                  <div className="flex items-center gap-2">
+                    <Repeat className="w-4 h-4 text-primary" />
+                    <div>
+                      <FormLabel className="font-semibold">Serviço recorrente (mensalidade/assinatura)?</FormLabel>
+                      <p className="text-xs text-muted-foreground">
+                        Ative se for uma gestão mensal recorrente, mesmo que o pagamento não seja via "Recorrência" (ex: à vista ou parcelado no cartão).
+                      </p>
+                    </div>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>
+              )} />
+            )}
+
+            {/* Escopo/entregáveis personalizados */}
+            <FormField control={form.control} name="escopo_personalizado" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Descrição personalizada do escopo (opcional)</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Deixe em branco para usar a descrição padrão de entregáveis. Preencha para substituir pelo escopo combinado na proposta (ex: criação, otimização, gestão...)."
+                    rows={4}
+                    {...field}
+                  />
+                </FormControl>
+                <p className="text-xs text-muted-foreground">
+                  Se preenchido, substitui a lista padrão de entregáveis na cláusula "Objeto do Contrato".
+                </p>
+                <FormMessage />
+              </FormItem>
+            )} />
+
+            {/* Cronograma de pagamento personalizado */}
+            {showParcelas && numeroParcelas > 1 && (
+              <div className="border rounded-lg p-4 space-y-4">
+                <FormField control={form.control} name="cronograma_personalizado" render={({ field }) => (
+                  <FormItem className="flex items-center justify-between">
+                    <div>
+                      <FormLabel className="font-semibold">Cronograma de pagamento personalizado?</FormLabel>
+                      <p className="text-xs text-muted-foreground">
+                        Defina uma data específica para cada parcela, em vez do vencimento mensal automático.
+                      </p>
+                    </div>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )} />
+
+                {cronogramaPersonalizado && (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {syncedVencimentos.map((v, i) => (
+                      <div key={i}>
+                        <label className="text-xs text-muted-foreground">Parcela {i + 1}</label>
+                        <Input type="date" value={v} onChange={(e) => setVencimentoAt(i, e.target.value)} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Permuta */}
             <div className="border rounded-lg p-4 space-y-4 bg-accent/5 border-accent/20">
               <FormField control={form.control} name="tem_permuta" render={({ field }) => (
@@ -349,18 +459,33 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
                 )} />
 
                 {oferecerDescontoAVista && (
-                  <FormField control={form.control} name="valor_a_vista" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Valor à vista com desconto (R$)</FormLabel>
-                      <FormControl>
-                        <Input type="number" step="0.01" min="0" placeholder="1500.00" {...field} />
-                      </FormControl>
-                      <p className="text-xs text-muted-foreground">
-                        O cliente poderá optar por pagar à vista com este valor ao invés do parcelamento.
-                      </p>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
+                  <>
+                    <FormField control={form.control} name="valor_a_vista" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Valor à vista com desconto (R$)</FormLabel>
+                        <FormControl>
+                          <Input type="number" step="0.01" min="0" placeholder="1500.00" {...field} />
+                        </FormControl>
+                        <p className="text-xs text-muted-foreground">
+                          O cliente poderá optar por pagar à vista com este valor ao invés do parcelamento.
+                        </p>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+                    <FormField control={form.control} name="mencionar_desconto_avista" render={({ field }) => (
+                      <FormItem className="flex items-center justify-between border rounded-md p-3 bg-background">
+                        <div>
+                          <FormLabel className="font-medium">Mencionar este desconto no texto do contrato?</FormLabel>
+                          <p className="text-xs text-muted-foreground">
+                            Desligado: o valor fica registrado no sistema, mas não aparece no contrato — útil para preservar a negociação (ex: cliente pagando cartão) e só revelar depois, caso ele opte pelo PIX.
+                          </p>
+                        </div>
+                        <FormControl>
+                          <Switch checked={field.value} onCheckedChange={field.onChange} />
+                        </FormControl>
+                      </FormItem>
+                    )} />
+                  </>
                 )}
               </div>
             )}
