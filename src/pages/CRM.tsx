@@ -28,6 +28,8 @@ interface Client {
   created_at: string;
   contract_count: number;
   total_value: number;
+  proxima_acao: string | null;
+  proxima_acao_data: string | null;
 }
 
 interface Contract {
@@ -80,6 +82,8 @@ export default function CRM() {
     totalContracts: 0,
     totalValue: 0,
     confirmedContracts: 0,
+    totalRecebido: 0,
+    totalPendente: 0,
   });
 
   const loadData = async () => {
@@ -93,6 +97,10 @@ export default function CRM() {
         .from('contracts')
         .select('id, numero_contrato, valor_total, status, created_at, servicos, tipo, client_id, clients(nome), servico_google, servico_recorrente, data_inicio_servico, data_termino_servico' as any)
         .order('created_at', { ascending: false });
+
+      const { data: pagamentosData } = await supabase
+        .from('contract_pagamentos' as any)
+        .select('contract_id, valor');
 
       if (clientsData) {
         const clientsWithStats = clientsData.map(client => {
@@ -125,11 +133,16 @@ export default function CRM() {
         }));
         setContracts(formattedContracts);
 
+        const totalRecebido = (pagamentosData || []).reduce((sum: number, p: any) => sum + Number(p.valor), 0);
+        const totalValueConfirmado = contractsData.filter(c => c.status === 'confirmado').reduce((sum, c) => sum + Number(c.valor_total), 0);
+
         setStats({
           totalClients: clientsData?.length || 0,
           totalContracts: contractsData.length,
           totalValue: contractsData.reduce((sum, c) => sum + Number(c.valor_total), 0),
           confirmedContracts: contractsData.filter(c => c.status === 'confirmado').length,
+          totalRecebido,
+          totalPendente: Math.max(0, totalValueConfirmado - totalRecebido),
         });
       }
     } catch (error) {
@@ -216,6 +229,12 @@ export default function CRM() {
     inativo: clients.filter(c => c.status === 'inativo').length,
   };
 
+  // Lembretes: clientes com próxima ação definida, ordenados por urgência (atrasados primeiro)
+  const hojeISO = new Date().toISOString().slice(0, 10);
+  const lembretes = clients
+    .filter(c => c.proxima_acao)
+    .sort((a, b) => (a.proxima_acao_data || '9999').localeCompare(b.proxima_acao_data || '9999'));
+
   // Contratos de serviços contínuos (Google e/ou recorrentes) confirmados — candidatos a renovação
   const renewalRank: Record<string, number> = { vencido: 0, vencendo: 1, sem_data: 2, ok: 3 };
   const renewalContracts = contracts
@@ -253,7 +272,7 @@ export default function CRM() {
 
       <main className="container py-8 max-w-7xl">
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Clientes</CardTitle>
@@ -275,12 +294,28 @@ export default function CRM() {
             </CardHeader>
             <CardContent><div className="text-2xl font-bold">{stats.confirmedContracts}</div></CardContent>
           </Card>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Valor Total</CardTitle>
               <DollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent><div className="text-2xl font-bold">R$ {formatBRL(stats.totalValue)}</div></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Recebido</CardTitle>
+              <DollarSign className="h-4 w-4 text-emerald-600" />
+            </CardHeader>
+            <CardContent><div className="text-2xl font-bold text-emerald-600">R$ {formatBRL(stats.totalRecebido)}</div></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pendente</CardTitle>
+              <DollarSign className="h-4 w-4 text-amber-600" />
+            </CardHeader>
+            <CardContent><div className="text-2xl font-bold text-amber-600">R$ {formatBRL(stats.totalPendente)}</div></CardContent>
           </Card>
         </div>
 
@@ -311,6 +346,40 @@ export default function CRM() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Lembretes / Próximas Ações */}
+        {lembretes.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Clock className="w-4 h-4 text-primary" />
+                Próximas Ações
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {lembretes.map(c => {
+                const atrasado = c.proxima_acao_data && c.proxima_acao_data < hojeISO;
+                return (
+                  <Link
+                    key={c.id}
+                    to={`/cliente/${c.id}`}
+                    className="flex items-center justify-between border rounded-lg p-3 hover:border-primary/40 transition-colors"
+                  >
+                    <div>
+                      <p className="text-sm font-medium">{c.nome}</p>
+                      <p className="text-xs text-muted-foreground">{c.proxima_acao}</p>
+                    </div>
+                    {c.proxima_acao_data && (
+                      <Badge variant={atrasado ? "destructive" : "outline"} className="text-xs gap-1">
+                        <Clock className="w-3 h-3" /> {new Date(c.proxima_acao_data + 'T00:00:00').toLocaleDateString('pt-BR')}
+                      </Badge>
+                    )}
+                  </Link>
+                );
+              })}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Tabs */}
         <Card className="border-0 shadow-lg">
