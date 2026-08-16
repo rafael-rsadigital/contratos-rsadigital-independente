@@ -15,7 +15,7 @@ import { DollarSign, Info, Repeat } from "lucide-react";
 
 const schema = z.object({
   valor_total: z.coerce.number().min(1, "Valor deve ser maior que zero"),
-  forma_pagamento: z.enum(["pix_boleto", "cartao", "dinheiro", "recorrencia"]),
+  forma_pagamento: z.enum(["avista", "parcelado"]),
   numero_parcelas: z.coerce.number().int().min(1).max(48),
   data_primeiro_vencimento: z.string().optional(),
   tem_entrada: z.boolean(),
@@ -126,10 +126,9 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
   const permutaValor = form.watch("permuta_valor") || 0;
   const cronogramaPersonalizado = form.watch("cronograma_personalizado");
 
-  const isCartao = formaPagamento === "cartao";
-  const isRecorrencia = formaPagamento === "recorrencia";
-  const showParcelas = formaPagamento === "pix_boleto" || isRecorrencia;
-  const showVencimento = formaPagamento === "pix_boleto" || isRecorrencia;
+  const isParcelado = formaPagamento === "parcelado";
+  const showParcelas = isParcelado;
+  const showVencimento = true;
 
   // Mantém a lista de datas personalizadas do mesmo tamanho do número de parcelas
   const syncedVencimentos = Array.from({ length: numeroParcelas || 0 }, (_, i) => vencimentosPersonalizados[i] || '');
@@ -145,13 +144,11 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
   const valorParcela = showParcelas && numeroParcelas > 0 ? formatBRL(valorAposDesconto / numeroParcelas) : '0,00';
 
   const [descontoRegressivo, setDescontoRegressivo] = useState(false);
-  const hasDesconto = formaPagamento === "pix_boleto" && numeroParcelas >= 10;
+  const hasDesconto = isParcelado && numeroParcelas >= 10;
 
   const paymentLabels: Record<PaymentMethod, string> = {
-    pix_boleto: "PIX / Boleto",
-    cartao: "Cartão",
-    dinheiro: "Dinheiro",
-    recorrencia: "Recorrência",
+    avista: "À Vista",
+    parcelado: "Parcelado",
   };
 
   const entradaLabels: Record<string, string> = {
@@ -161,7 +158,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
   };
 
   const handleSubmit = (values: FormValues) => {
-    const parcelas = (values.forma_pagamento === "pix_boleto" || values.forma_pagamento === "recorrencia") ? values.numero_parcelas : 1;
+    const parcelas = values.forma_pagamento === "parcelado" ? values.numero_parcelas : 1;
     onNext({
       valor_total: values.valor_total,
       forma_pagamento: values.forma_pagamento as PaymentMethod,
@@ -218,10 +215,8 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="pix_boleto">PIX / Boleto</SelectItem>
-                      <SelectItem value="cartao">Cartão</SelectItem>
-                      <SelectItem value="dinheiro">Dinheiro</SelectItem>
-                      <SelectItem value="recorrencia">Recorrência</SelectItem>
+                      <SelectItem value="avista">À Vista</SelectItem>
+                      <SelectItem value="parcelado">Parcelado</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -243,7 +238,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
               {showVencimento && (
                 <FormField control={form.control} name="data_primeiro_vencimento" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Data do Primeiro Vencimento</FormLabel>
+                    <FormLabel>{isParcelado ? "Data do Primeiro Vencimento" : "Data de Vencimento"}</FormLabel>
                     <FormControl>
                       <Input type="date" {...field} />
                     </FormControl>
@@ -298,24 +293,22 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
             </div>
 
             {/* Serviço recorrente (independente da forma de pagamento) */}
-            {!isRecorrencia && (
-              <FormField control={form.control} name="servico_recorrente" render={({ field }) => (
-                <FormItem className="flex items-center justify-between border rounded-lg p-4">
-                  <div className="flex items-center gap-2">
-                    <Repeat className="w-4 h-4 text-primary" />
-                    <div>
-                      <FormLabel className="font-semibold">Serviço recorrente (mensalidade/assinatura)?</FormLabel>
-                      <p className="text-xs text-muted-foreground">
-                        Ative se for uma gestão mensal recorrente, mesmo que o pagamento não seja via "Recorrência" (ex: à vista ou parcelado no cartão).
-                      </p>
-                    </div>
+            <FormField control={form.control} name="servico_recorrente" render={({ field }) => (
+              <FormItem className="flex items-center justify-between border rounded-lg p-4">
+                <div className="flex items-center gap-2">
+                  <Repeat className="w-4 h-4 text-primary" />
+                  <div>
+                    <FormLabel className="font-semibold">Serviço recorrente (mensalidade/assinatura)?</FormLabel>
+                    <p className="text-xs text-muted-foreground">
+                      Ative se for uma gestão mensal recorrente (ex: gestão de Google), independente de o pagamento ser à vista ou parcelado.
+                    </p>
                   </div>
-                  <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
-                  </FormControl>
-                </FormItem>
-              )} />
-            )}
+                </div>
+                <FormControl>
+                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                </FormControl>
+              </FormItem>
+            )} />
 
             {/* Escopo/entregáveis personalizados */}
             <FormField control={form.control} name="escopo_personalizado" render={({ field }) => (
@@ -425,26 +418,24 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
               )} />
             )}
 
-            {/* Link de pagamento para cartão */}
-            {isCartao && (
-              <div className="border rounded-lg p-4 space-y-4 bg-muted/5">
-                <FormField control={form.control} name="link_pagamento" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Link de pagamento (cartão de crédito)</FormLabel>
-                    <FormControl>
-                      <Input type="url" placeholder="https://..." {...field} />
-                    </FormControl>
-                    <p className="text-xs text-muted-foreground">
-                      Cole o link de pagamento que será exibido ao cliente na etapa de confirmação.
-                    </p>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-              </div>
-            )}
+            {/* Link de pagamento (opcional) */}
+            <div className="border rounded-lg p-4 space-y-4 bg-muted/5">
+              <FormField control={form.control} name="link_pagamento" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Link de pagamento (opcional)</FormLabel>
+                  <FormControl>
+                    <Input type="url" placeholder="https://..." {...field} />
+                  </FormControl>
+                  <p className="text-xs text-muted-foreground">
+                    Se preenchido, será exibido ao cliente na etapa de confirmação como opção de pagamento. Deixe em branco para usar apenas PIX.
+                  </p>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            </div>
 
-            {/* Desconto à Vista */}
-            {((showParcelas && numeroParcelas > 1) || isCartao) && (
+            {/* Desconto à Vista (alternativa ao parcelamento) */}
+            {isParcelado && numeroParcelas > 1 && (
               <div className="border rounded-lg p-4 space-y-4 bg-primary/5 border-primary/20">
                 <FormField control={form.control} name="oferecer_desconto_avista" render={({ field }) => (
                   <FormItem className="flex items-center justify-between">
@@ -477,7 +468,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
                         <div>
                           <FormLabel className="font-medium">Mencionar este desconto no texto do contrato?</FormLabel>
                           <p className="text-xs text-muted-foreground">
-                            Desligado: o valor fica registrado no sistema, mas não aparece no contrato — útil para preservar a negociação (ex: cliente pagando cartão) e só revelar depois, caso ele opte pelo PIX.
+                            Desligado: o valor fica registrado no sistema, mas não aparece no contrato — útil para preservar a negociação e só revelar depois, caso o cliente opte por pagar tudo de uma vez.
                           </p>
                         </div>
                         <FormControl>

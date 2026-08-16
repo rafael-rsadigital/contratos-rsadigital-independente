@@ -31,7 +31,7 @@ export default function NovoContrato() {
     servico_google: "",
     prazo_google: "30 dias",
     valor_total: 0,
-    forma_pagamento: "pix_boleto",
+    forma_pagamento: "parcelado",
     numero_parcelas: 1,
     data_primeiro_vencimento: "",
     desconto_regressivo: false,
@@ -49,6 +49,8 @@ export default function NovoContrato() {
     servico_recorrente: false,
     cronograma_personalizado: false,
     vencimentos_personalizados: [],
+    data_inicio_servico: null,
+    data_termino_servico: null,
     anexos: [],
     aditivos: [],
   });

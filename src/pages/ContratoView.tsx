@@ -12,6 +12,7 @@ import { ContractFormData, PaymentMethod, EntradaPaymentMethod, CONTRATADO, Anex
 import { Download, Check, CheckCircle, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { formatBRL } from "@/lib/utils";
+import { computeDataTermino } from "@/lib/renewals";
 import { PaymentScreen } from "@/components/PaymentScreen";
 import { PermutaControl } from "@/components/PermutaControl";
 import { useAuth } from "@/hooks/useAuth";
@@ -111,7 +112,9 @@ export default function ContratoView() {
           servico_google: (data as any).servico_google || servicos.find((s: string) => s.includes('Google')) || '',
           prazo_google: (data as any).prazo_google || '30 dias',
           valor_total: Number(data.valor_total),
-          forma_pagamento: data.forma_pagamento as PaymentMethod,
+          forma_pagamento: (['avista', 'parcelado'].includes(data.forma_pagamento)
+            ? data.forma_pagamento
+            : (data.numero_parcelas > 1 ? 'parcelado' : 'avista')) as PaymentMethod,
           numero_parcelas: data.numero_parcelas,
           data_primeiro_vencimento: (data as any).data_primeiro_vencimento || '',
           desconto_regressivo: data.desconto_regressivo,
@@ -129,6 +132,8 @@ export default function ContratoView() {
           servico_recorrente: !!(data as any).servico_recorrente,
           cronograma_personalizado: !!((data as any).vencimentos_personalizados?.length > 0),
           vencimentos_personalizados: (data as any).vencimentos_personalizados || [],
+          data_inicio_servico: (data as any).data_inicio_servico || null,
+          data_termino_servico: (data as any).data_termino_servico || null,
           anexos: (anexos || []).map((a: any): AnexoData => ({ id: a.id, titulo: a.titulo, descricao: a.descricao, data: a.data })),
           aditivos: (aditivos || []).map((a: any): AditivoData => ({ id: a.id, numero: a.numero || 1, titulo: a.titulo, descricao: a.descricao, data: a.data, status: a.status || 'pendente', data_aceite: a.data_aceite, nome_aceite: a.nome_aceite, email_aceite: a.email_aceite, ip_aceite: a.ip_aceite, navegador_aceite: a.navegador_aceite, timezone_aceite: a.timezone_aceite, idioma_aceite: a.idioma_aceite, resolucao_aceite: a.resolucao_aceite, codigo_verificacao: a.codigo_verificacao, clausulas_alteradas: a.clausulas_alteradas, novo_valor: a.novo_valor, novo_prazo: a.novo_prazo })),
         });
@@ -412,7 +417,18 @@ export default function ContratoView() {
 
   const handleAdminConfirm = async () => {
     if (!id) return;
-    await supabase.from('contracts').update({ status: 'confirmado' }).eq('id', id);
+    const updateData: any = { status: 'confirmado' };
+
+    // Auto-calcula início/término do serviço na primeira confirmação (não sobrescreve se já definido manualmente)
+    if (contractData && !contractData.data_inicio_servico) {
+      const hoje = new Date().toISOString().slice(0, 10);
+      updateData.data_inicio_servico = hoje;
+      const prazoRelevante = contractData.servico_google ? contractData.prazo_google : '';
+      const termino = prazoRelevante ? computeDataTermino(hoje, prazoRelevante) : null;
+      if (termino) updateData.data_termino_servico = termino;
+    }
+
+    await supabase.from('contracts').update(updateData).eq('id', id);
     setContractStatus('confirmado');
     toast.success("Pagamento confirmado!");
   };

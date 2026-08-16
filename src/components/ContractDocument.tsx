@@ -21,10 +21,8 @@ interface Props {
 }
 
 const paymentLabel: Record<string, string> = {
-  pix_boleto: "PIX / Boleto",
-  cartao: "Cartão de Crédito",
-  dinheiro: "Dinheiro",
-  recorrencia: "Recorrência",
+  avista: "À Vista",
+  parcelado: "Parcelado",
 };
 
 const entradaPaymentLabel: Record<string, string> = {
@@ -268,10 +266,8 @@ function ConfirmacaoFooter({ confirmed, confirmDate, nomeConfirmacao, emailConfi
 function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
   data: ContractFormData; valorParcela: string; vencimentos: string[]; clauseNum: number;
 }) {
-  const isPB = data.forma_pagamento === 'pix_boleto';
-  const isCash = data.forma_pagamento === 'dinheiro';
-  const isCard = data.forma_pagamento === 'cartao';
-  const isRecorrencia = data.forma_pagamento === 'recorrencia';
+  const isAvista = data.forma_pagamento === 'avista';
+  const isParcelado = data.forma_pagamento === 'parcelado';
   const hasPermuta = data.permuta_valor > 0;
   const hasEntrada = data.valor_entrada > 0;
   const hasDescontoAVista = data.valor_a_vista != null && data.valor_a_vista > 0 && data.mencionar_desconto_avista;
@@ -281,18 +277,23 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
     ? formatBRL(saldoRestante / data.numero_parcelas)
     : formatBRL(saldoRestante);
 
+  const dataVencimentoFormatada = (() => {
+    if (!data.data_primeiro_vencimento) return null;
+    try { return format(parseISO(data.data_primeiro_vencimento), "dd/MM/yyyy"); } catch { return null; }
+  })();
+
   return (
     <>
       <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum}. VALOR E CONDIÇÕES DE PAGAMENTO</h2>
       <p>Pela execução dos serviços descritos neste contrato, o CONTRATANTE pagará ao CONTRATADO o valor total de:</p>
       <p className="ml-4 font-bold text-base">R$ {formatBRL(data.valor_total)}</p>
 
-      {hasDescontoAVista && (isPB || isCard) && data.numero_parcelas > 1 && (
+      {hasDescontoAVista && isParcelado && data.numero_parcelas > 1 && (
         <>
           <p className="mt-4 font-semibold">Opção de pagamento à vista com desconto:</p>
           <p className="ml-4">
             O CONTRATANTE poderá optar pelo pagamento à vista, no valor de <strong>R$ {formatBRL(data.valor_a_vista!)}</strong>, 
-            obtendo desconto de <strong>R$ {formatBRL(data.valor_total - data.valor_a_vista!)}</strong> sobre o valor parcelado.
+            obtendo desconto de <strong>R$ {formatBRL(data.valor_total - data.valor_a_vista!)}</strong> sobre o valor total.
           </p>
           <p className="ml-4 mt-1 text-sm text-muted-foreground">
             Caso o CONTRATANTE opte pelo pagamento à vista, as condições de parcelamento descritas abaixo não se aplicam.
@@ -300,7 +301,7 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
         </>
       )}
 
-      <p className="mt-4 font-semibold">Forma de pagamento (parcelado):</p>
+      <p className="mt-4 font-semibold">Forma de pagamento:</p>
       <ul className="list-disc ml-8 my-2 space-y-1">
         {hasEntrada && (
           <li>Entrada: <strong>R$ {formatBRL(data.valor_entrada)}</strong> via {entradaPaymentLabel[data.forma_pagamento_entrada]}.</li>
@@ -310,21 +311,17 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
         )}
         <li>
           Saldo restante: <strong>R$ {formatBRL(saldoRestante)}</strong>
-          {isPB && data.numero_parcelas > 1 ? (
-            <>, parcelado em <strong>{data.numero_parcelas}x de R$ {valorParcelaReal}</strong> via {paymentLabel[data.forma_pagamento]}.</>
-          ) : isRecorrencia && data.numero_parcelas > 1 ? (
-            <>, em <strong>{data.numero_parcelas} mensalidades de R$ {valorParcelaReal}</strong> via {paymentLabel[data.forma_pagamento]}.</>
-          ) : isCard ? (
-            <>, pago via cartão de crédito no ato da contratação.</>
-          ) : isCash ? (
-            <>, pago em dinheiro no ato da contratação.</>
+          {isParcelado && data.numero_parcelas > 1 ? (
+            <>, parcelado em <strong>{data.numero_parcelas}x de R$ {valorParcelaReal}</strong>.</>
+          ) : dataVencimentoFormatada ? (
+            <>, pago à vista, com vencimento em <strong>{dataVencimentoFormatada}</strong>.</>
           ) : (
-            <>, pago à vista via {paymentLabel[data.forma_pagamento]} no ato da contratação.</>
+            <>, pago à vista no ato da contratação.</>
           )}
         </li>
       </ul>
 
-      {(isPB || isRecorrencia) && data.numero_parcelas > 1 && vencimentos.length > 0 && (
+      {isParcelado && data.numero_parcelas > 1 && vencimentos.length > 0 && (
         <>
           <p className="mt-2">Vencimentos das parcelas:</p>
           <ul className="list-disc ml-8 my-2">
@@ -335,7 +332,7 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
         </>
       )}
 
-      {!isRecorrencia && !data.servico_recorrente && (
+      {!data.servico_recorrente && (
         <p className="mt-2">O parcelamento refere-se exclusivamente à forma de pagamento do serviço contratado, não caracterizando mensalidade, assinatura ou prestação de serviço recorrente.</p>
       )}
       <p className="mt-2">O valor contratado corresponde à execução dos serviços durante o prazo estabelecido neste contrato.</p>

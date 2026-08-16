@@ -11,7 +11,7 @@ export interface ClientData {
   email: string;
 }
 
-export type PaymentMethod = 'pix_boleto' | 'cartao' | 'dinheiro' | 'recorrencia';
+export type PaymentMethod = 'avista' | 'parcelado';
 export type EntradaPaymentMethod = 'pix' | 'cartao' | 'dinheiro';
 
 export const WEBSITE_SERVICES = [
@@ -60,6 +60,8 @@ export interface ContractFormData {
   servico_recorrente: boolean;
   cronograma_personalizado: boolean;
   vencimentos_personalizados: string[];
+  data_inicio_servico: string | null;
+  data_termino_servico: string | null;
   anexos: AnexoData[];
   aditivos: AditivoData[];
 }

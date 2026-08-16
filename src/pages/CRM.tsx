@@ -10,9 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { ArrowLeft, LogOut, Search, Users, FileText, TrendingUp, DollarSign, Eye, Trash2 } from "lucide-react";
+import { ArrowLeft, LogOut, Search, Users, FileText, TrendingUp, DollarSign, Eye, Trash2, AlertCircle, Clock, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { getRenewalStatus, formatDateBR, computeDataTermino } from "@/lib/renewals";
 
 interface Client {
   id: string;
@@ -38,6 +39,10 @@ interface Contract {
   created_at: string;
   servicos: string[];
   tipo: string;
+  servico_google: string | null;
+  servico_recorrente: boolean;
+  data_inicio_servico: string | null;
+  data_termino_servico: string | null;
 }
 
 const contractStatusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
@@ -86,7 +91,7 @@ export default function CRM() {
 
       const { data: contractsData } = await supabase
         .from('contracts')
-        .select('id, numero_contrato, valor_total, status, created_at, servicos, tipo, client_id, clients(nome)')
+        .select('id, numero_contrato, valor_total, status, created_at, servicos, tipo, client_id, clients(nome), servico_google, servico_recorrente, data_inicio_servico, data_termino_servico' as any)
         .order('created_at', { ascending: false });
 
       if (clientsData) {
@@ -113,6 +118,10 @@ export default function CRM() {
           created_at: c.created_at,
           servicos: c.servicos || [],
           tipo: c.tipo,
+          servico_google: c.servico_google || null,
+          servico_recorrente: !!c.servico_recorrente,
+          data_inicio_servico: c.data_inicio_servico || null,
+          data_termino_servico: c.data_termino_servico || null,
         }));
         setContracts(formattedContracts);
 
@@ -173,6 +182,15 @@ export default function CRM() {
     }
   };
 
+  const handleUpdateRenewalDate = async (contractId: string, field: 'data_inicio_servico' | 'data_termino_servico', value: string) => {
+    const { error } = await supabase.from('contracts').update({ [field]: value || null } as any).eq('id', contractId);
+    if (error) {
+      toast.error('Erro ao salvar data.');
+      return;
+    }
+    setContracts(prev => prev.map(c => c.id === contractId ? { ...c, [field]: value || null } : c));
+  };
+
   const filteredClients = clients.filter(c => {
     const matchesSearch = c.nome.toLowerCase().includes(searchClients.toLowerCase()) ||
       c.cpf_cnpj.includes(searchClients) ||
@@ -197,6 +215,25 @@ export default function CRM() {
     recorrente: clients.filter(c => c.status === 'recorrente').length,
     inativo: clients.filter(c => c.status === 'inativo').length,
   };
+
+  // Contratos de serviços contínuos (Google e/ou recorrentes) confirmados — candidatos a renovação
+  const renewalRank: Record<string, number> = { vencido: 0, vencendo: 1, sem_data: 2, ok: 3 };
+  const renewalContracts = contracts
+    .filter(c => c.status === 'confirmado' && (c.servico_google || c.servico_recorrente))
+    .map(c => ({ ...c, renewal: getRenewalStatus(c.data_termino_servico) }))
+    .sort((a, b) => {
+      const rankDiff = renewalRank[a.renewal.status] - renewalRank[b.renewal.status];
+      if (rankDiff !== 0) return rankDiff;
+      return (a.renewal.diasRestantes ?? 9999) - (b.renewal.diasRestantes ?? 9999);
+    });
+  const urgentRenewalsCount = renewalContracts.filter(c => c.renewal.status === 'vencido' || c.renewal.status === 'vencendo').length;
+
+  function RenewalBadge({ status, diasRestantes }: { status: string; diasRestantes: number | null }) {
+    if (status === 'sem_data') return <Badge variant="outline" className="text-xs gap-1"><Clock className="w-3 h-3" /> Sem data</Badge>;
+    if (status === 'vencido') return <Badge variant="destructive" className="text-xs gap-1"><AlertCircle className="w-3 h-3" /> Vencido há {Math.abs(diasRestantes!)}d</Badge>;
+    if (status === 'vencendo') return <Badge className="text-xs gap-1 bg-amber-500 hover:bg-amber-500/90 text-white border-transparent"><AlertCircle className="w-3 h-3" /> Vence em {diasRestantes}d</Badge>;
+    return <Badge variant="secondary" className="text-xs">Em dia ({diasRestantes}d)</Badge>;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -279,9 +316,15 @@ export default function CRM() {
         <Card className="border-0 shadow-lg">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <CardHeader>
-              <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsList className="grid w-full max-w-lg grid-cols-3">
                 <TabsTrigger value="clientes">Clientes</TabsTrigger>
                 <TabsTrigger value="contratos">Contratos</TabsTrigger>
+                <TabsTrigger value="renovacoes" className="gap-1.5">
+                  Renovações
+                  {urgentRenewalsCount > 0 && (
+                    <Badge variant="destructive" className="text-[10px] h-4 min-w-4 px-1">{urgentRenewalsCount}</Badge>
+                  )}
+                </TabsTrigger>
               </TabsList>
             </CardHeader>
 
@@ -419,12 +462,15 @@ export default function CRM() {
                         <TableHead>Serviços</TableHead>
                         <TableHead>Valor</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead>Vencimento</TableHead>
                         <TableHead></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {filteredContracts.map(c => {
                         const st = contractStatusLabels[c.status] || contractStatusLabels.rascunho;
+                        const isOngoing = c.status === 'confirmado' && (c.servico_google || c.servico_recorrente);
+                        const renewal = isOngoing ? getRenewalStatus(c.data_termino_servico) : null;
                         return (
                           <TableRow key={c.id}>
                             <TableCell className="text-xs font-mono">{c.numero_contrato || '—'}</TableCell>
@@ -443,6 +489,9 @@ export default function CRM() {
                               <Badge variant={st.variant} className="text-xs">{st.label}</Badge>
                             </TableCell>
                             <TableCell>
+                              {renewal ? <RenewalBadge status={renewal.status} diasRestantes={renewal.diasRestantes} /> : <span className="text-xs text-muted-foreground">—</span>}
+                            </TableCell>
+                            <TableCell>
                               <Link to={`/contrato/${c.id}`}>
                                 <Button variant="ghost" size="sm">Ver</Button>
                               </Link>
@@ -450,6 +499,65 @@ export default function CRM() {
                           </TableRow>
                         );
                       })}
+                    </TableBody>
+                  </Table>
+                )}
+              </TabsContent>
+
+              {/* RENOVAÇÕES TAB */}
+              <TabsContent value="renovacoes" className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Contratos de serviços contínuos (Google Meu Negócio e/ou marcados como recorrentes) já confirmados. Ajuste as datas manualmente quando necessário — elas são preenchidas automaticamente ao confirmar o pagamento, quando o prazo é reconhecível (ex: "30 dias", "6 meses").
+                </p>
+                {loading ? (
+                  <p className="text-sm text-muted-foreground py-6 text-center">Carregando...</p>
+                ) : renewalContracts.length === 0 ? (
+                  <p className="text-center py-10 text-muted-foreground">Nenhum contrato de serviço contínuo confirmado ainda.</p>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Cliente</TableHead>
+                        <TableHead>Serviço</TableHead>
+                        <TableHead>Início</TableHead>
+                        <TableHead>Término</TableHead>
+                        <TableHead>Situação</TableHead>
+                        <TableHead></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {renewalContracts.map(c => (
+                        <TableRow key={c.id}>
+                          <TableCell className="font-medium text-sm">{c.client_nome}</TableCell>
+                          <TableCell className="text-xs">
+                            {[c.servico_google, c.servico_recorrente && !c.servico_google ? 'Recorrente' : null].filter(Boolean).join(' · ') || '—'}
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              type="date"
+                              defaultValue={c.data_inicio_servico || ''}
+                              onBlur={(e) => handleUpdateRenewalDate(c.id, 'data_inicio_servico', e.target.value)}
+                              className="h-8 w-[150px] text-xs"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Input
+                              type="date"
+                              defaultValue={c.data_termino_servico || ''}
+                              onBlur={(e) => handleUpdateRenewalDate(c.id, 'data_termino_servico', e.target.value)}
+                              className="h-8 w-[150px] text-xs"
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <RenewalBadge status={c.renewal.status} diasRestantes={c.renewal.diasRestantes} />
+                          </TableCell>
+                          <TableCell>
+                            <Link to={`/contrato/${c.id}`}>
+                              <Button variant="ghost" size="sm">Ver</Button>
+                            </Link>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 )}

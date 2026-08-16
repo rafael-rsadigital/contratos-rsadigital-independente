@@ -75,8 +75,6 @@ export function PaymentScreen({
   const opçõesParcelas = Array.from({ length: numeroParcelas }, (_, i) => i + 1);
 
   const valorPagamento = modoAvista && valorAVista ? valorAVista : valorEntrada;
-  const isCartao = formaPagamento === 'cartao';
-  const isRecorrencia = formaPagamento === 'recorrencia';
 
   return (
     <div className="max-w-full overflow-x-hidden px-1 sm:px-0 space-y-6">
@@ -89,16 +87,14 @@ export function PaymentScreen({
       <div className="text-center space-y-2">
         <h2 className="text-xl font-bold text-foreground">Pagamento</h2>
         <p className="text-sm text-muted-foreground">
-          {isCartao
-            ? "Realize o pagamento via cartão de crédito ou finalize para pagar depois."
-            : isRecorrencia
-            ? "Realize o pagamento da primeira mensalidade via Pix, ou finalize para pagar depois."
+          {linkPagamento
+            ? "Realize o pagamento através do link enviado, ou finalize para pagar depois."
             : "Realize o pagamento via Pix para confirmar sua contratação, ou finalize para pagar depois."}
         </p>
       </div>
 
       {/* Opção à vista com desconto */}
-      {valorAVista && valorAVista > 0 && (numeroParcelas > 1 || isCartao) && (
+      {valorAVista && valorAVista > 0 && numeroParcelas > 1 && (
         <div className="rounded-lg border-2 border-primary/40 bg-primary/5 p-4 space-y-3">
           <div className="flex items-center gap-2">
             <Tag className="w-4 h-4 text-primary" />
@@ -248,29 +244,18 @@ export function PaymentScreen({
             {copied ? "Copiado!" : "Copiar Chave Pix"}
           </Button>
         </div>
-      ) : isCartao && linkPagamento ? (
+      ) : linkPagamento ? (
         <div className="rounded-lg border bg-card p-5 space-y-4">
-          <h3 className="font-semibold text-center">Pague via Cartão de Crédito</h3>
+          <h3 className="font-semibold text-center">Pague através do link</h3>
           <div className="text-center">
             <p className="text-xs text-muted-foreground">Valor a pagar</p>
             <p className="text-2xl font-bold text-primary">R$ {formatBRL(valorTotal)}</p>
           </div>
           <Button asChild className="w-full gap-2" size="lg">
             <a href={linkPagamento} target="_blank" rel="noopener noreferrer">
-              Pagar com Cartão de Crédito
+              Pagar agora
             </a>
           </Button>
-        </div>
-      ) : isCartao ? (
-        <div className="rounded-lg border bg-card p-5 space-y-4">
-          <h3 className="font-semibold text-center">Pagamento via Cartão de Crédito</h3>
-          <div className="text-center">
-            <p className="text-xs text-muted-foreground">Valor a pagar</p>
-            <p className="text-2xl font-bold text-primary">R$ {formatBRL(valorTotal)}</p>
-          </div>
-          <p className="text-sm text-muted-foreground text-center">
-            O link de pagamento será enviado pelo contratado.
-          </p>
         </div>
       ) : (
         <div className="rounded-lg border bg-card p-5 space-y-4">
