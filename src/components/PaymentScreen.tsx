@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CONTRATADO } from "@/types/contract";
+import { Contratado, CONTRATADO_DEFAULT } from "@/types/contract";
 import { formatBRL } from "@/lib/utils";
 import { Copy, Check, ArrowLeft, Tag } from "lucide-react";
 import logoRsa from "@/assets/logo-rsa-digital.png";
@@ -21,6 +21,7 @@ interface PaymentScreenProps {
   onFinalize: () => void;
   onBack: () => void;
   saving: boolean;
+  contratado?: Contratado;
 }
 
 export function PaymentScreen({
@@ -35,7 +36,9 @@ export function PaymentScreen({
   onFinalize,
   onBack,
   saving,
+  contratado,
 }: PaymentScreenProps) {
+  const c = contratado || CONTRATADO_DEFAULT;
   const [valorEntradaStr, setValorEntradaStr] = useState(formatBRL(valorEntradaMinimo));
   const [parcelasSelecionadas, setParcelasSelecionadas] = useState(numeroParcelas);
   const [copied, setCopied] = useState(false);
@@ -63,12 +66,12 @@ export function PaymentScreen({
 
   const handleCopyPix = async () => {
     try {
-      await navigator.clipboard.writeText(CONTRATADO.cnpj);
+      await navigator.clipboard.writeText(c.cnpj);
       setCopied(true);
       toast.success("Chave Pix copiada!");
       setTimeout(() => setCopied(false), 3000);
     } catch {
-      toast.error("Erro ao copiar. Copie manualmente: " + CONTRATADO.cnpj);
+      toast.error("Erro ao copiar. Copie manualmente: " + c.cnpj);
     }
   };
 
@@ -80,7 +83,7 @@ export function PaymentScreen({
     <div className="max-w-full overflow-x-hidden px-1 sm:px-0 space-y-6">
       {/* Logo */}
       <div className="flex justify-center">
-        <img src={logoRsa} alt="RSA Digital" className="h-14 object-contain" />
+        <img src={c.logoUrl || logoRsa} alt={c.nomeFantasia} className="h-14 object-contain" />
       </div>
 
       {/* Header */}
@@ -224,13 +227,13 @@ export function PaymentScreen({
           
           <div className="text-center space-y-1">
             <p className="text-xs text-muted-foreground">Chave Pix (CNPJ)</p>
-            <p className="font-mono text-lg font-bold tracking-wide">{CONTRATADO.cnpj}</p>
+            <p className="font-mono text-lg font-bold tracking-wide">{c.cnpj}</p>
           </div>
 
           <div className="text-center space-y-1">
             <p className="text-xs text-muted-foreground">Beneficiário</p>
-            <p className="font-medium text-sm">{CONTRATADO.nome}</p>
-            <p className="text-xs text-muted-foreground">{CONTRATADO.nomeFantasia}</p>
+            <p className="font-medium text-sm">{c.nome}</p>
+            <p className="text-xs text-muted-foreground">{c.nomeFantasia}</p>
             <p className="text-xs text-muted-foreground">Banco: ASAAS IP S.A.</p>
           </div>
 
@@ -263,13 +266,13 @@ export function PaymentScreen({
           
           <div className="text-center space-y-1">
             <p className="text-xs text-muted-foreground">Chave Pix (CNPJ)</p>
-            <p className="font-mono text-lg font-bold tracking-wide">{CONTRATADO.cnpj}</p>
+            <p className="font-mono text-lg font-bold tracking-wide">{c.cnpj}</p>
           </div>
 
           <div className="text-center space-y-1">
             <p className="text-xs text-muted-foreground">Beneficiário</p>
-            <p className="font-medium text-sm">{CONTRATADO.nome}</p>
-            <p className="text-xs text-muted-foreground">{CONTRATADO.nomeFantasia}</p>
+            <p className="font-medium text-sm">{c.nome}</p>
+            <p className="text-xs text-muted-foreground">{c.nomeFantasia}</p>
             <p className="text-xs text-muted-foreground">Banco: ASAAS IP S.A.</p>
           </div>
 

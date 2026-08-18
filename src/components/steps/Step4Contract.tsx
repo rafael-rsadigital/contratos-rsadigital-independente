@@ -4,11 +4,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ContractFormData, AnexoData, AditivoData, CONTRATADO } from "@/types/contract";
+import { ContractFormData, AnexoData, AditivoData } from "@/types/contract";
 import { Check, Download, MessageCircle, ArrowLeft, Plus, Paperclip, FilePlus, Copy, Mail, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { ContractDocument } from "@/components/ContractDocument";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile, profileToContratado } from "@/hooks/useProfile";
 
 interface Props {
   data: ContractFormData;
@@ -18,6 +20,9 @@ interface Props {
 }
 
 export function Step4Contract({ data: initialData, existingClientId, onBack, onConfirmed }: Props) {
+  const { user } = useAuth();
+  const { profile } = useProfile();
+  const contratado = profileToContratado(profile);
   const [data, setData] = useState(initialData);
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -88,6 +93,7 @@ export function Step4Contract({ data: initialData, existingClientId, onBack, onC
             municipio: data.client.municipio,
             estado: data.client.estado,
             email: data.client.email || '',
+            owner_id: user?.id,
           })
           .select()
           .single();
@@ -119,6 +125,7 @@ export function Step4Contract({ data: initialData, existingClientId, onBack, onC
         .from('contracts')
         .insert({
           client_id: clientId,
+          owner_id: user?.id,
           tipo: servicos[0] || 'website',
           servicos,
           servico_website: data.servico_website || null,
@@ -212,9 +219,9 @@ export function Step4Contract({ data: initialData, existingClientId, onBack, onC
     }
     const link = getContractLink();
     const servicos = [data.servico_website, data.servico_google].filter(Boolean).join(' + ');
-    const subject = encodeURIComponent(`Contrato RSA Digital - ${servicos}`);
+    const subject = encodeURIComponent(`Contrato ${contratado?.nomeFantasia || 'Digital'} - ${servicos}`);
     const body = encodeURIComponent(
-      `Olá ${data.client.nome},\n\nSegue o contrato para leitura e confirmação:\n\n${link}\n\nApós a leitura basta clicar em "Confirmar contratação".\n\nAtenciosamente,\nRSA Digital`
+      `Olá ${data.client.nome},\n\nSegue o contrato para leitura e confirmação:\n\n${link}\n\nApós a leitura basta clicar em "Confirmar contratação".\n\nAtenciosamente,\n${contratado?.nomeFantasia || ''}`
     );
     window.open(`mailto:${data.client.email}?subject=${subject}&body=${body}`, '_blank');
   };
@@ -280,6 +287,7 @@ export function Step4Contract({ data: initialData, existingClientId, onBack, onC
       <div id="contract-document" className="bg-card rounded-lg shadow-lg p-6 md:p-10">
         <ContractDocument
           data={data}
+          contratado={contratado}
           confirmed={false}
           codigoVerificacao={codigoVerificacao}
           numeroContrato={numeroContrato}

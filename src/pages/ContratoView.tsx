@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { ContractDocument } from "@/components/ContractDocument";
-import { ContractFormData, PaymentMethod, EntradaPaymentMethod, CONTRATADO, AnexoData, AditivoData } from "@/types/contract";
+import { ContractFormData, PaymentMethod, EntradaPaymentMethod, Contratado, CONTRATADO_DEFAULT, AnexoData, AditivoData } from "@/types/contract";
 import { Download, Check, CheckCircle, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { formatBRL } from "@/lib/utils";
@@ -22,6 +22,7 @@ export default function ContratoView() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [contractData, setContractData] = useState<ContractFormData | null>(null);
+  const [contratado, setContratado] = useState<Contratado>(CONTRATADO_DEFAULT);
   const [confirmed, setConfirmed] = useState(false);
   const [confirmDate, setConfirmDate] = useState("");
   const [nomeConfirmacao, setNomeConfirmacao] = useState("");
@@ -90,6 +91,28 @@ export default function ContratoView() {
           supabase.from('contract_anexos').select('*').eq('contract_id', id).order('created_at'),
           supabase.from('contract_aditivos').select('*').eq('contract_id', id).order('created_at'),
         ]);
+
+        if ((data as any).owner_id) {
+          const { data: profileData } = await supabase
+            .from('profiles' as any)
+            .select('*')
+            .eq('id', (data as any).owner_id)
+            .maybeSingle();
+          if (profileData) {
+            const p = profileData as any;
+            setContratado({
+              nome: p.nome_contratado || CONTRATADO_DEFAULT.nome,
+              cnpj: p.cnpj || CONTRATADO_DEFAULT.cnpj,
+              nomeFantasia: p.nome_fantasia || CONTRATADO_DEFAULT.nomeFantasia,
+              cidade: p.cidade || CONTRATADO_DEFAULT.cidade,
+              whatsapp: p.whatsapp || CONTRATADO_DEFAULT.whatsapp,
+              logoUrl: p.logo_url || null,
+              multaPct: Number(p.multa_pct ?? CONTRATADO_DEFAULT.multaPct),
+              jurosPct: Number(p.juros_pct ?? CONTRATADO_DEFAULT.jurosPct),
+              multaRescisoriaPct: Number(p.multa_rescisoria_pct ?? CONTRATADO_DEFAULT.multaRescisoriaPct),
+            });
+          }
+        }
 
         const websiteServices = ['Site Onepage Otimizado', 'Site Institucional Completo Otimizado', 'Site Portfólio Onepage (não otimizado)', 'Site Institucional Completo (não otimizado)'];
         const servicos = data.servicos || [];
@@ -328,7 +351,7 @@ export default function ContratoView() {
       const message = encodeURIComponent(
         `Olá Rafael, confirmei o contrato.\n\nCliente: ${confirmNome}\nServiço: ${servicos}\nValor total: R$ ${formatBRL(Number(contractData?.valor_total || 0))}${paymentInfo}\n\nLink do contrato:\n${link}`
       );
-      window.open(`https://wa.me/${CONTRATADO.whatsapp}?text=${message}`, '_blank');
+      window.open(`https://wa.me/${contratado.whatsapp}?text=${message}`, '_blank');
     } catch (err) {
       console.error(err);
       toast.error("Erro ao confirmar contrato.");
@@ -406,7 +429,7 @@ export default function ContratoView() {
       const message = encodeURIComponent(
         `Olá Rafael, finalizei o contrato (sem pagamento imediato).\n\nCliente: ${confirmNome}\nServiço: ${servicos}\nValor total: R$ ${formatBRL(Number(contractData?.valor_total || 0))}\n\nLink do contrato:\n${link}`
       );
-      window.open(`https://wa.me/${CONTRATADO.whatsapp}?text=${message}`, '_blank');
+      window.open(`https://wa.me/${contratado.whatsapp}?text=${message}`, '_blank');
     } catch (err) {
       console.error(err);
       toast.error("Erro ao finalizar contrato.");
@@ -523,7 +546,7 @@ export default function ContratoView() {
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card no-print">
         <div className="container py-4 flex items-center justify-between">
-          <span className="font-bold text-primary">RSA Digital</span>
+          <span className="font-bold text-primary">{contratado.nomeFantasia}</span>
           <div className="flex gap-2">
             <Button onClick={handleDownloadPDF} variant="outline" size="sm" className="gap-2">
               <Download className="w-4 h-4" /> PDF
@@ -551,6 +574,7 @@ export default function ContratoView() {
         <div id="contract-document" className="bg-card rounded-lg shadow-lg p-6 md:p-10">
           <ContractDocument
             data={contractData}
+            contratado={contratado}
             confirmed={confirmed}
             confirmDate={confirmDate}
             nomeConfirmacao={nomeConfirmacao}
@@ -573,6 +597,7 @@ export default function ContratoView() {
               contractId={id}
               permutaValor={contractData.permuta_valor}
               clienteNome={contractData.client.nome}
+              contratado={contratado}
             />
           </div>
         )}
@@ -701,6 +726,7 @@ export default function ContratoView() {
               onFinalize={handleFinalizeWithoutPayment}
               onBack={() => setConfirmStep(2)}
               saving={saving}
+              contratado={contratado}
             />
           )}
 

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { Search, ShieldCheck } from "lucide-react";
-import logoRsa from "@/assets/logo-rsa-digital.png";
+import { Contratado } from "@/types/contract";
 
 interface VerificationResult {
   nome: string;
@@ -14,6 +14,7 @@ interface VerificationResult {
   nome_confirmacao: string | null;
   numero_contrato: string | null;
   servicos: string[];
+  nomeFantasia: string;
 }
 
 const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
@@ -38,11 +39,21 @@ export default function VerificarContrato() {
 
     const { data } = await supabase
       .from('contracts')
-      .select('status, data_confirmacao, nome_confirmacao, numero_contrato, servicos, clients(nome)')
+      .select('status, data_confirmacao, nome_confirmacao, numero_contrato, servicos, owner_id, clients(nome)' as any)
       .eq('codigo_verificacao', code.trim())
       .single();
 
     if (data) {
+      let nomeFantasia = 'RSA Digital';
+      const ownerId = (data as any).owner_id;
+      if (ownerId) {
+        const { data: profileData } = await supabase
+          .from('profiles' as any)
+          .select('nome_fantasia')
+          .eq('id', ownerId)
+          .maybeSingle();
+        if ((profileData as any)?.nome_fantasia) nomeFantasia = (profileData as any).nome_fantasia;
+      }
       setResult({
         nome: (data.clients as any)?.nome || '—',
         status: data.status,
@@ -50,6 +61,7 @@ export default function VerificarContrato() {
         nome_confirmacao: data.nome_confirmacao,
         numero_contrato: data.numero_contrato,
         servicos: data.servicos || [],
+        nomeFantasia,
       });
     } else {
       setNotFound(true);
@@ -63,7 +75,7 @@ export default function VerificarContrato() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center space-y-3">
-          <img src={logoRsa} alt="RSA Digital" className="h-10 object-contain mx-auto" />
+          <ShieldCheck className="h-10 w-10 object-contain mx-auto text-primary" />
           <CardTitle className="flex items-center justify-center gap-2">
             <ShieldCheck className="w-5 h-5 text-primary" />
             Verificar Contrato
@@ -118,7 +130,7 @@ export default function VerificarContrato() {
                 )}
               </div>
               <div className="text-xs text-muted-foreground pt-2 border-t">
-                <p>Este é um registro verificado emitido pela RSA Digital.</p>
+                <p>Este é um registro verificado emitido por {result.nomeFantasia}.</p>
               </div>
             </div>
           )}

@@ -121,10 +121,27 @@ export interface ContractRecord {
   clients?: ClientData & { id: string };
 }
 
-export const CONTRATADO = {
+export interface Contratado {
+  nome: string;
+  cnpj: string;
+  nomeFantasia: string;
+  cidade: string;
+  whatsapp: string;
+  logoUrl: string | null;
+  multaPct: number;
+  jurosPct: number;
+  multaRescisoriaPct: number;
+}
+
+// Fallback usado apenas se o perfil do dono do contrato não puder ser carregado.
+export const CONTRATADO_DEFAULT: Contratado = {
   nome: 'Rafael Kelvin Silva de Assis',
   cnpj: '60.351.596/0001-04',
   nomeFantasia: 'RSA Digital',
   cidade: 'Jacareí – SP',
   whatsapp: '5512988052097',
-} as const;
+  logoUrl: null,
+  multaPct: 2,
+  jurosPct: 1,
+  multaRescisoriaPct: 20,
+};

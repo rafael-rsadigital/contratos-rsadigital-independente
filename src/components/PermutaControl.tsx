@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Repeat, Plus, MessageCircle, History } from "lucide-react";
-import { CONTRATADO } from "@/types/contract";
+import { Contratado, CONTRATADO_DEFAULT } from "@/types/contract";
 import { formatBRL } from "@/lib/utils";
 
 interface Utilizacao {
@@ -22,9 +22,11 @@ interface Props {
   contractId: string;
   permutaValor: number;
   clienteNome: string;
+  contratado?: Contratado;
 }
 
-export function PermutaControl({ contractId, permutaValor, clienteNome }: Props) {
+export function PermutaControl({ contractId, permutaValor, clienteNome, contratado }: Props) {
+  const c = contratado || CONTRATADO_DEFAULT;
   const [utilizacoes, setUtilizacoes] = useState<Utilizacao[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
@@ -88,7 +90,7 @@ export function PermutaControl({ contractId, permutaValor, clienteNome }: Props)
     const message = encodeURIComponent(
       `Olá ${clienteNome}!\n\n*Extrato de Permuta*\n\nValor inicial: R$ ${formatBRL(permutaValor)}\nValor utilizado: R$ ${formatBRL(totalUtilizado)}\n*Saldo restante: R$ ${formatBRL(saldoRestante)}*\n\n${utilizacoes.length > 0 ? `Últimas utilizações:\n${utilizacoes.slice(0, 5).map(u => `• ${new Date(u.data_utilizacao).toLocaleDateString('pt-BR')} - R$ ${formatBRL(u.valor_utilizado)} - ${u.descricao}`).join('\n')}` : 'Nenhuma utilização registrada.'}\n\nAcesse o contrato:\n${link}`
     );
-    window.open(`https://wa.me/55${CONTRATADO.whatsapp}?text=${message}`, '_blank');
+    window.open(`https://wa.me/55${c.whatsapp}?text=${message}`, '_blank');
   };
 
   if (loading) {

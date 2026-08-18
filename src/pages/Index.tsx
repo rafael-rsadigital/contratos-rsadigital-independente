@@ -6,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import {
   FilePlus, LogOut, FileText, Users, DollarSign, Clock,
-  TrendingUp, ArrowRight, CalendarDays, Repeat
+  TrendingUp, ArrowRight, CalendarDays, Repeat, Settings
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -19,6 +20,7 @@ import { ptBR } from "date-fns/locale";
 
 export default function Index() {
   const { signOut } = useAuth();
+  const { profile } = useProfile();
   const [loading, setLoading] = useState(true);
   const [contracts, setContracts] = useState<any[]>([]);
   const [permutas, setPermutas] = useState<any[]>([]);
@@ -109,11 +111,16 @@ export default function Index() {
       {/* Header */}
       <header className="border-b bg-card sticky top-0 z-10">
         <div className="container py-4 flex items-center justify-between">
-          <h1 className="font-bold text-xl text-primary">RSA Digital</h1>
+          <h1 className="font-bold text-xl text-primary">{profile?.nome_fantasia || "Gerador de Contratos"}</h1>
           <div className="flex items-center gap-3">
             <Link to="/novo-contrato">
               <Button size="sm" className="gap-1.5">
                 <FilePlus className="w-4 h-4" /> Novo Contrato
+              </Button>
+            </Link>
+            <Link to="/configuracoes">
+              <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground">
+                <Settings className="w-4 h-4" />
               </Button>
             </Link>
             <Button variant="ghost" size="sm" onClick={signOut} className="gap-1 text-muted-foreground">

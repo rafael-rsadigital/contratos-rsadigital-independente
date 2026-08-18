@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
-import { CONTRATADO } from "@/types/contract";
+import { Contratado, CONTRATADO_DEFAULT } from "@/types/contract";
 import { Check } from "lucide-react";
 import { toast } from "sonner";
 import { formatBRL } from "@/lib/utils";
@@ -55,6 +55,7 @@ export default function AditivoView() {
   const [email, setEmail] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [contratado, setContratado] = useState<Contratado>(CONTRATADO_DEFAULT);
 
   useEffect(() => {
     const load = async () => {
@@ -68,10 +69,33 @@ export default function AditivoView() {
         setAditivo(data);
         const { data: contractData } = await supabase
           .from('contracts')
-          .select('numero_contrato, created_at, clients(nome, cpf_cnpj)')
+          .select('numero_contrato, created_at, owner_id, clients(nome, cpf_cnpj)' as any)
           .eq('id', data.contract_id)
           .single();
         setContract(contractData as any);
+
+        const ownerId = (contractData as any)?.owner_id;
+        if (ownerId) {
+          const { data: profileData } = await supabase
+            .from('profiles' as any)
+            .select('*')
+            .eq('id', ownerId)
+            .maybeSingle();
+          if (profileData) {
+            const p = profileData as any;
+            setContratado({
+              nome: p.nome_contratado || CONTRATADO_DEFAULT.nome,
+              cnpj: p.cnpj || CONTRATADO_DEFAULT.cnpj,
+              nomeFantasia: p.nome_fantasia || CONTRATADO_DEFAULT.nomeFantasia,
+              cidade: p.cidade || CONTRATADO_DEFAULT.cidade,
+              whatsapp: p.whatsapp || CONTRATADO_DEFAULT.whatsapp,
+              logoUrl: p.logo_url || null,
+              multaPct: Number(p.multa_pct ?? CONTRATADO_DEFAULT.multaPct),
+              jurosPct: Number(p.juros_pct ?? CONTRATADO_DEFAULT.jurosPct),
+              multaRescisoriaPct: Number(p.multa_rescisoria_pct ?? CONTRATADO_DEFAULT.multaRescisoriaPct),
+            });
+          }
+        }
       }
       setLoading(false);
     };
@@ -154,7 +178,7 @@ export default function AditivoView() {
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card no-print">
         <div className="container py-4 flex items-center justify-between">
-          <span className="font-bold text-primary">RSA Digital</span>
+          <span className="font-bold text-primary">{contratado.nomeFantasia}</span>
           {!isAccepted && (
             <Button onClick={() => { setStep(1); setShowDialog(true); }} size="sm" className="gap-2">
               <Check className="w-4 h-4" /> Aceitar Termo Aditivo
@@ -173,7 +197,7 @@ export default function AditivoView() {
         <div className="bg-card rounded-lg shadow-lg p-6 md:p-10">
           <div className="contract-document max-w-3xl mx-auto text-[15px] leading-relaxed space-y-6">
             <div className="flex justify-center mb-4">
-              <img src={logoRsa} alt="RSA Digital" className="h-16 object-contain" />
+              <img src={contratado.logoUrl || logoRsa} alt={contratado.nomeFantasia} className="h-16 object-contain" />
             </div>
 
             <h1 className="text-center text-lg mb-2 tracking-widest font-bold">
@@ -264,8 +288,8 @@ export default function AditivoView() {
             )}
 
             <div className="mt-10 pt-6 border-t text-center text-xs text-muted-foreground">
-              <p>{CONTRATADO.nomeFantasia} — CNPJ {CONTRATADO.cnpj}</p>
-              <p>{CONTRATADO.cidade}</p>
+              <p>{contratado.nomeFantasia} — CNPJ {contratado.cnpj}</p>
+              <p>{contratado.cidade}</p>
             </div>
           </div>
         </div>

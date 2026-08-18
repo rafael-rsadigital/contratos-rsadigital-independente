@@ -7,6 +7,7 @@ import { Step3Commercial } from "@/components/steps/Step3Commercial";
 import { Step4Contract } from "@/components/steps/Step4Contract";
 import { ClientData, ContractFormData } from "@/types/contract";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,6 +22,7 @@ const emptyClient: ClientData = {
 export default function NovoContrato() {
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const { profile } = useProfile();
   const [searchParams] = useSearchParams();
   const [step, setStep] = useState(0);
   const [existingClientId, setExistingClientId] = useState<string | undefined>();
@@ -91,7 +93,7 @@ export default function NovoContrato() {
       <header className="border-b bg-card">
         <div className="container py-4 flex items-center justify-between">
           <button onClick={() => navigate("/")} className="font-bold text-lg text-primary hover:opacity-80 transition">
-            RSA Digital
+            {profile?.nome_fantasia || "Gerador de Contratos"}
           </button>
           <div className="flex items-center gap-3">
             <span className="text-sm text-muted-foreground">Novo Contrato</span>

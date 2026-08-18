@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,7 +32,7 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm border-0 shadow-lg">
         <CardHeader className="text-center pb-4">
-          <CardTitle className="text-2xl font-bold text-primary">RSA Digital</CardTitle>
+          <CardTitle className="text-2xl font-bold text-primary">Gerador de Contratos</CardTitle>
           <p className="text-sm text-muted-foreground">Acesso Administrativo</p>
         </CardHeader>
         <CardContent>
@@ -50,6 +50,10 @@ export default function Login() {
               {loading ? "Entrando..." : "Entrar"}
             </Button>
           </form>
+          <div className="mt-4 flex flex-col items-center gap-2 text-sm">
+            <Link to="/esqueci-senha" className="text-muted-foreground hover:text-primary">Esqueci minha senha</Link>
+            <Link to="/cadastro" className="text-primary hover:underline">Criar uma conta</Link>
+          </div>
         </CardContent>
       </Card>
     </div>

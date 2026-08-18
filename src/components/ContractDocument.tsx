@@ -1,4 +1,4 @@
-import { ContractFormData, AnexoData, AditivoData, CONTRATADO } from "@/types/contract";
+import { ContractFormData, AnexoData, AditivoData, Contratado, CONTRATADO_DEFAULT } from "@/types/contract";
 import { format, addMonths, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import logoRsa from "@/assets/logo-rsa-digital.png";
@@ -6,6 +6,7 @@ import { formatBRL } from "@/lib/utils";
 
 interface Props {
   data: ContractFormData;
+  contratado?: Contratado;
   confirmed: boolean;
   confirmDate?: string;
   nomeConfirmacao?: string;
@@ -47,7 +48,8 @@ function isOptimized(servico: string): boolean {
   return servico.includes('Otimizado') && !servico.includes('não otimizado');
 }
 
-export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, codigoVerificacao, numeroContrato, ipConfirmacao, navegadorConfirmacao, timezoneConfirmacao, idiomaConfirmacao, resolucaoConfirmacao, isAdmin }: Props) {
+export function ContractDocument({ data, contratado, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, codigoVerificacao, numeroContrato, ipConfirmacao, navegadorConfirmacao, timezoneConfirmacao, idiomaConfirmacao, resolucaoConfirmacao, isAdmin }: Props) {
+  const c = contratado || CONTRATADO_DEFAULT;
   const hasWebsite = !!data.servico_website;
   const hasGoogle = !!data.servico_google;
   const hasBoth = hasWebsite && hasGoogle;
@@ -67,7 +69,7 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
     <div className="space-y-16">
       {/* Logo */}
       <div className="flex justify-center mb-4">
-        <img src={logoRsa} alt="RSA Digital" className="h-16 object-contain" />
+        <img src={c.logoUrl || logoRsa} alt={c.nomeFantasia} className="h-16 object-contain" />
       </div>
 
       {/* Contract number header */}
@@ -80,6 +82,7 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
       {hasWebsite && (
         <WebsiteContract
           data={data}
+          contratado={c}
           confirmed={confirmed}
           confirmDate={confirmDate}
           nomeConfirmacao={nomeConfirmacao}
@@ -101,6 +104,7 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
           {hasWebsite && <div className="border-t-4 border-primary/20 my-12" />}
           <GoogleContract
             data={data}
+            contratado={c}
             confirmed={confirmed}
             confirmDate={confirmDate}
             nomeConfirmacao={nomeConfirmacao}
@@ -156,13 +160,13 @@ export function ContractDocument({ data, confirmed, confirmDate, nomeConfirmacao
 }
 
 /* ─── CONTRATANTE HEADER ─── */
-function ContratanteHeader({ data }: { data: ContractFormData }) {
+function ContratanteHeader({ data, contratado }: { data: ContractFormData; contratado: Contratado }) {
   return (
     <>
       <h2 className="text-sm font-bold mt-6 mb-2">CONTRATADO</h2>
       <p>
-        <strong>{CONTRATADO.nome}</strong>, inscrito no CNPJ nº {CONTRATADO.cnpj}, atuando sob o nome
-        fantasia <strong>{CONTRATADO.nomeFantasia}</strong>, com sede em {CONTRATADO.cidade}, doravante denominado CONTRATADO.
+        <strong>{contratado.nome}</strong>, inscrito no CNPJ nº {contratado.cnpj}, atuando sob o nome
+        fantasia <strong>{contratado.nomeFantasia}</strong>, com sede em {contratado.cidade}, doravante denominado CONTRATADO.
       </p>
 
       <h2 className="text-sm font-bold mt-6 mb-2">CONTRATANTE</h2>
@@ -184,8 +188,8 @@ function ContratanteHeader({ data }: { data: ContractFormData }) {
 }
 
 /* ─── CONFIRMAÇÃO FOOTER (versão cliente) ─── */
-function ConfirmacaoFooter({ confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, codigoVerificacao, ipConfirmacao, navegadorConfirmacao, timezoneConfirmacao, idiomaConfirmacao, resolucaoConfirmacao, isAdmin }: {
-  confirmed: boolean; confirmDate?: string; nomeConfirmacao?: string; emailConfirmacao?: string; codigoVerificacao?: string; ipConfirmacao?: string; navegadorConfirmacao?: string; timezoneConfirmacao?: string; idiomaConfirmacao?: string; resolucaoConfirmacao?: string; isAdmin?: boolean;
+function ConfirmacaoFooter({ contratado, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, codigoVerificacao, ipConfirmacao, navegadorConfirmacao, timezoneConfirmacao, idiomaConfirmacao, resolucaoConfirmacao, isAdmin }: {
+  contratado: Contratado; confirmed: boolean; confirmDate?: string; nomeConfirmacao?: string; emailConfirmacao?: string; codigoVerificacao?: string; ipConfirmacao?: string; navegadorConfirmacao?: string; timezoneConfirmacao?: string; idiomaConfirmacao?: string; resolucaoConfirmacao?: string; isAdmin?: boolean;
 }) {
   // Parse navegador for friendly display
   const parseBrowser = (ua?: string) => {
@@ -255,8 +259,8 @@ function ConfirmacaoFooter({ confirmed, confirmDate, nomeConfirmacao, emailConfi
         <p className="text-muted-foreground italic">Aguardando confirmação do contratante.</p>
       )}
       <div className="mt-10 pt-6 border-t text-center text-xs text-muted-foreground">
-        <p>{CONTRATADO.nomeFantasia} — CNPJ {CONTRATADO.cnpj}</p>
-        <p>{CONTRATADO.cidade}</p>
+        <p>{contratado.nomeFantasia} — CNPJ {contratado.cnpj}</p>
+        <p>{contratado.cidade}</p>
       </div>
     </>
   );
@@ -342,8 +346,8 @@ function PaymentSection({ data, valorParcela, vencimentos, clauseNum }: {
 }
 
 /* ═══ CONTRATO WEBSITE ═══ */
-function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, ipConfirmacao, navegadorConfirmacao, timezoneConfirmacao, idiomaConfirmacao, resolucaoConfirmacao, valorParcela, vencimentos, isComplementar, isAdmin }: Props & {
-  valorParcela: string; vencimentos: string[]; isComplementar: boolean;
+function WebsiteContract({ data, contratado, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, ipConfirmacao, navegadorConfirmacao, timezoneConfirmacao, idiomaConfirmacao, resolucaoConfirmacao, valorParcela, vencimentos, isComplementar, isAdmin }: Props & {
+  contratado: Contratado; valorParcela: string; vencimentos: string[]; isComplementar: boolean;
 }) {
   const optimized = isOptimized(data.servico_website);
   const isInstitucional = data.servico_website.includes('Institucional');
@@ -357,7 +361,7 @@ function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailC
         TERMO DE PRESTAÇÃO DE SERVIÇOS DE DESENVOLVIMENTO DE WEBSITE
       </h1>
 
-      <ContratanteHeader data={data} />
+      <ContratanteHeader data={data} contratado={contratado} />
 
       <h2 className="text-sm font-bold mt-6 mb-2">1. OBJETO DO CONTRATO</h2>
       <p>O presente contrato tem por objeto a prestação de serviços de desenvolvimento de website para o CONTRATANTE, com a finalidade de estabelecer presença digital e facilitar o contato com clientes e parceiros.</p>
@@ -439,7 +443,7 @@ function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailC
         return (
           <>
             <h2 className="text-sm font-bold mt-6 mb-2">{n}. ATRASO E INADIMPLÊNCIA</h2>
-            <p>Multa de 2% e juros de 1% ao mês. Inadimplência superior a 15 dias permite a suspensão dos serviços, protesto do título e negativação do débito nos órgãos de proteção ao crédito.</p>
+            <p>Multa de {contratado.multaPct}% e juros de {contratado.jurosPct}% ao mês. Inadimplência superior a 15 dias permite a suspensão dos serviços, protesto do título e negativação do débito nos órgãos de proteção ao crédito.</p>
 
             <h2 className="text-sm font-bold mt-6 mb-2">{n + 1}. HOSPEDAGEM DURANTE O PARCELAMENTO</h2>
             <p>Durante o período de parcelamento, o website poderá permanecer hospedado em infraestrutura administrada pelo CONTRATADO.</p>
@@ -457,7 +461,7 @@ function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailC
               return (
                 <>
                   <h2 className="text-sm font-bold mt-6 mb-2">{m}. RESCISÃO ANTECIPADA</h2>
-                  <p>Em caso de cancelamento do contrato por iniciativa do CONTRATANTE antes do término do prazo estabelecido, será devida multa rescisória de 20% (vinte por cento) sobre o valor total das parcelas vincendas (saldo remanescente do contrato). O reembolso do saldo credor, deduzida a multa, será realizado ao CONTRATANTE em até 10 (dez) dias úteis após a formalização do distrato.</p>
+                  <p>Em caso de cancelamento do contrato por iniciativa do CONTRATANTE antes do término do prazo estabelecido, será devida multa rescisória de {contratado.multaRescisoriaPct}% (percentual definido pelo CONTRATADO) sobre o valor total das parcelas vincendas (saldo remanescente do contrato). O reembolso do saldo credor, deduzida a multa, será realizado ao CONTRATANTE em até 10 (dez) dias úteis após a formalização do distrato.</p>
 
                   <h2 className="text-sm font-bold mt-6 mb-2">{m + 1}. LIMITAÇÃO DE RESPONSABILIDADE</h2>
                   <p>O CONTRATADO não garante resultados comerciais específicos decorrentes do website.</p>
@@ -481,14 +485,14 @@ function WebsiteContract({ data, confirmed, confirmDate, nomeConfirmacao, emailC
         );
       })()}
 
-      <ConfirmacaoFooter confirmed={confirmed} confirmDate={confirmDate} nomeConfirmacao={nomeConfirmacao} emailConfirmacao={emailConfirmacao} codigoVerificacao={undefined} ipConfirmacao={ipConfirmacao} navegadorConfirmacao={navegadorConfirmacao} timezoneConfirmacao={timezoneConfirmacao} idiomaConfirmacao={idiomaConfirmacao} resolucaoConfirmacao={resolucaoConfirmacao} isAdmin={isAdmin} />
+      <ConfirmacaoFooter contratado={contratado} confirmed={confirmed} confirmDate={confirmDate} nomeConfirmacao={nomeConfirmacao} emailConfirmacao={emailConfirmacao} codigoVerificacao={undefined} ipConfirmacao={ipConfirmacao} navegadorConfirmacao={navegadorConfirmacao} timezoneConfirmacao={timezoneConfirmacao} idiomaConfirmacao={idiomaConfirmacao} resolucaoConfirmacao={resolucaoConfirmacao} isAdmin={isAdmin} />
     </div>
   );
 }
 
 /* ═══ CONTRATO GOOGLE ═══ */
-function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, ipConfirmacao, navegadorConfirmacao, timezoneConfirmacao, idiomaConfirmacao, resolucaoConfirmacao, valorParcela, vencimentos, isComplementar, isAdmin }: Props & {
-  valorParcela: string; vencimentos: string[]; isComplementar: boolean;
+function GoogleContract({ data, contratado, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, ipConfirmacao, navegadorConfirmacao, timezoneConfirmacao, idiomaConfirmacao, resolucaoConfirmacao, valorParcela, vencimentos, isComplementar, isAdmin }: Props & {
+  contratado: Contratado; valorParcela: string; vencimentos: string[]; isComplementar: boolean;
 }) {
   return (
     <div className="contract-document max-w-3xl mx-auto text-[15px] leading-relaxed">
@@ -502,7 +506,7 @@ function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailCo
         PRESENÇA DIGITAL NO GOOGLE
       </h2>
 
-      <ContratanteHeader data={data} />
+      <ContratanteHeader data={data} contratado={contratado} />
 
       <h2 className="text-sm font-bold mt-6 mb-2">1. OBJETO DO CONTRATO</h2>
       <p>O presente contrato tem por objeto a prestação de serviços de otimização e gestão da presença digital do CONTRATANTE no Google.</p>
@@ -562,10 +566,10 @@ function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailCo
       )}
 
       <h2 className="text-sm font-bold mt-6 mb-2">8. ATRASO E INADIMPLÊNCIA</h2>
-      <p>Multa de 2% e juros de 1% ao mês. Inadimplência superior a 15 dias permite a suspensão dos serviços, protesto do título e negativação do débito nos órgãos de proteção ao crédito.</p>
+      <p>Multa de {contratado.multaPct}% e juros de {contratado.jurosPct}% ao mês. Inadimplência superior a 15 dias permite a suspensão dos serviços, protesto do título e negativação do débito nos órgãos de proteção ao crédito.</p>
 
       <h2 className="text-sm font-bold mt-6 mb-2">9. RESCISÃO ANTECIPADA</h2>
-      <p>Em caso de cancelamento do contrato por iniciativa do CONTRATANTE antes do término do prazo estabelecido, será devida multa rescisória de 20% (vinte por cento) sobre o valor total das parcelas vincendas (saldo remanescente do contrato). O reembolso do saldo credor, deduzida a multa, será realizado ao CONTRATANTE em até 10 (dez) dias úteis após a formalização do distrato.</p>
+      <p>Em caso de cancelamento do contrato por iniciativa do CONTRATANTE antes do término do prazo estabelecido, será devida multa rescisória de {contratado.multaRescisoriaPct}% (percentual definido pelo CONTRATADO) sobre o valor total das parcelas vincendas (saldo remanescente do contrato). O reembolso do saldo credor, deduzida a multa, será realizado ao CONTRATANTE em até 10 (dez) dias úteis após a formalização do distrato.</p>
 
       <h2 className="text-sm font-bold mt-6 mb-2">10. RESPONSABILIDADE SOBRE A PLATAFORMA GOOGLE</h2>
       <p>Alterações nas políticas ou algoritmos do Google podem impactar os resultados, não sendo responsabilidade do CONTRATADO.</p>
@@ -586,7 +590,7 @@ function GoogleContract({ data, confirmed, confirmDate, nomeConfirmacao, emailCo
       <p>Ao clicar em "Confirmar contratação", o CONTRATANTE declara que leu, compreendeu e concorda com todas as condições.</p>
       <p className="mt-2">O registro eletrônico constitui aceite formal, dispensando assinatura física.</p>
 
-      <ConfirmacaoFooter confirmed={confirmed} confirmDate={confirmDate} nomeConfirmacao={nomeConfirmacao} emailConfirmacao={emailConfirmacao} codigoVerificacao={undefined} ipConfirmacao={ipConfirmacao} navegadorConfirmacao={navegadorConfirmacao} timezoneConfirmacao={timezoneConfirmacao} idiomaConfirmacao={idiomaConfirmacao} resolucaoConfirmacao={resolucaoConfirmacao} isAdmin={isAdmin} />
+      <ConfirmacaoFooter contratado={contratado} confirmed={confirmed} confirmDate={confirmDate} nomeConfirmacao={nomeConfirmacao} emailConfirmacao={emailConfirmacao} codigoVerificacao={undefined} ipConfirmacao={ipConfirmacao} navegadorConfirmacao={navegadorConfirmacao} timezoneConfirmacao={timezoneConfirmacao} idiomaConfirmacao={idiomaConfirmacao} resolucaoConfirmacao={resolucaoConfirmacao} isAdmin={isAdmin} />
     </div>
   );
 }
