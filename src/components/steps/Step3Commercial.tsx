@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -15,6 +16,7 @@ import { DollarSign, Info, Repeat } from "lucide-react";
 
 const schema = z.object({
   valor_total: z.coerce.number().min(1, "Valor deve ser maior que zero"),
+  multa_pct: z.coerce.number().min(0, "A multa não pode ser negativa").max(100, "A multa não pode ser maior que 100%"),
   forma_pagamento: z.enum(["avista", "parcelado"]),
   numero_parcelas: z.coerce.number().int().min(1).max(48),
   data_primeiro_vencimento: z.string().optional(),
@@ -40,6 +42,7 @@ type FormValues = z.infer<typeof schema>;
 interface Props {
   data: {
     valor_total: number;
+    multa_pct: number;
     forma_pagamento: PaymentMethod;
     numero_parcelas: number;
     data_primeiro_vencimento: string;
@@ -62,6 +65,7 @@ interface Props {
   isInstitucional: boolean;
   onNext: (data: {
     valor_total: number;
+    multa_pct: number;
     forma_pagamento: PaymentMethod;
     numero_parcelas: number;
     data_primeiro_vencimento: string;
@@ -89,6 +93,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
     resolver: zodResolver(schema),
     defaultValues: {
       valor_total: data.valor_total || undefined,
+      multa_pct: data.multa_pct ?? 2,
       forma_pagamento: data.forma_pagamento,
       numero_parcelas: data.numero_parcelas || 1,
       data_primeiro_vencimento: data.data_primeiro_vencimento || '',
@@ -161,6 +166,7 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
     const parcelas = values.forma_pagamento === "parcelado" ? values.numero_parcelas : 1;
     onNext({
       valor_total: values.valor_total,
+      multa_pct: values.multa_pct,
       forma_pagamento: values.forma_pagamento as PaymentMethod,
       numero_parcelas: parcelas,
       data_primeiro_vencimento: values.data_primeiro_vencimento || '',
@@ -246,6 +252,32 @@ export function Step3Commercial({ data, hasWebsite, isInstitucional, onNext, onB
                   </FormItem>
                 )} />
               )}
+            </div>
+
+            {/* Encargos por inadimplemento */}
+            <div className="border rounded-lg p-4 space-y-4 bg-muted/30">
+              <div>
+                <p className="font-semibold">Encargos por atraso</p>
+                <p className="text-xs text-muted-foreground">
+                  Defina a multa que será aplicada em caso de inadimplência. Os juros são fixos em 1% ao mês.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField control={form.control} name="multa_pct" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Multa (%)</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.1" min="0" max="100" placeholder="2" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+                <div className="space-y-2">
+                  <Label htmlFor="juros-fixo">Juros ao mês (%)</Label>
+                  <Input id="juros-fixo" type="number" value="1" disabled aria-readonly="true" />
+                  <p className="text-xs text-muted-foreground">Percentual fixo aplicado proporcionalmente ao período de atraso.</p>
+                </div>
+              </div>
             </div>
 
             {/* Entrada */}

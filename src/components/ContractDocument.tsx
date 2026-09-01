@@ -49,7 +49,12 @@ function isOptimized(servico: string): boolean {
 }
 
 export function ContractDocument({ data, contratado, confirmed, confirmDate, nomeConfirmacao, emailConfirmacao, codigoVerificacao, numeroContrato, ipConfirmacao, navegadorConfirmacao, timezoneConfirmacao, idiomaConfirmacao, resolucaoConfirmacao, isAdmin }: Props) {
-  const c = contratado || CONTRATADO_DEFAULT;
+  const contratadoBase = contratado || CONTRATADO_DEFAULT;
+  const c: Contratado = {
+    ...contratadoBase,
+    multaPct: data.multa_pct ?? contratadoBase.multaPct,
+    jurosPct: 1,
+  };
   const hasWebsite = !!data.servico_website;
   const hasGoogle = !!data.servico_google;
   const hasBoth = hasWebsite && hasGoogle;
@@ -125,7 +130,7 @@ export function ContractDocument({ data, contratado, confirmed, confirmDate, nom
       {data.permuta_valor > 0 && (
         <>
           <div className="border-t-4 border-primary/20 my-12" />
-          <PermutaAnexo data={data} />
+          <PermutaAnexo data={data} multaPct={c.multaPct} />
         </>
       )}
 
@@ -596,7 +601,7 @@ function GoogleContract({ data, contratado, confirmed, confirmDate, nomeConfirma
 }
 
 /* ═══ ANEXO DE PERMUTA ═══ */
-function PermutaAnexo({ data }: { data: ContractFormData }) {
+function PermutaAnexo({ data, multaPct }: { data: ContractFormData; multaPct: number }) {
   let clauseNum = 1;
 
   return (
@@ -667,7 +672,7 @@ function PermutaAnexo({ data }: { data: ContractFormData }) {
       <h2 className="text-sm font-bold mt-6 mb-2">{clauseNum++}. ENCARGOS POR INADIMPLEMENTO</h2>
       <p>Após a conversão da permuta em obrigação financeira, o valor devido ficará sujeito às seguintes condições:</p>
       <ul className="list-disc ml-8 my-2">
-        <li>multa moratória de 2% sobre o valor devido</li>
+        <li>multa moratória de {multaPct}% sobre o valor devido</li>
         <li>juros de 1% ao mês, calculados proporcionalmente ao período de atraso</li>
         <li>correção monetária conforme índice oficial aplicável</li>
       </ul>

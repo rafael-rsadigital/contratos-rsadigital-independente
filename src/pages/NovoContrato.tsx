@@ -33,6 +33,8 @@ export default function NovoContrato() {
     servico_google: "",
     prazo_google: "30 dias",
     valor_total: 0,
+    multa_pct: 2,
+    juros_pct: 1,
     forma_pagamento: "parcelado",
     numero_parcelas: 1,
     data_primeiro_vencimento: "",
@@ -142,6 +144,7 @@ export default function NovoContrato() {
           <Step3Commercial
             data={{
               valor_total: formData.valor_total,
+              multa_pct: formData.multa_pct,
               forma_pagamento: formData.forma_pagamento,
               numero_parcelas: formData.numero_parcelas,
               data_primeiro_vencimento: formData.data_primeiro_vencimento,

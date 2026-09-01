@@ -22,8 +22,11 @@ interface Props {
 export function Step4Contract({ data: initialData, existingClientId, onBack, onConfirmed }: Props) {
   const { user } = useAuth();
   const { profile } = useProfile();
-  const contratado = profileToContratado(profile);
   const [data, setData] = useState(initialData);
+  const contratadoBase = profileToContratado(profile);
+  const contratado = contratadoBase
+    ? { ...contratadoBase, multaPct: data.multa_pct, jurosPct: 1 }
+    : undefined;
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [contractId, setContractId] = useState<string | null>(null);
@@ -80,8 +83,7 @@ export function Step4Contract({ data: initialData, existingClientId, onBack, onC
 
       if (!clientId) {
         // Create new client
-        const { data: clientRow, error: clientErr } = await supabase
-          .from('clients')
+        const { data: clientRow, error: clientErr } = await (supabase.from('clients') as any)
           .insert({
             nome: data.client.nome,
             cpf_cnpj: data.client.cpf_cnpj,
@@ -131,6 +133,8 @@ export function Step4Contract({ data: initialData, existingClientId, onBack, onC
           servico_website: data.servico_website || null,
           servico_google: data.servico_google || null,
           valor_total: data.valor_total,
+          multa_pct: data.multa_pct,
+          juros_pct: 1,
           forma_pagamento: data.forma_pagamento,
           numero_parcelas: data.numero_parcelas,
           data_primeiro_vencimento: data.data_primeiro_vencimento || null,

@@ -107,8 +107,8 @@ export default function ContratoView() {
               cidade: p.cidade || CONTRATADO_DEFAULT.cidade,
               whatsapp: p.whatsapp || CONTRATADO_DEFAULT.whatsapp,
               logoUrl: p.logo_url || null,
-              multaPct: Number(p.multa_pct ?? CONTRATADO_DEFAULT.multaPct),
-              jurosPct: Number(p.juros_pct ?? CONTRATADO_DEFAULT.jurosPct),
+              multaPct: Number((data as any).multa_pct ?? p.multa_pct ?? CONTRATADO_DEFAULT.multaPct),
+              jurosPct: 1,
               multaRescisoriaPct: Number(p.multa_rescisoria_pct ?? CONTRATADO_DEFAULT.multaRescisoriaPct),
             });
           }
@@ -135,6 +135,8 @@ export default function ContratoView() {
           servico_google: (data as any).servico_google || servicos.find((s: string) => s.includes('Google')) || '',
           prazo_google: (data as any).prazo_google || '30 dias',
           valor_total: Number(data.valor_total),
+          multa_pct: Number((data as any).multa_pct ?? 2),
+          juros_pct: 1,
           forma_pagamento: (['avista', 'parcelado'].includes(data.forma_pagamento)
             ? data.forma_pagamento
             : (data.numero_parcelas > 1 ? 'parcelado' : 'avista')) as PaymentMethod,

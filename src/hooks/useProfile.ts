@@ -27,7 +27,7 @@ export function profileToContratado(profile: Profile | null): Contratado | undef
     whatsapp: profile.whatsapp,
     logoUrl: profile.logo_url,
     multaPct: Number(profile.multa_pct),
-    jurosPct: Number(profile.juros_pct),
+    jurosPct: 1,
     multaRescisoriaPct: Number(profile.multa_rescisoria_pct),
   };
 }

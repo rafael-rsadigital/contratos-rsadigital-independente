@@ -42,6 +42,8 @@ export interface ContractFormData {
   servico_google: string;
   prazo_google: string;
   valor_total: number;
+  multa_pct: number;
+  juros_pct: number;
   forma_pagamento: PaymentMethod;
   numero_parcelas: number;
   data_primeiro_vencimento: string;
@@ -99,6 +101,8 @@ export interface ContractRecord {
   client_id: string;
   servicos: string[];
   valor_total: number;
+  multa_pct: number;
+  juros_pct: number;
   forma_pagamento: PaymentMethod;
   numero_parcelas: number;
   data_primeiro_vencimento: string | null;

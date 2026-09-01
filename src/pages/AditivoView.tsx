@@ -91,7 +91,7 @@ export default function AditivoView() {
               whatsapp: p.whatsapp || CONTRATADO_DEFAULT.whatsapp,
               logoUrl: p.logo_url || null,
               multaPct: Number(p.multa_pct ?? CONTRATADO_DEFAULT.multaPct),
-              jurosPct: Number(p.juros_pct ?? CONTRATADO_DEFAULT.jurosPct),
+              jurosPct: 1,
               multaRescisoriaPct: Number(p.multa_rescisoria_pct ?? CONTRATADO_DEFAULT.multaRescisoriaPct),
             });
           }

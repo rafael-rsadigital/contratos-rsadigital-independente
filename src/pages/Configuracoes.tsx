@@ -23,7 +23,6 @@ export default function Configuracoes() {
   const [cidade, setCidade] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [multaPct, setMultaPct] = useState("2");
-  const [jurosPct, setJurosPct] = useState("1");
   const [multaRescisoriaPct, setMultaRescisoriaPct] = useState("20");
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -41,7 +40,6 @@ export default function Configuracoes() {
       setCidade(profile.cidade || "");
       setWhatsapp(profile.whatsapp || "");
       setMultaPct(String(profile.multa_pct ?? 2));
-      setJurosPct(String(profile.juros_pct ?? 1));
       setMultaRescisoriaPct(String(profile.multa_rescisoria_pct ?? 20));
       setLogoUrl(profile.logo_url);
     }
@@ -59,7 +57,7 @@ export default function Configuracoes() {
         cidade,
         whatsapp,
         multa_pct: Number(multaPct) || 0,
-        juros_pct: Number(jurosPct) || 0,
+        juros_pct: 1,
         multa_rescisoria_pct: Number(multaRescisoriaPct) || 0,
       } as any)
       .eq('id', user.id);
@@ -203,7 +201,7 @@ export default function Configuracoes() {
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Juros e Multa</CardTitle>
-            <p className="text-sm text-muted-foreground">Usados na cláusula de inadimplência e cancelamento dos seus contratos.</p>
+            <p className="text-sm text-muted-foreground">A multa pode ser definida por contrato. Os juros são fixos em 1% ao mês.</p>
           </CardHeader>
           <CardContent className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
@@ -211,8 +209,8 @@ export default function Configuracoes() {
               <Input type="number" step="0.1" min="0" value={multaPct} onChange={e => setMultaPct(e.target.value)} />
             </div>
             <div className="space-y-2">
-              <Label>Juros ao mês (%)</Label>
-              <Input type="number" step="0.1" min="0" value={jurosPct} onChange={e => setJurosPct(e.target.value)} />
+              <Label htmlFor="juros-fixo-config">Juros ao mês (%)</Label>
+              <Input id="juros-fixo-config" type="number" value="1" disabled aria-readonly="true" />
             </div>
             <div className="space-y-2">
               <Label>Multa rescisória (%)</Label>
