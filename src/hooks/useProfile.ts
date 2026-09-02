@@ -4,7 +4,7 @@ import { useAuth } from "./useAuth";
 import type { Contratado } from "@/types/contract";
 
 export interface Profile {
-  id: string;
+  id: string | number;
   email: string | null;
   nome_contratado: string;
   cnpj: string;
@@ -44,12 +44,19 @@ export function useProfile() {
       return;
     }
     setLoading(true);
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('profiles' as any)
       .select('*')
-      .eq('id', user.id)
+      // The legacy production table uses a bigint primary key. The UUID from
+      // auth.users is stored in owner_id, so never compare it with profiles.id.
+      .eq('owner_id', user.id)
       .maybeSingle();
-    setProfile((data as any) || null);
+    if (error) {
+      console.warn('Não foi possível carregar o perfil da contratada:', error.message);
+      setProfile(null);
+    } else {
+      setProfile((data as any) || null);
+    }
     setLoading(false);
   }, [user]);
 

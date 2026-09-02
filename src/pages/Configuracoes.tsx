@@ -60,7 +60,7 @@ export default function Configuracoes() {
         juros_pct: 1,
         multa_rescisoria_pct: Number(multaRescisoriaPct) || 0,
       } as any)
-      .eq('id', user.id);
+      .eq('owner_id', user.id);
     setSaving(false);
     if (error) {
       toast.error("Erro ao salvar configurações.");
@@ -97,7 +97,7 @@ export default function Configuracoes() {
     const { error: updateError } = await supabase
       .from('profiles' as any)
       .update({ logo_url: newUrl } as any)
-      .eq('id', user.id);
+      .eq('owner_id', user.id);
 
     setUploadingLogo(false);
     if (updateError) {

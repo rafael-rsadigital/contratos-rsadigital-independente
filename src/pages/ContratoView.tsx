@@ -96,7 +96,7 @@ export default function ContratoView() {
           const { data: profileData } = await supabase
             .from('profiles' as any)
             .select('*')
-            .eq('id', (data as any).owner_id)
+            .eq('owner_id', (data as any).owner_id)
             .maybeSingle();
           if (profileData) {
             const p = profileData as any;

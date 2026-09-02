@@ -104,7 +104,7 @@ export function Step4Contract({ data: initialData, existingClientId, onBack, onC
         clientId = clientRow.id;
       } else {
         // Update existing client data
-        await supabase
+        const { error: clientUpdateErr } = await supabase
           .from('clients')
           .update({
             nome: data.client.nome,
@@ -119,6 +119,7 @@ export function Step4Contract({ data: initialData, existingClientId, onBack, onC
             email: data.client.email || '',
           })
           .eq('id', clientId);
+        if (clientUpdateErr) throw clientUpdateErr;
       }
 
       const servicos = [data.servico_website, data.servico_google].filter(Boolean);
@@ -192,7 +193,10 @@ export function Step4Contract({ data: initialData, existingClientId, onBack, onC
       onConfirmed(contractRow.id);
     } catch (err) {
       console.error('Erro ao salvar contrato:', err);
-      toast.error("Erro ao salvar contrato. Tente novamente.");
+      const message = err instanceof Error
+        ? err.message
+        : (typeof err === 'object' && err && 'message' in err ? String((err as { message?: unknown }).message) : 'Erro desconhecido');
+      toast.error(`Erro ao salvar contrato: ${message}`);
     } finally {
       setSaving(false);
     }

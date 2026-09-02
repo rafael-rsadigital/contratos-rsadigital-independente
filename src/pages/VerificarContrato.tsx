@@ -50,7 +50,7 @@ export default function VerificarContrato() {
         const { data: profileData } = await supabase
           .from('profiles' as any)
           .select('nome_fantasia')
-          .eq('id', ownerId)
+          .eq('owner_id', ownerId)
           .maybeSingle();
         if ((profileData as any)?.nome_fantasia) nomeFantasia = (profileData as any).nome_fantasia;
       }

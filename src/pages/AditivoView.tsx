@@ -79,7 +79,7 @@ export default function AditivoView() {
           const { data: profileData } = await supabase
             .from('profiles' as any)
             .select('*')
-            .eq('id', ownerId)
+            .eq('owner_id', ownerId)
             .maybeSingle();
           if (profileData) {
             const p = profileData as any;
