@@ -264,9 +264,14 @@ export default function CRM() {
             </Link>
             <h1 className="font-bold text-lg text-primary">CRM - Gestão Completa</h1>
           </div>
-          <Button variant="ghost" size="sm" onClick={signOut} className="gap-1 text-muted-foreground">
-            <LogOut className="w-4 h-4" /> Sair
-          </Button>
+          <div className="flex items-center gap-2">
+            <Link to="/crm-operacao">
+              <Button variant="outline" size="sm">Operação comercial</Button>
+            </Link>
+            <Button variant="ghost" size="sm" onClick={signOut} className="gap-1 text-muted-foreground">
+              <LogOut className="w-4 h-4" /> Sair
+            </Button>
+          </div>
         </div>
       </header>
 
