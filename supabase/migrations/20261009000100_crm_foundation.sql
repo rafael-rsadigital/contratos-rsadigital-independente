@@ -128,3 +128,36 @@ grant select, insert, update, delete on public.crm_proposals to authenticated;
 grant select, insert, update, delete on public.crm_projects to authenticated;
 grant select, insert, update, delete on public.crm_activities to authenticated;
 grant select, insert, update, delete on public.crm_monthly_reports to authenticated;
+
+-- Simple accounts receivable tracking for CRM-managed projects.
+create table if not exists public.crm_financial_entries (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  client_id uuid not null references public.clients(id) on delete restrict,
+  project_id uuid references public.crm_projects(id) on delete set null,
+  contract_id uuid references public.contracts(id) on delete set null,
+  entry_type text not null default 'receivable'
+    check (entry_type in ('receivable', 'expense')),
+  description text not null,
+  amount numeric(12,2) not null check (amount >= 0),
+  due_date date,
+  status text not null default 'pending'
+    check (status in ('pending', 'paid', 'overdue', 'cancelled')),
+  paid_at timestamptz,
+  payment_method text,
+  notes text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists crm_financial_entries_owner_status_due_idx
+  on public.crm_financial_entries (owner_id, status, due_date);
+create index if not exists crm_financial_entries_client_idx
+  on public.crm_financial_entries (client_id, created_at desc);
+alter table public.crm_financial_entries enable row level security;
+drop policy if exists "CRM owners manage financial entries" on public.crm_financial_entries;
+create policy "CRM owners manage financial entries"
+  on public.crm_financial_entries for all to authenticated
+  using (owner_id = (select auth.uid()))
+  with check (owner_id = (select auth.uid()));
+grant select, insert, update, delete on public.crm_financial_entries to authenticated;
