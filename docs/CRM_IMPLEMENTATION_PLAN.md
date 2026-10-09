@@ -11,6 +11,12 @@
 - Next action and follow-up date.
 - Contracts, renewal dates, contract views, addenda and payment tracking.
 
+## Findings requiring attention before production changes
+- The live database contains both English and Portuguese legacy tables. Current source code uses `clients` and `contracts`, while the Portuguese `contratos` table contains records. No consolidation or deletion is safe until the published app/version and record ownership are reconciled.
+- Existing RLS policies are permissive: anonymous/public reads exist on `clients` and `contracts`; anonymous users can update rows in `contracts`; and `clientes`, `contratos` and `aditivos` have public `ALL` policies. These may be relied on by public contract view/acceptance flows, so do not remove them blindly. Map each public route and test token-based access before designing least-privilege replacements.
+- Supabase Auth's leaked-password protection is disabled. Enable it in Auth settings as a separate security-hardening step after confirming account access.
+- The Supabase advisor reported eight foreign-key indexes missing. Those are performance improvements, not blockers for CRM feature development; add only after checking query patterns.
+
 ## Proposed additions
 1. Commercial proposals linked to the existing `clients` table, with status, scope, price, validity and optional link to the contract generated after acceptance.
 2. Projects linked to the client, proposal and contract, with scope, lifecycle status, dates and closeout notes.
