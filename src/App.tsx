@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import NovoContrato from "./pages/NovoContrato";
 import Historico from "./pages/Historico";
 import CRM from "./pages/CRM";
+import CRMOperacao from "./pages/CRMOperacao";
 import ContratoView from "./pages/ContratoView";
 import VerificarContrato from "./pages/VerificarContrato";
 import AditivoView from "./pages/AditivoView";
@@ -42,6 +43,7 @@ const App = () => (
           <Route path="/novo-contrato" element={<ProtectedRoute><NovoContrato /></ProtectedRoute>} />
           <Route path="/historico" element={<ProtectedRoute><Historico /></ProtectedRoute>} />
           <Route path="/crm" element={<ProtectedRoute><CRM /></ProtectedRoute>} />
+          <Route path="/crm-operacao" element={<ProtectedRoute><CRMOperacao /></ProtectedRoute>} />
           <Route path="/cliente/:id" element={<ProtectedRoute><ClienteView /></ProtectedRoute>} />
           <Route path="/configuracoes" element={<ProtectedRoute><Configuracoes /></ProtectedRoute>} />
 
