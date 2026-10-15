@@ -142,7 +142,7 @@ export const CONTRATADO_DEFAULT: Contratado = {
   nome: 'Rafael Kelvin Silva de Assis',
   cnpj: '60.351.596/0001-04',
   nomeFantasia: 'RSA Digital',
-  cidade: 'Jacareí – SP',
+  cidade: 'Guarujá – SP',
   whatsapp: '5512988052097',
   logoUrl: null,
   multaPct: 2,

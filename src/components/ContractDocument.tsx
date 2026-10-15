@@ -475,7 +475,7 @@ function WebsiteContract({ data, contratado, confirmed, confirmDate, nomeConfirm
                   <p>O CONTRATADO poderá manter identificação técnica no rodapé e utilizar o projeto como referência em portfólio.</p>
 
                   <h2 className="text-sm font-bold mt-6 mb-2">{m + 3}. RESOLUÇÃO DE CONFLITOS</h2>
-                  <p>Fica eleito o foro da comarca de Jacareí – SP.</p>
+                  <p>Fica eleito o foro da comarca de Guarujá – SP.</p>
 
                    <h2 className="text-sm font-bold mt-6 mb-2">{m + 4}. ALTERAÇÕES CONTRATUAIS</h2>
                    <p>Alterações no presente contrato somente terão validade quando formalizadas por meio de termo aditivo, devidamente registrado e aceito eletronicamente pelas partes.</p>
@@ -586,7 +586,7 @@ function GoogleContract({ data, contratado, confirmed, confirmDate, nomeConfirma
       <p>Ambas as partes comprometem-se a manter sigilo sobre informações trocadas durante a execução.</p>
 
       <h2 className="text-sm font-bold mt-6 mb-2">13. RESOLUÇÃO DE CONFLITOS</h2>
-      <p>Fica eleito o foro da comarca de Jacareí – SP.</p>
+      <p>Fica eleito o foro da comarca de Guarujá – SP.</p>
 
       <h2 className="text-sm font-bold mt-6 mb-2">14. ALTERAÇÕES CONTRATUAIS</h2>
       <p>Alterações no presente contrato somente terão validade quando formalizadas por meio de termo aditivo, devidamente registrado e aceito eletronicamente pelas partes.</p>
